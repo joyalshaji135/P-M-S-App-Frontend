@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom'; // Import Outlet
-import AdminSidebar from '../../components/sidebars/AdminSidebar';
+import { Outlet } from 'react-router-dom';
 import Modal from '../../components/admin/Modal';
+import CompanyOwnerSidebar from '../../components/sidebars/CompanyOwnerSidebar';
 
-function AdminDashboard() {
+function CompanyOwnerDashboard() {
   const [open, setOpen] = useState(false);
   const unreadNotifications = 3;
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Admin Sidebar */}
-      <AdminSidebar />
+      {/* Company Owner Sidebar */}
+      <CompanyOwnerSidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-white shadow-sm p-4 flex justify-between items-center">
-          <div className="text-xl font-semibold text-gray-800">Admin Dashboard</div>
+          <div className="text-xl font-semibold text-gray-800">Company Owner Dashboard</div>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setOpen(true)}
@@ -59,4 +59,4 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default CompanyOwnerDashboard;

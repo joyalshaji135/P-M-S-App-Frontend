@@ -1,15 +1,14 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function AdminSidebar() {
   return (
     <div className="bg-white w-64 p-6 border-r border-gray-200">
-      <div className="text-xl font-semibold text-gray-800 mb-8">Admin Panel</div>
+      <div className="text-xl font-semibold text-gray-800 mb-8">TaskFlow</div>
       <ul className="space-y-3">
         <li>
           <Link
-            to="/admin"
+            to="/admin" // Matches the default route for /admin
             className="block text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-2 rounded"
           >
             Dashboard
@@ -17,7 +16,7 @@ function AdminSidebar() {
         </li>
         <li>
           <Link
-            to="/admin/projects"
+            to="/admin/projects" // Matches the /admin/projects route
             className="block text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-2 rounded"
           >
             Projects
@@ -25,7 +24,7 @@ function AdminSidebar() {
         </li>
         <li>
           <Link
-            to="/admin/users"
+            to="/admin/users" // Matches the /admin/users route
             className="block text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-2 rounded"
           >
             Users
@@ -33,7 +32,7 @@ function AdminSidebar() {
         </li>
         <li>
           <Link
-            to="/admin/settings"
+            to="/admin/settings" // Matches the /admin/settings route
             className="block text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-2 rounded"
           >
             Settings
@@ -49,7 +48,7 @@ function AdminSidebar() {
         </li>
       </ul>
     </div>
-  )
+  );
 }
 
-export default AdminSidebar
+export default AdminSidebar;
