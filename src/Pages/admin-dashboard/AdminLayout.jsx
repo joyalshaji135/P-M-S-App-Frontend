@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from '../../components/Header';
 import AdminSidebar from './AdminSidebar';
@@ -6,12 +6,17 @@ import AdminSidebar from './AdminSidebar';
 
 
 function AdminLayout() {
-    const dashboardName = "Admin Dashboard";
+    const dashboardName = "Admin";
+
+    const [isSidebarOpen,setIsSidebarOpen] = useState(false)
+    const toggleSidebar = () => {
+      setIsSidebarOpen(!isSidebarOpen )
+    }
 
     return (
     <div className="flex h-screen bg-gray-50">
       {/* Admin Sidebar */}
-      <AdminSidebar/>
+      <AdminSidebar isSidebarOpen={isSidebarOpen}/>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">

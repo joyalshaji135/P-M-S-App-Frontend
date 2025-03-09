@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LuWorkflow } from "react-icons/lu";
 import { MdEmail, MdLock } from "react-icons/md";
 
-function IconInput({ children, placeholder, type, name, onChange }) {
+function IconInput({ children, placeholder, type }) {
     return (
         <div className="flex justify-left items-center w-full relative h-12 bg-gray-100 rounded-lg mt-4">
             <div className='icon-wrapper w-14 flex justify-center items-center absolute'>
@@ -11,15 +11,13 @@ function IconInput({ children, placeholder, type, name, onChange }) {
             <input 
                 type={type} 
                 placeholder={placeholder} 
-                name={name}
-                onChange={onChange}
                 className='w-full h-full pl-14 pr-4 rounded-lg focus:outline-none bg-transparent'
             />
         </div>
     );
 }
 
-function Login() {
+function Log() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -61,7 +59,7 @@ function Login() {
 
     return (
         <div className='flex justify-center items-center w-full h-screen bg-slate-50'>
-            <div className='form-container overflow-hidden rounded-2xl justify-between flex drop-shadow-xl w-11/12 max-w-screen-xl bg-white'>
+            <div className='form-container overflow-hidden rounded-2xl justify-between flex drop-shadow-lg w-11/12 max-w-screen-xl bg-white'>
                 <div className='form-section w-1/2 px-24 py-12'>
                     <div className="logo-wrap flex justify-center gap-x-1 items-center">
                         <LuWorkflow className="text-2xl text-blue-600" />
@@ -70,20 +68,10 @@ function Login() {
                     <h1 className='text-2xl font-semibold mt-6 text-neutral-900 opacity-80 text-center'>Log in to your account</h1>
                     <form onSubmit={handleSubmit}>
                         <div className="mt-6">
-                            <IconInput 
-                                type='email' 
-                                placeholder='Email' 
-                                name="email" 
-                                onChange={handleChange}
-                            >
+                            <IconInput type='email' placeholder='Email' name="email" onChange={handleChange}>
                                 <MdEmail />
                             </IconInput>
-                            <IconInput 
-                                type='password' 
-                                placeholder='Password' 
-                                name="password" 
-                                onChange={handleChange}
-                            >
+                            <IconInput type='password' placeholder='Password' name="password" onChange={handleChange}>
                                 <MdLock />
                             </IconInput>
                         </div>
@@ -125,4 +113,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default Log;

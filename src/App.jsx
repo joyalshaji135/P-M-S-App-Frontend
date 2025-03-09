@@ -42,12 +42,15 @@ import ManagerHome from './Pages/team-manager/ManagerHome';
 import ManagerGoogleMeet from './Pages/team-manager/ManagerGoogleMeet';
 import ManagerProject from './Pages/team-manager/ManagerProject';
 import ManagerTask from './Pages/team-manager/ManagerTask';
+// import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* <Route path='/login' element={<Log/>}/> */}
+
       <Route path="/register" element={<Reg />} />
 
       {/* Admin Dashboard */}

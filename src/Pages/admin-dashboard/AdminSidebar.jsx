@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom'; // Use NavLink instead of Link
+import { FcParallelTasks } from "react-icons/fc";
+import { MdOutlineHome } from "react-icons/md";
+import { MdOutlineEvent } from "react-icons/md";
+import { FaPeopleGroup } from "react-icons/fa6";
+import { MdOutlineVideoCall } from "react-icons/md";
+import { VscFileSubmodule } from "react-icons/vsc";
 
-function AdminSidebar() {
+function AdminSidebar({isSidebarOpen}) {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
 
   const toggleLookup = () => {
@@ -9,20 +15,25 @@ function AdminSidebar() {
   };
 
   return (
-    <div className="bg-white w-64 p-6 border-r border-gray-200">
-      <div className="text-xl font-semibold text-gray-800 mb-8">TaskFlow</div>
-      <ul className="space-y-3">
+    <aside className={`h-screen fixed top-0 left-0 z-40 bg-white w-64 p-3 border-r border-gray-200 sm:translate-x-0 transition-transform `}>
+      <div className='h-full overflow-y-auto'>
+      <div className="text-xl font-bold text-black-900 mb-4 flex items-center  ">
+        <span ><FcParallelTasks  className="text-black-700 mx-2"/></span>
+        <h1>TaskFlow</h1>
+        </div>
+      <ul className="space-y-2 font-medium">
         <li>
           <NavLink
             to="/admin"
             end // Add the "end" prop to ensure exact match
             className={({ isActive }) =>
-              `block text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-2 rounded transition-colors ${
+              `block text-gray-600 hover:text-gray-900 hover:bg-gray-100  p-2 rounded-lg transition-colors flex justify-center items-center${
                 isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
               }`
             }
           >
-            Dashboard
+            <MdOutlineHome className="text-xl"/>
+            Home
           </NavLink>
         </li>
         <li>
@@ -58,6 +69,7 @@ function AdminSidebar() {
               }`
             }
           >
+            <FaPeopleGroup />
             Team Members
           </NavLink>
         </li>
@@ -70,6 +82,7 @@ function AdminSidebar() {
               }`
             }
           >
+            <MdOutlineEvent />
             Manage Event
           </NavLink>
         </li>
@@ -94,6 +107,7 @@ function AdminSidebar() {
               }`
             }
           >
+            <MdOutlineVideoCall />
             Google Meet
           </NavLink>
         </li>
@@ -106,6 +120,7 @@ function AdminSidebar() {
               }`
             }
           >
+            <VscFileSubmodule />
             File Document
           </NavLink>
         </li>
@@ -182,7 +197,8 @@ function AdminSidebar() {
           )}
         </li>
       </ul>
-    </div>
+      </div>
+    </aside>
   );
 }
 
