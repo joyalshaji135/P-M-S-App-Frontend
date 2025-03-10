@@ -42,6 +42,8 @@ import ManagerHome from './Pages/team-manager/ManagerHome';
 import ManagerGoogleMeet from './Pages/team-manager/ManagerGoogleMeet';
 import ManagerProject from './Pages/team-manager/ManagerProject';
 import ManagerTask from './Pages/team-manager/ManagerTask';
+import TestAdminLayout from './test/testAdminLayout';
+import TestAdminHome from './test/testAdminHome';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -109,6 +111,13 @@ function App() {
         {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
       </Route>
+
+      <Route path='/test' element={<TestAdminLayout/>} >
+      
+      <Route index element={<TestAdminHome/>} />
+      </Route>
+       
+
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaUserTie, FaUsers, FaUserFriends, FaCalendarAlt, FaVideo, FaEnvelope, FaFolder } from 'react-icons/fa';
 
-function AdminHome() {
+function TestAdminHome() {
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-4">Welcome, Admin!</h1>
@@ -19,7 +19,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Company Owners</h2>
-          <p className="text-sm text-gray-500 mt-1">Total company owners</p>
+          <p className="text-sm text-gray-500 mt-1">2 more than yesterday</p>
         </div>
 
         {/* Team Managers Card */}
@@ -33,7 +33,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Team Managers</h2>
-          <p className="text-sm text-gray-500 mt-1">Total team managers</p>
+          <p className="text-sm text-gray-500 mt-1">5 less than last week</p>
         </div>
 
         {/* Team Members Card */}
@@ -47,7 +47,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Team Members</h2>
-          <p className="text-sm text-gray-500 mt-1">Total team members</p>
+          <p className="text-sm text-gray-500 mt-1">10 more than yesterday</p>
         </div>
 
         {/* Events Card */}
@@ -61,7 +61,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Events</h2>
-          <p className="text-sm text-gray-500 mt-1">Upcoming events</p>
+          <p className="text-sm text-gray-500 mt-1">1 new event today</p>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Google Meets</h2>
-          <p className="text-sm text-gray-500 mt-1">Scheduled meetings</p>
+          <p className="text-sm text-gray-500 mt-1">3 scheduled today</p>
         </div>
 
         {/* Recruitment Messages Card */}
@@ -92,7 +92,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Recruitment</h2>
-          <p className="text-sm text-gray-500 mt-1">Pending recruitment messages</p>
+          <p className="text-sm text-gray-500 mt-1">5 new messages</p>
         </div>
 
         {/* File Documents Card */}
@@ -106,7 +106,7 @@ function AdminHome() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">File Documents</h2>
-          <p className="text-sm text-gray-500 mt-1">Total uploaded documents</p>
+          <p className="text-sm text-gray-500 mt-1">2 uploaded today</p>
         </div>
       </div>
 
@@ -125,4 +125,4 @@ function AdminHome() {
   );
 }
 
-export default AdminHome;
+export default TestAdminHome;
