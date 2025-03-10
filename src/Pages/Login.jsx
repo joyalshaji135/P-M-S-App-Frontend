@@ -46,7 +46,6 @@ function Login() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form Data Submitted:", formData);
-        // Add your form submission logic here (e.g., API call)
     };
 
     if (isLoading) {
