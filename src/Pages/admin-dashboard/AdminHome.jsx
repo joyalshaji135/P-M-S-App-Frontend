@@ -9,7 +9,7 @@ function AdminHome() {
       {/* Status Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Company Owners Card */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+        <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-lg">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-blue-50 rounded-full">
               <FaUserTie className="h-5 w-5 text-black" />
@@ -37,7 +37,7 @@ function AdminHome() {
         </div>
 
         {/* Team Members Card */}
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg">
+        <div className="bg-gradient-to-br from-slate-100 to-slate-200 p-4 rounded-lg">
           <div className="flex justify-between items-start">
             <div className="p-2 bg-gray-50 rounded-full">
               <FaUserFriends className="h-5 w-5 text-black" />
