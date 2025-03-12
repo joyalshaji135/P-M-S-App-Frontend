@@ -91,7 +91,7 @@ function AdminSidebar({ isSidebarOpen }) {
           {/* Manage Event */}
           <li>
             <NavLink
-              to="/admin/manage-event"
+              to="/admin/events"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -106,7 +106,7 @@ function AdminSidebar({ isSidebarOpen }) {
           {/* Manage Recruitment */}
           <li>
             <NavLink
-              to="/admin/manage-recruitment"
+              to="/admin/recruitment"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -120,7 +120,7 @@ function AdminSidebar({ isSidebarOpen }) {
           {/* Google Meet */}
           <li>
             <NavLink
-              to="/admin/google-meet"
+              to="/admin/meetings"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -128,14 +128,14 @@ function AdminSidebar({ isSidebarOpen }) {
               }
             >
               <MdOutlineVideoCall className="text-xl" />
-              <span className="ml-2">Google Meet</span>
+              <span className="ml-2">Meetings</span>
             </NavLink>
           </li>
 
           {/* File Document */}
           <li>
             <NavLink
-              to="/admin/file-document"
+              to="/admin/documents"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-function AddTeamManager() {
+function AddManagersCo() {
   const navigate = useNavigate();
   const { id } = useParams(); // Get the id from the URL
 
@@ -9,11 +9,7 @@ function AddTeamManager() {
   const [formData, setFormData] = useState({
     id: Date.now(),
     name: '',
-    email: '',
-    phone: '',
-    department: '',
     description: '',
-    photo: null,
     status: 'Active', // Default status
   });
 
@@ -38,21 +34,6 @@ function AddTeamManager() {
     });
   };
 
-  // Handle photo upload
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          photo: reader.result,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -73,7 +54,7 @@ function AddTeamManager() {
     }
 
     // Redirect to the Team Managers page
-    navigate('/admin/team-managers');
+    navigate('/owner/team-managers');
   };
 
   return (
@@ -100,44 +81,16 @@ function AddTeamManager() {
             />
           </div>
 
-          {/* Email */}
+          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter email"
-              required
-            />
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter phone number"
-              required
-            />
-          </div>
-
-          {/* Department */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <input
               type="text"
-              name="department"
-              value={formData.department}
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter department"
+              placeholder="Enter description"
               required
             />
           </div>
@@ -156,40 +109,6 @@ function AddTeamManager() {
               <option value="Inactive">Inactive</option>
             </select>
           </div>
-
-          {/* Photo Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
-            <input
-              type="file"
-              name="photo"
-              onChange={handlePhotoUpload}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              accept="image/*"
-              required={!id} // Required only for new entries
-            />
-            {formData.photo && (
-              <img
-                src={formData.photo}
-                alt="Preview"
-                className="mt-2 w-16 h-16 rounded-full object-cover"
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Description (Full Width) */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
-            placeholder="Enter description"
-            required
-          ></textarea>
         </div>
 
         {/* Save Button */}
@@ -206,4 +125,4 @@ function AddTeamManager() {
   );
 }
 
-export default AddTeamManager;
+export default AddManagersCo;

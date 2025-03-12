@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaBars, FaBell } from 'react-icons/fa';
 import { MdSpaceDashboard } from 'react-icons/md';
+import MessageModal from './MessageModal';
+
 
 function Header({ dashboardName, toggleSidebar }) {
   const [open, setOpen] = useState(false); // State for modal
@@ -47,7 +49,7 @@ function Header({ dashboardName, toggleSidebar }) {
       </div>
 
       {/* Message Modal (Placeholder) */}
-      {/* <MessageModal open={open} onClose={() => setOpen(false)} /> */}
+      <MessageModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }

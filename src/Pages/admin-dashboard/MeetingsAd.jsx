@@ -1,82 +1,77 @@
-import React, { useState, useEffect } from 'react';
-import DataTable from 'react-data-table-component';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import DataTable from 'react-data-table-component';
 
-function CompanyOwners() {
-  // State for company owners data
-  const [companyOwners, setCompanyOwners] = useState([]);
+function MeetingsAd() {
+  const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [filteredMeetings, setFilteredMeetings] = useState([]);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from localStorage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('companyOwners')) || [];
-    setCompanyOwners(storedData);
+    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
+    setMeetings(storedData);
+    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
   }, []);
 
-  // Filter data based on search input
-  const filteredData = companyOwners.filter(
-    (owner) =>
-      owner.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      owner.companyName.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Handle search functionality
+  useEffect(() => {
+    if (searchText) {
+      const filtered = meetings.filter(
+        (meeting) =>
+          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.time.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredMeetings(filtered);
+    } else {
+      setFilteredMeetings(meetings); // Reset to all meetings if search text is empty
+    }
+  }, [searchText, meetings]);
 
-  // Function to delete a company owner
+  // Handle delete functionality
   const handleDelete = (id) => {
-    const updatedData = companyOwners.filter((owner) => owner.id !== id);
-    setCompanyOwners(updatedData);
-    localStorage.setItem('companyOwners', JSON.stringify(updatedData));
+    const updatedMeetings = meetings.filter((meeting) => meeting.id !== id);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    setMeetings(updatedMeetings); // Update state to reflect the deletion
+    setFilteredMeetings(updatedMeetings); // Update filtered meetings as well
   };
 
-  // Columns definition
+  // Table columns
   const columns = [
     {
-      name: 'Name',
-      sortable: true,
-      cell: (row) => (
-        <div className="flex items-center space-x-4 ">
-          <img
-            src={row.photo || 'https://via.placeholder.com/50'}
-            alt={row.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <div >
-
-          <p className="font-medium text-black text-sm">{row.name}</p>
-          {/* <p className="">{row.email}</p> */}
-          </div>
-        </div>
-      ),
-    },
-    {
-      name: 'Company Name',
-      selector: (row) => row.companyName,
+      name: 'Sl No',
+      selector: (row, index) => index + 1,
       sortable: true,
     },
     {
-      name: 'Status',
-      selector: (row) => row.status,
+      name: 'Meeting Title',
+      selector: (row) => row.title,
+      sortable: true,
+    },
+    {
+      name: 'Time',
+      selector: (row) => row.time,
+      sortable: true,
+    },
+    {
+      name: 'Meeting Link',
       cell: (row) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold border ${
-            row.status === 'Active'
-              ? 'border-green-800 bg-green-100 text-green-800'
-              : 'border-red-800 bg-red-100 text-red-800'
-          }`}
+        <a
+          href={row.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
         >
-          {row.status}
-        </span>
+          Join Meeting
+        </a>
       ),
-    },
-    {
-      name: 'Contact',
-      selector: (row) => row.phone,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/company-owner/view/${row.id}`}>
+          <Link to={`/admin/meetings/view/${row.id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +90,7 @@ function CompanyOwners() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/company-owner/edit/${row.id}`}>
+          <Link to={`/admin/meetings/edit/${row.id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -128,45 +123,14 @@ function CompanyOwners() {
           </button>
         </div>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
-  // Custom styles for the table
-  const customStyles = {
-    headCells: {
-      style: {
-        backgroundColor: '#F5F5F5',
-        color: '#333',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
-      },
-    },
-    cells: {
-      style: {
-        // paddingLeft: '16px',
-        // paddingRight: '2px',
-        padding:'0.8rem 0.4rem',
-        border:'1px solid #e53e7eb'
-      },
-    },
-    rows: {
-      style: {
-        borderBottom: '1px solid #e5e7eb',
-        // border:'1px solid #e5e7eb'
-      },
-    },
-  };
-
   return (
-    <div className="flex-1 p-6 overflow-y-auto" style={{ zIndex: 1 }}> {/* Ensure table has a lower z-index */}
+    <div className="flex-1 p-6 overflow-y-auto">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Company Owners</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Manage Google Meets</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
@@ -178,7 +142,7 @@ function CompanyOwners() {
           />
           {/* Add Button */}
           <Link
-            to="/admin/company-owner/add"
+            to="/admin/meetings/add"
             className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
             Add +
@@ -187,17 +151,17 @@ function CompanyOwners() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredData}
-          customStyles={customStyles}
+          data={filteredMeetings}
           pagination
           highlightOnHover
+          responsive
         />
       </div>
     </div>
   );
 }
 
-export default CompanyOwners;
+export default MeetingsAd;

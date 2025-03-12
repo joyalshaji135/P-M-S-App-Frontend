@@ -1,85 +1,219 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function AddTeamMembersAd() {
+  const navigate = useNavigate();
+  const { id } = useParams(); // Get the id from the URL
+
+  // State for form data
+  const [formData, setFormData] = useState({
+    id: Date.now(),
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    role: '',
+    description: '',
+    status: 'Active', // Default status
+    photo: null, // Add photo field
+  });
+
+  // Fetch data from local storage on component mount
+  useEffect(() => {
+    if (id) {
+      // If id exists, fetch the data for editing
+      const storedData = JSON.parse(localStorage.getItem('teamMembers')) || [];
+      const memberToEdit = storedData.find((member) => member.id === parseInt(id));
+      if (memberToEdit) {
+        setFormData(memberToEdit); // Pre-fill the form with existing data
+      }
+    }
+  }, [id]);
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  // Handle photo upload
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          photo: reader.result, // Store the base64 encoded image
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Get existing data from local storage
+    const storedData = JSON.parse(localStorage.getItem('teamMembers')) || [];
+
+    if (id) {
+      // If editing, update the existing entry
+      const updatedData = storedData.map((member) =>
+        member.id === parseInt(id) ? formData : member
+      );
+      localStorage.setItem('teamMembers', JSON.stringify(updatedData));
+    } else {
+      // If adding, create a new entry
+      const updatedData = [...storedData, formData];
+      localStorage.setItem('teamMembers', JSON.stringify(updatedData));
+    }
+
+    // Redirect to the Team Members page
+    navigate('/admin/team-members');
+  };
+
   return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Add Team Member</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+        {id ? 'Edit Team Member' : 'Add Team Member'}
+      </h1>
 
       {/* Form */}
-      <form className="bg-white p-6 rounded-lg shadow-md">
-        {/* Name and Email in one row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
+        {/* Grid Layout for Form Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter name"
               required
             />
           </div>
+
+          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter email"
               required
             />
           </div>
-        </div>
 
-        {/* Phone Number and Address in one row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Phone Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
             <input
               type="tel"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter phone number"
               required
             />
           </div>
+
+          {/* Address */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <input
               type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter address"
               required
             />
           </div>
-        </div>
 
-        {/* Role and Description in one row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Role */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Role</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <input
               type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter role"
               required
             />
           </div>
+
+          {/* Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              rows="3"
-              placeholder="Enter description"
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            ></textarea>
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          {/* Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
+            <input
+              type="file"
+              name="photo"
+              onChange={handlePhotoUpload}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              accept="image/*"
+              required={!id} // Required only for new entries
+            />
+            {formData.photo && (
+              <img
+                src={formData.photo}
+                alt="Preview"
+                className="mt-2 w-16 h-16 rounded-full object-cover"
+              />
+            )}
           </div>
         </div>
 
+        {/* Description (Full Width) */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="4"
+            placeholder="Enter description"
+            required
+          ></textarea>
+        </div>
+
         {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="mt-8 flex justify-end">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Save
+            {id ? 'Update' : 'Save'}
           </button>
         </div>
       </form>

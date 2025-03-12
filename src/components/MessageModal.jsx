@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function MessageModal({ open, onClose }) {
   // Sample notification messages
@@ -11,18 +12,28 @@ function MessageModal({ open, onClose }) {
   return (
     <div
       onClick={onClose}
-      className={`fixed inset-0 flex  justify-end pt-16 pr-4 transition-colors ${
+      className={`fixed inset-0 flex justify-end pt-16 pr-4 transition-colors ${
         open ? 'visible bg-black/20' : 'invisible'
       }`}
+      style={{ zIndex: 1000 }} // Ensure overlay has a high z-index
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-white h-80 rounded-xl shadow-lg w-80 transition-all ${
+        className={`bg-white h-1/2 rounded-xl shadow-lg w-80 transition-all ${
           open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
+        style={{ zIndex: 1001 }} // Ensure modal has a higher z-index than overlay
       >
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Notifications</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
+            <button
+              className="text-sm text-red-500 hover:text-red-700 float-right"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
           <div className="space-y-3">
             {notifications.map((notification) => (
               <div key={notification.id} className="p-3 bg-gray-50 rounded-lg">
@@ -30,6 +41,15 @@ function MessageModal({ open, onClose }) {
                 <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
               </div>
             ))}
+          </div>
+          {/* "View All Messages" Button */}
+          <div className="mt-4">
+            <Link
+              to="/messages"
+              className="w-full  text-center block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              View All Messages
+            </Link>
           </div>
         </div>
       </div>
