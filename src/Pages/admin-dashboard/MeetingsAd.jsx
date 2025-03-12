@@ -2,39 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 
-function ManageRecruitmentAd() {
-  const [recruitmentData, setRecruitmentData] = useState([]);
+function MeetingsAd() {
+  const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredMeetings, setFilteredMeetings] = useState([]);
 
   // Fetch data from localStorage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('recruitmentData')) || [];
-    setRecruitmentData(storedData);
-    setFilteredData(storedData); // Initialize filteredData with all data
+    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
+    setMeetings(storedData);
+    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
   }, []);
 
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
-      const filtered = recruitmentData.filter(
-        (recruitment) =>
-          recruitment.candidateName.toLowerCase().includes(searchText.toLowerCase()) ||
-          recruitment.position.toLowerCase().includes(searchText.toLowerCase()) ||
-          recruitment.status.toLowerCase().includes(searchText.toLowerCase())
+      const filtered = meetings.filter(
+        (meeting) =>
+          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.time.toLowerCase().includes(searchText.toLowerCase())
       );
-      setFilteredData(filtered);
+      setFilteredMeetings(filtered);
     } else {
-      setFilteredData(recruitmentData); // Reset to all data if search text is empty
+      setFilteredMeetings(meetings); // Reset to all meetings if search text is empty
     }
-  }, [searchText, recruitmentData]);
+  }, [searchText, meetings]);
 
   // Handle delete functionality
   const handleDelete = (id) => {
-    const updatedData = recruitmentData.filter((recruitment) => recruitment.id !== id);
-    localStorage.setItem('recruitmentData', JSON.stringify(updatedData));
-    setRecruitmentData(updatedData); // Update state to reflect the deletion
-    setFilteredData(updatedData); // Update filtered data as well
+    const updatedMeetings = meetings.filter((meeting) => meeting.id !== id);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    setMeetings(updatedMeetings); // Update state to reflect the deletion
+    setFilteredMeetings(updatedMeetings); // Update filtered meetings as well
   };
 
   // Table columns
@@ -45,38 +44,34 @@ function ManageRecruitmentAd() {
       sortable: true,
     },
     {
-      name: 'Candidate Name',
-      selector: (row) => row.candidateName,
+      name: 'Meeting Title',
+      selector: (row) => row.title,
       sortable: true,
     },
     {
-      name: 'Position',
-      selector: (row) => row.position,
+      name: 'Time',
+      selector: (row) => row.time,
       sortable: true,
     },
     {
-      name: 'Status',
+      name: 'Meeting Link',
       cell: (row) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === 'Offer Sent'
-              ? 'bg-green-100 text-green-800'
-              : row.status === 'Interview Scheduled'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-red-100 text-red-800'
-          }`}
+        <a
+          href={row.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
         >
-          {row.status}
-        </span>
+          Join Meeting
+        </a>
       ),
-      sortable: true,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/recruitment/view/${row.id}`}>
+          <Link to={`/admin/meetings/view/${row.id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +90,7 @@ function ManageRecruitmentAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/recruitment/edit/${row.id}`}>
+          <Link to={`/admin/meetings/edit/${row.id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +130,7 @@ function ManageRecruitmentAd() {
     <div className="flex-1 p-6 overflow-y-auto">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Recruitment</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Manage Google Meets</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
@@ -147,7 +142,7 @@ function ManageRecruitmentAd() {
           />
           {/* Add Button */}
           <Link
-            to="/admin/recruitment/add"
+            to="/admin/meetings/add"
             className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
             Add +
@@ -159,7 +154,7 @@ function ManageRecruitmentAd() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredData}
+          data={filteredMeetings}
           pagination
           highlightOnHover
           responsive
@@ -169,4 +164,4 @@ function ManageRecruitmentAd() {
   );
 }
 
-export default ManageRecruitmentAd;
+export default MeetingsAd;
