@@ -44,6 +44,9 @@ import ManagerProject from './Pages/team-manager/ManagerProject';
 import ManagerTask from './Pages/team-manager/ManagerTask';
 import TestAdminLayout from './test/testAdminLayout';
 import TestAdminHome from './test/testAdminHome';
+import ViewCompanyOwner from './Pages/admin-dashboard/ViewCompanyOwner';
+import ViewTeamManager from './Pages/admin-dashboard/ViewTeamManager';
+import MessagesPage from './components/MessagesPage';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -53,15 +56,21 @@ function App() {
       <Route path="/login" element={<Login />} />
       {/* <Route path='/login' element={<Log/>}/> */}
 
-      <Route path="/register" element={<Reg />} />
+      {/* <Route path="/register" element={<Reg />} /> */}
+
+      <Route path='/messages' element={<MessagesPage/>} />
 
       {/* Admin Dashboard */}
       <Route path="/admin" element={<AdminLayout/>}>
         <Route index element={<AdminHome/>} /> {/* Default route for /admin */}
         <Route path="company-owner" element={<CompanyOwners/>}/>
         <Route path="company-owner/add" element={<AddCompanyOwner/>}/>
-        <Route path="team-managers" element={<TeamManagersAd/>}/>
+        <Route path="company-owner/edit/:id" element={<AddCompanyOwner/>}/>
+        <Route path="company-owner/view/:id" element={<ViewCompanyOwner/>}/>
+         <Route path="team-managers" element={<TeamManagersAd/>}/>
         <Route path="team-managers/add" element={<AddTeamManagersAd/>}/>
+        <Route path="team-managers/edit/:id" element={<AddTeamManagersAd/>}/>
+        <Route path="team-managers/view/:id" element={<ViewTeamManager/>}/> 
         <Route path="team-members" element={<TeamMembersAd/>}/>
         <Route path="team-members/add" element={<AddTeamMembersAd/>}/>
         <Route path="manage-event" element={<ManageEventAd/>}/>

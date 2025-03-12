@@ -25,7 +25,7 @@ function AdminLayout() {
         <Header dashboardName={dashboardName} toggleSidebar={toggleSidebar} />
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-100 rounded-xl">
+        <div className="flex-1 overflow-y-auto bg-white rounded-xl">
           <Outlet /> {/* Render nested routes here */}
         </div>
       </div>
