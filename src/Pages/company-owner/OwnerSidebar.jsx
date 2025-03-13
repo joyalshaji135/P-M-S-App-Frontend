@@ -93,7 +93,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Project */}
           <li>
             <NavLink
-              to="/owner/project"
+              to="/owner/projects"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -108,7 +108,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Feedback */}
           <li>
             <NavLink
-              to="/owner/feedback"
+              to="/owner/feedbacks"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -123,7 +123,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Alert */}
           <li>
             <NavLink
-              to="/owner/alert"
+              to="/owner/alerts"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -138,7 +138,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Manage Event */}
           <li>
             <NavLink
-              to="/owner/manage-event"
+              to="/owner/events"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -153,7 +153,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Manage Recruitment */}
           <li>
             <NavLink
-              to="/owner/manage-recruitment"
+              to="/owner/recruitments"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -168,7 +168,7 @@ function OwnerSidebar({ isSidebarOpen }) {
           {/* Google Meet */}
           <li>
             <NavLink
-              to="/owner/google-meet"
+              to="/owner/meetings"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -180,79 +180,7 @@ function OwnerSidebar({ isSidebarOpen }) {
             </NavLink>
           </li>
 
-          {/* Lookup Section */}
-          <li>
-            <div
-              onClick={toggleLookup}
-              className="flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg cursor-pointer transition-colors"
-            >
-              <span className="ml-2">Lookup {isLookupOpen ? '▲' : '▼'}</span>
-            </div>
-            {isLookupOpen && (
-              <ul className="pl-4 mt-2 space-y-2">
-                <li>
-                  <NavLink
-                    to="/owner/lookup/customer-type"
-                    className={({ isActive }) =>
-                      `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                      }`
-                    }
-                  >
-                    <span className="ml-2">Customer Type</span>
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/owner/lookup/role"
-                    className={({ isActive }) =>
-                      `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                      }`
-                    }
-                  >
-                    <span className="ml-2">Role</span>
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/owner/lookup/industry"
-                    className={({ isActive }) =>
-                      `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                      }`
-                    }
-                  >
-                    <span className="ml-2">Industry</span>
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/owner/lookup/priority"
-                    className={({ isActive }) =>
-                      `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                      }`
-                    }
-                  >
-                    <span className="ml-2">Priority</span>
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink
-                    to="/owner/lookup/task-module"
-                    className={({ isActive }) =>
-                      `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                      }`
-                    }
-                  >
-                    <span className="ml-2">Task Module</span>
-                  </NavLink>
-                </li>
-              </ul>
-            )}
-          </li>
+        
         </ul>
       </div>
     </aside>
