@@ -2,39 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 
-function TasksOwner() {
-  const [tasks, setTasks] = useState([]);
+function MeetingsCo() {
+  const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [filteredMeetings, setFilteredMeetings] = useState([]);
 
   // Fetch data from localStorage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('tasks')) || [];
-    setTasks(storedData);
-    setFilteredTasks(storedData); // Initialize filteredTasks with all data
+    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
+    setMeetings(storedData);
+    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
   }, []);
 
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
-      const filtered = tasks.filter(
-        (task) =>
-          task.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          task.description.toLowerCase().includes(searchText.toLowerCase()) ||
-          task.status.toLowerCase().includes(searchText.toLowerCase())
+      const filtered = meetings.filter(
+        (meeting) =>
+          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.time.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.link.toLowerCase().includes(searchText.toLowerCase())
       );
-      setFilteredTasks(filtered);
+      setFilteredMeetings(filtered);
     } else {
-      setFilteredTasks(tasks); // Reset to all tasks if search text is empty
+      setFilteredMeetings(meetings); // Reset to all meetings if search text is empty
     }
-  }, [searchText, tasks]);
+  }, [searchText, meetings]);
 
   // Handle delete functionality
   const handleDelete = (id) => {
-    const updatedTasks = tasks.filter((task) => task.id !== id);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    setTasks(updatedTasks); // Update state to reflect the deletion
-    setFilteredTasks(updatedTasks); // Update filtered tasks as well
+    const updatedMeetings = meetings.filter((meeting) => meeting.id !== id);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    setMeetings(updatedMeetings); // Update state to reflect the deletion
+    setFilteredMeetings(updatedMeetings); // Update filtered meetings as well
   };
 
   // Table columns
@@ -45,38 +45,34 @@ function TasksOwner() {
       sortable: true,
     },
     {
-      name: 'Title',
+      name: 'Meeting Title',
       selector: (row) => row.title,
       sortable: true,
     },
     {
-      name: 'Description',
-      selector: (row) => row.description,
+      name: 'Time',
+      selector: (row) => row.time,
       sortable: true,
     },
     {
-      name: 'Status',
+      name: 'Meeting Link',
       cell: (row) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === 'Completed'
-              ? 'bg-green-100 text-green-800'
-              : row.status === 'In Progress'
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
-          }`}
+        <a
+          href={row.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
         >
-          {row.status}
-        </span>
+          Join Meeting
+        </a>
       ),
-      sortable: true,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/owner/tasks/view/${row.id}`}>
+          <Link to={`/owner/meetings/view/${row.id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +91,7 @@ function TasksOwner() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/owner/tasks/edit/${row.id}`}>
+          <Link to={`/owner/meetings/edit/${row.id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +131,7 @@ function TasksOwner() {
     <div className="flex-1 p-6 overflow-y-auto">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Tasks</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Manage Google Meets</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
@@ -147,10 +143,10 @@ function TasksOwner() {
           />
           {/* Add Button */}
           <Link
-            to="/owner/tasks/add"
+            to="/owner/meetings/add"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
           >
-            Add +
+            Add Meet
           </Link>
         </div>
       </div>
@@ -159,7 +155,7 @@ function TasksOwner() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredTasks}
+          data={filteredMeetings}
           pagination
           highlightOnHover
           responsive
@@ -169,4 +165,4 @@ function TasksOwner() {
   );
 }
 
-export default TasksOwner;
+export default MeetingsCo;
