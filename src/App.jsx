@@ -20,7 +20,7 @@ import TeamManagersAd from './Pages/admin-dashboard/TeamManagersAd';
 import AddTeamManagersAd from './Pages/admin-dashboard/AddTeamManagersAd';
 import ManageEventAd from './Pages/admin-dashboard/ManageEventAd';
 import ManageRecruitmentAd from './Pages/admin-dashboard/ManageRecruitmentAd';
-import GoogleMeetAd from './Pages/admin-dashboard/GoogleMeetAd';
+import GoogleMeetAd from './Pages/admin-dashboard/MeetingsAd';
 import FileDocumentsAd from './Pages/admin-dashboard/FileDocumentsAd';
 import CustomerTypeAd from './Pages/admin-dashboard/CustomerTypeAd';
 import ManageRolesAd from './Pages/admin-dashboard/ManageRolesAd';
@@ -30,10 +30,9 @@ import TaskModuleAd from './Pages/admin-dashboard/TaskModuleAd';
 import OwnerLayout from './Pages/company-owner/OwnerLayout';
 import OwnerHome from './Pages/company-owner/OwnerHome';
 import TeamManagersOwner from './Pages/company-owner/TeamManagersOwner';
-import TeamMembersOwner from './Pages/company-owner/TeamMembersOwner';
 import ManageEventOwner from './Pages/company-owner/ManageEventOwner';
 import ManageRecruitmentOwner from './Pages/company-owner/ManageRecruitmentOwner';
-import GoogleMeetOwner from './Pages/company-owner/GoogleMeetOwner';
+import GoogleMeetOwner from './Pages/company-owner/MeetingsCo';
 import TasksOwner from './Pages/company-owner/TasksOwner';
 import ProjectOwner from './Pages/company-owner/ProjectOwner';
 import FeedbackOwner from './Pages/company-owner/FeedbackOwner';
@@ -47,6 +46,36 @@ import TestAdminHome from './test/testAdminHome';
 import ViewCompanyOwner from './Pages/admin-dashboard/ViewCompanyOwner';
 import ViewTeamManager from './Pages/admin-dashboard/ViewTeamManager';
 import MessagesPage from './components/MessagesPage';
+import ViewTeamMembersAd from './Pages/admin-dashboard/ViewTeamMembersAd';
+import AddEventsAd from './Pages/admin-dashboard/AddEventsAd';
+import ViewEventsAd from './Pages/admin-dashboard/ViewEventsAd';
+import AddRecruitmentAd from './Pages/admin-dashboard/AddRecruitmentAd';
+import ViewRecruitmentAd from './Pages/admin-dashboard/ViewRecruitmentAd';
+import AddMeetingsAd from './Pages/admin-dashboard/AddMeetingsAd';
+import ViewMeetingsAd from './Pages/admin-dashboard/ViewMeetingsAd';
+import AddDocuments from './Pages/admin-dashboard/AddDocuments';
+import ViewDocumentsAd from './Pages/admin-dashboard/ViewDocumentsAd';
+import AddManagersCo from './Pages/company-owner/AddManagersCo';
+import ViewManagersCo from './Pages/company-owner/ViewManagersCo';
+import AddMembersCo from './Pages/company-owner/AddMembersCo';
+import TeamMembersOwner from './Pages/company-owner/TeamMembersOwner';
+import ViewMembersCo from './Pages/company-owner/ViewMembersCo';
+import AddTasksCo from './Pages/company-owner/AddTasksCo';
+import ViewTasksCo from './Pages/company-owner/ViewTasksCo';
+import AddProjectCo from './Pages/company-owner/AddProjectCo';
+import ViewProjectsCo from './Pages/company-owner/ViewProjectsCo';
+import AddFeedbackCo from './Pages/company-owner/AddFeedbackCo';
+import ViewFeedbackCo from './Pages/company-owner/ViewFeedbackCo';
+import AlertOwner from './Pages/company-owner/AlertOwner';
+import AddAlertCo from './Pages/company-owner/AddAlertCo';
+import ViewAlert from './Pages/company-owner/ViewAlert';
+import AddEventCo from './Pages/company-owner/AddEventCo';
+import ViewEventCo from './Pages/company-owner/ViewEventCo';
+import AddRecruitmentCo from './Pages/company-owner/AddRecruitmentCo';
+import ViewRecruitmentCo from './Pages/company-owner/ViewRecruitmentCo';
+import MeetingsCo from './Pages/company-owner/MeetingsCo';
+import AddMeetingsCo from './Pages/company-owner/AddMeetingsCo';
+import ViewMeetingsCo from './Pages/company-owner/ViewMeetingsCo';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -63,20 +92,42 @@ function App() {
       {/* Admin Dashboard */}
       <Route path="/admin" element={<AdminLayout/>}>
         <Route index element={<AdminHome/>} /> {/* Default route for /admin */}
+
         <Route path="company-owner" element={<CompanyOwners/>}/>
         <Route path="company-owner/add" element={<AddCompanyOwner/>}/>
         <Route path="company-owner/edit/:id" element={<AddCompanyOwner/>}/>
         <Route path="company-owner/view/:id" element={<ViewCompanyOwner/>}/>
+
          <Route path="team-managers" element={<TeamManagersAd/>}/>
         <Route path="team-managers/add" element={<AddTeamManagersAd/>}/>
         <Route path="team-managers/edit/:id" element={<AddTeamManagersAd/>}/>
         <Route path="team-managers/view/:id" element={<ViewTeamManager/>}/> 
+
         <Route path="team-members" element={<TeamMembersAd/>}/>
         <Route path="team-members/add" element={<AddTeamMembersAd/>}/>
-        <Route path="manage-event" element={<ManageEventAd/>}/>
-        <Route path="manage-recruitment" element={<ManageRecruitmentAd/>}/>
-        <Route path="google-meet" element={<GoogleMeetAd/>}/>
-        <Route path="file-document" element={<FileDocumentsAd/>}/>
+        <Route path="team-members/edit/:id" element={<AddTeamMembersAd/>}/>
+        <Route path='team-members/view/:id' element={<ViewTeamMembersAd/>} />
+
+        <Route path="events" element={<ManageEventAd/>}/>
+        <Route path='events/add' element={<AddEventsAd/>} />
+        <Route path="events/edit/:id" element={<AddEventsAd/>}/>
+        <Route path='events/view/:id' element={<ViewEventsAd/>} />
+
+        <Route path="recruitment" element={<ManageRecruitmentAd/>}/>
+        <Route path='recruitment/add' element={<AddRecruitmentAd/>} /> 
+        <Route path="recruitment/edit/:id" element={<AddRecruitmentAd/>}/>
+        <Route path='recruitment/view/:id' element={<ViewRecruitmentAd/>} />
+
+        <Route path="meetings" element={<GoogleMeetAd/>}/>
+        <Route path='meetings/add' element={<AddMeetingsAd/>} />
+        <Route path="meetings/edit/:id" element={<AddMeetingsAd/>}/>
+        <Route path='meetings/view/:id' element={<ViewMeetingsAd/>} />
+
+        <Route path="documents" element={<FileDocumentsAd/>}/>
+        <Route path='documents/add' element={<AddDocuments/>} />
+        <Route path="documents/edit/:id" element={<AddDocuments/>}/>
+        <Route path="documents/view/:id" element={<ViewDocumentsAd/>} />
+
         <Route path="lookup/customer-type" element={<CustomerTypeAd/>}/>
         <Route path="lookup/role" element={<ManageRolesAd/>}/>
         <Route path="lookup/industry" element={<IndustryAd/>}/>
@@ -109,14 +160,51 @@ function App() {
       {/* Company Owner Dashboard */}
       <Route path="/owner" element={<OwnerLayout />}>
         <Route index element={<OwnerHome/>} />
+
         <Route path="team-managers" element={<TeamManagersOwner/>}/>
-        <Route path="team-members" element={<TeamMembersOwner/>}/>
+        <Route path='team-managers/add' element={<AddManagersCo/>} />
+        <Route path='team-managers/edit/:id' element={<AddManagersCo/>} />
+        <Route path='team-managers/view/:id' element={<ViewManagersCo/>}  />
+
+        <Route path='team-members' element={<TeamMembersOwner/>} /> 
+        <Route path='team-members/add' element={<AddMembersCo/>} />
+        <Route path='team-members/edit/:id' element={<AddMembersCo/>} />
+        <Route path='team-members/view/:id' element={<ViewMembersCo/>} />
+
         <Route path="tasks" element={<TasksOwner/>}/>
-        <Route path="project" element={<ProjectOwner/>}/>
-        <Route path="feedback" element={<FeedbackOwner/>}/>
-        <Route path="manage-event" element={<ManageEventOwner/>}/>
-        <Route path="manage-recruitment" element={<ManageRecruitmentOwner/>}/>
-        <Route path="google-meet" element={<GoogleMeetOwner/>}/>
+        <Route path='tasks/add' element={<AddTasksCo/>} />
+        <Route path='tasks/edit/:id' element={<AddTasksCo/>} />
+        <Route path='tasks/view/:id' element={<ViewTasksCo/>} />
+
+        <Route path="projects" element={<ProjectOwner/>}/>
+        <Route path='projects/add' element={<AddProjectCo/>}/> 
+        <Route path='projects/edit/:id' element={<AddProjectCo/>} />
+        <Route path='projects/view/:id' element={<ViewProjectsCo/>} />
+
+        <Route path="feedbacks" element={<FeedbackOwner/>}/>
+        <Route path='feedbacks/add' element={<AddFeedbackCo/>}/> 
+        <Route path='feedbacks/edit/:id' element={<AddFeedbackCo/>} />
+        <Route path='feedbacks/view/:id' element={<ViewFeedbackCo/>} />
+
+        <Route path="alerts" element={<AlertOwner/>}/>
+        <Route path='alerts/add' element={<AddAlertCo/>}/>
+        <Route path='alerts/edit/:id' element={<AddAlertCo/>}/>
+        <Route path='alerts/view/:id' element={<ViewAlert/>} />
+
+        <Route path="events" element={<ManageEventOwner/>}/>
+        <Route path='events/add' element={<AddEventCo/>}/>
+        <Route path='events/edit/:id' element={<AddEventCo/>}/>
+        <Route path='events/view/:id' element={<ViewEventCo/>} />
+
+        <Route path="recruitments" element={<ManageRecruitmentOwner/>}/>
+        <Route path='recruitments/add' element={<AddRecruitmentCo/>}/>
+        <Route path='recruitments/edit/:id' element={<AddRecruitmentCo/>}/>
+        <Route path='recruitments/view/:id' element={<ViewRecruitmentCo/>} />
+
+        <Route path="meetings" element={<MeetingsCo/>}/>
+        <Route path='meetings/add' element={<AddMeetingsCo/>}/>
+        <Route path='meetings/edit/:id' element={<AddMeetingsCo/>}/>
+        <Route path='meetings/view/:id' element={<ViewMeetingsCo/>} />
         {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
       </Route>
