@@ -1,47 +1,52 @@
-import React, { useState } from 'react'
-import AddModal from '../admin-dashboard/AddModal'
+import React, { useState } from 'react';
+import AddModal from '../admin-dashboard/AddModal';
 
+function TasksMg() {
+  const [tasks, setTasks] = useState([
+    {
+      id: 1,
+      title: 'Task 1',
+      description: 'This is the first task.',
+      status: 'Pending',
+    },
+    {
+      id: 2,
+      title: 'Task 2',
+      description: 'This is the second task.',
+      status: 'In Progress',
+    },
+  ]);
 
-function OwnerTasks() {
-    const [taskModules, setTaskModules] = useState([
-            {
-              id: 1,
-              name: 'Development',
-              description: 'Tasks related to software development.',
-              status: 'Active',
-            },
-            { 
-              id: 2,
-              name: 'Testing',
-              description: 'Tasks related to quality assurance and testing.',
-              status: 'Active',
-            },
-          ]);
-        
-          const [isModalOpen, setIsModalOpen] = useState(false);
-        
-          const handleAddTaskModule = (newTaskModule) => {
-            const newId = taskModules.length + 1;
-            setTaskModules([...taskModules, { id: newId, ...newTaskModule, status: 'Active' }]);
-          };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddTask = (newTask) => {
+    const newId = tasks.length + 1;
+    setTasks([...tasks, { id: newId, ...newTask, status: 'Pending' }]);
+  };
+
+  const handleDelete = (id) => {
+    const updatedTasks = tasks.filter((task) => task.id !== id);
+    setTasks(updatedTasks);
+  };
+
   return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Manage Task Modules</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Manage Tasks</h1>
 
-      {/* Add Task Module Button */}
+      {/* Add Task Button */}
       <div className="mb-6">
-      <button
+        <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
-          Add Task Module
+          Add Task
         </button>
         <AddModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddTaskModule}
-        title="Add Task Module"
-      />
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAdd={handleAddTask}
+          title="Add Task"
+        />
       </div>
 
       {/* Table */}
@@ -53,7 +58,7 @@ function OwnerTasks() {
                 Sl No
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Module Name
+                Title
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Description
@@ -67,26 +72,28 @@ function OwnerTasks() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {taskModules.map((module, index) => (
-              <tr key={module.id}>
+            {tasks.map((task, index) => (
+              <tr key={task.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {index + 1}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {module.name}
+                  {task.title}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {module.description}
+                  {task.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      module.status === 'Active'
+                      task.status === 'Completed'
                         ? 'bg-green-100 text-green-800'
+                        : task.status === 'In Progress'
+                        ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {module.status}
+                    {task.status}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -121,7 +128,10 @@ function OwnerTasks() {
                     </button>
 
                     {/* Delete Button */}
-                    <button className="text-red-600 hover:text-red-900">
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(task.id)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -143,7 +153,7 @@ function OwnerTasks() {
         </table>
       </div>
     </div>
-  )
+  );
 }
 
-export default OwnerTasks
+export default TasksMg;

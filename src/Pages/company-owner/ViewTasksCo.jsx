@@ -52,7 +52,7 @@ function ViewTasksCo() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
             <p className="text-gray-900">{task.dueDate}</p>
-          </div>
+          </div>   
         </div>
       </div>
     </div>

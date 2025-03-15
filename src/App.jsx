@@ -76,6 +76,21 @@ import ViewRecruitmentCo from './Pages/company-owner/ViewRecruitmentCo';
 import MeetingsCo from './Pages/company-owner/MeetingsCo';
 import AddMeetingsCo from './Pages/company-owner/AddMeetingsCo';
 import ViewMeetingsCo from './Pages/company-owner/ViewMeetingsCo';
+import MembersMg from './Pages/team-manager/MembersMg';
+import AddMembersMg from './Pages/team-manager/AddMembersMg';
+import ViewMembersMg from './Pages/team-manager/ViewMembersMg';
+import AddTasksMg from './Pages/team-manager/AddTasksMg';
+import ViewTasksMg from './Pages/team-manager/ViewTasksMg';
+import AddProjectMg from './Pages/team-manager/AddProjectMg';
+import ViewProjectMg from './Pages/team-manager/ViewProjectMg';
+import AddMeetingsMg from './Pages/team-manager/AddMeetingsMg';
+import ViewMeetings from './Pages/team-manager/ViewMeetings';
+import ManagerFeedback from './Pages/team-manager/ManagerFeedback';
+import AddFeedbackMg from './Pages/team-manager/AddFeedbackMg';
+import ViewFeedbackMg from './Pages/team-manager/ViewFeedbackMg';
+import ManagerTodo from './Pages/team-manager/ManagerToDo';
+import AddToDoMg from './Pages/team-manager/AddToDoMg';
+import ViewTodoMg from './Pages/team-manager/ViewToDoMg';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -149,9 +164,40 @@ function App() {
       {/* Team Manager Dashboard */}
       <Route path="/team-manager" element={<ManagerLayout/>}>
         <Route index element={<ManagerHome/>} />
-        <Route path="google-meet" element={<ManagerGoogleMeet/>}/>
-        <Route path="project" element={<ManagerProject/>}/>
+
+            <Route path="team-members" element={<MembersMg/>}/>
+            <Route path='team-members/add' element={<AddMembersMg/>} />
+            <Route path='team-members/edit/:id' element={<AddMembersMg/>} />
+            <Route path='team-members/view/:id' element={<ViewMembersMg/>} />
+
         <Route path="tasks" element={<ManagerTask/>}/>
+        <Route path='tasks/add' element={<AddTasksMg/>} />
+        <Route path='tasks/edit/:id' element={<AddTasksMg/>} />
+        <Route path='tasks/view/:id' element={<ViewTasksMg/>} />
+
+        <Route path="projects" element={<ManagerProject/>}/>
+        <Route path='projects/add' element={<AddProjectMg/>} />
+        <Route path='projects/edit/:id' element={<AddProjectMg/>} />
+        <Route path='projects/view/:id' element={<ViewProjectMg/>} />
+
+        <Route path="meetings" element={<ManagerGoogleMeet/>}/>
+        <Route path='meetings/add' element={<AddMeetingsMg/>} />
+        <Route path='meetings/edit/:id' element={<AddMeetingsMg/>} />
+        <Route path='meetings/view/:id' element={<ViewMeetings/>} />
+
+        <Route path='feedbacks' element={<ManagerFeedback/>}/>
+        <Route path='feedbacks/add' element={<AddFeedbackMg/>} />
+        <Route path='feedbacks/edit/:id' element={<AddFeedbackMg/>} />
+        <Route path='feedbacks/view/:id' element={<ViewFeedbackMg/>} />
+
+        <Route path='to-do' element={<ManagerTodo/>}/> 
+        <Route path='to-do/add' element={<AddToDoMg/>} />
+        <Route path='to-do/edit/:id' element={<AddToDoMg/>} />
+        <Route path='to-do/view/:id' element={<ViewTodoMg/>} />
+
+
+
+
         {/* <Route path="tasks" element={<Tasks />} />
         <Route path="reports" element={<Reports />} />
         <Route path="analytics" element={<Analytics />} /> */}
