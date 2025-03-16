@@ -33,16 +33,14 @@ function CompanyOwners() {
       name: 'Name',
       sortable: true,
       cell: (row) => (
-        <div className="flex items-center space-x-4 ">
+        <div className="flex items-center space-x-4">
           <img
-            src={row.photo || 'https://via.placeholder.com/50'}
+            src={row.photo || 'https://via.placeholder.com/50'} // Use the actual photo if available
             alt={row.name}
             className="w-12 h-12 rounded-full object-cover"
           />
-          <div >
-
-          <p className="font-medium text-black text-sm">{row.name}</p>
-          {/* <p className="">{row.email}</p> */}
+          <div>
+            <p className="font-medium text-black text-sm">{row.name}</p>
           </div>
         </div>
       ),
@@ -148,22 +146,19 @@ function CompanyOwners() {
     },
     cells: {
       style: {
-        // paddingLeft: '16px',
-        // paddingRight: '2px',
-        padding:'0.8rem 0.4rem',
-        border:'1px solid #e53e7eb'
+        padding: '0.8rem 0.4rem',
+        verticalAlign: 'top', // Align content to the top
       },
     },
     rows: {
       style: {
         borderBottom: '1px solid #e5e7eb',
-        // border:'1px solid #e5e7eb'
       },
     },
   };
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto" style={{ zIndex: 1 }}> {/* Ensure table has a lower z-index */}
+    <div className="flex-1 p-6 overflow-y-auto" style={{ zIndex: 1 }}>
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Company Owners</h1>

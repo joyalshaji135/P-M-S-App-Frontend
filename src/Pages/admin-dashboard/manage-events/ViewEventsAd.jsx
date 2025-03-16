@@ -53,6 +53,30 @@ function ViewEventsAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <p className="text-gray-900">{event.description}</p>
           </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <p className="text-gray-900">{event.industry}</p>
+          </div>
+
+          {/* Priority */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <p className="text-gray-900">{event.priority}</p>
+          </div>
+
+          {/* Domain */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+            <p className="text-gray-900">{event.Domain}</p>
+          </div>
+
+          {/* Event Post */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Event Post</label>
+            <p className="text-gray-900">{event.eventPost}</p>
+          </div>
         </div>
       </div>
     </div>

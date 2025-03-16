@@ -8,9 +8,11 @@ function AddDocuments() {
   // State for form data
   const [formData, setFormData] = useState({
     id: Date.now(),
-    fileName: '',
-    type: '',
-    uploadDate: '',
+    name: '',
+    description: '',
+    industry: '',
+    priority: '',
+    fileDocument: '',
   });
 
   // Fetch data from local storage on component mount
@@ -31,6 +33,15 @@ function AddDocuments() {
     setFormData({
       ...formData,
       [name]: value,
+    });
+  };
+
+  // Handle file input changes
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData({
+      ...formData,
+      fileDocument: file ? file.name : '',
     });
   };
 
@@ -67,49 +78,81 @@ function AddDocuments() {
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
         {/* Grid Layout for Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* File Name */}
+          {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               type="text"
-              name="fileName"
-              value={formData.fileName}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter file name"
+              placeholder="Enter document name"
               required
             />
           </div>
 
-          {/* File Type */}
+          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter document description"
+              rows="3"
+              required
+            />
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
             <select
-              name="type"
-              value={formData.type}
+              name="industry"
+              value={formData.industry}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select file type</option>
-              <option value="PDF">PDF</option>
-              <option value="Excel">Excel</option>
-              <option value="ZIP">ZIP</option>
-              <option value="Word">Word</option>
+              <option value="">Select industry</option>
+              <option value="Technology">Technology</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Finance">Finance</option>
+              <option value="Education">Education</option>
             </select>
           </div>
 
-          {/* Upload Date */}
+          {/* Priority */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date</label>
-            <input
-              type="date"
-              name="uploadDate"
-              value={formData.uploadDate}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
+            >
+              <option value="">Select priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          {/* File Document */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">File Document</label>
+            <div className="flex items-center">
+              <input
+                type="file"
+                name="fileDocument"
+                onChange={handleFileChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
           </div>
         </div>
 

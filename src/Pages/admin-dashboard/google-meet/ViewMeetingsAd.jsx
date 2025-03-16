@@ -30,23 +30,41 @@ function ViewMeetingsAd() {
             <p className="text-gray-900">{meeting.title}</p>
           </div>
 
-          {/* Time */}
+          {/* Meeting Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <p className="text-gray-900">{meeting.time}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
+            <p className="text-gray-900">{new Date(meeting.meetingDate).toLocaleDateString()}</p>
+          </div>
+
+          {/* Meeting Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Time</label>
+            <p className="text-gray-900">{meeting.meetingTime}</p>
           </div>
 
           {/* Meeting Link */}
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
             <a
-              href={meeting.link}
+              href={meeting.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
             >
               Join Meeting
             </a>
+          </div>
+
+          {/* Meeting Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Status</label>
+            <p className="text-gray-900">{meeting.meetingStatus}</p>
+          </div>
+
+          {/* Description */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <p className="text-gray-900">{meeting.description}</p>
           </div>
         </div>
       </div>

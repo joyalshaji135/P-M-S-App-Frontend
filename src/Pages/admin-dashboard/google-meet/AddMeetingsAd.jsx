@@ -11,7 +11,16 @@ function AddMeetingsAd() {
     title: '',
     time: '',
     link: '',
+    industryProject: '',
+    customer: '',
+    meetingDate: '',
+    meetingTime: '',
+    meetingStatus: '',
   });
+
+  // State for dropdown options
+  const [industryProjects, setIndustryProjects] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   // Fetch data from local storage on component mount
   useEffect(() => {
@@ -23,6 +32,16 @@ function AddMeetingsAd() {
         setFormData(meetingToEdit); // Pre-fill the form with existing data
       }
     }
+
+    // Fetch industryProjects and customers (example data)
+    setIndustryProjects([
+      { _id: '1', name: 'Project 1' },
+      { _id: '2', name: 'Project 2' },
+    ]);
+    setCustomers([
+      { _id: '1', name: 'Customer 1' },
+      { _id: '2', name: 'Customer 2' },
+    ]);
   }, [id]);
 
   // Handle input changes
@@ -81,21 +100,71 @@ function AddMeetingsAd() {
             />
           </div>
 
-          {/* Time */}
+          {/* Industry Project */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <input
-              type="text"
-              name="time"
-              value={formData.time}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry Project</label>
+            <select
+              name="industryProject"
+              value={formData.industryProject}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter meeting time"
+              required
+            >
+              <option value="">Select Industry Project</option>
+              {industryProjects.map((project) => (
+                <option key={project._id} value={project._id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Customer */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
+            <select
+              name="customer"
+              value={formData.customer}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Customer</option>
+              {customers.map((customer) => (
+                <option key={customer._id} value={customer._id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Meeting Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
+            <input
+              type="date"
+              name="meetingDate"
+              value={formData.meetingDate}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
-          {/* Link */}
+          {/* Meeting Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Time</label>
+            <input
+              type="time"
+              name="meetingTime"
+              value={formData.meetingTime}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Meeting Link */}
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
             <input
@@ -107,6 +176,23 @@ function AddMeetingsAd() {
               placeholder="Enter meeting link"
               required
             />
+          </div>
+
+          {/* Meeting Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Status</label>
+            <select
+              name="meetingStatus"
+              value={formData.meetingStatus}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Status</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
           </div>
         </div>
 
