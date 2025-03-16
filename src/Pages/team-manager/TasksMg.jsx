@@ -1,40 +1,52 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import AddModal from '../admin-dashboard/AddModal';
 
-function GoogleMeetAd() {
-  const meetings = [
+function TasksMg() {
+  const [tasks, setTasks] = useState([
     {
       id: 1,
-      title: 'Project Kickoff',
-      time: '10:00 AM - 11:00 AM',
-      link: 'https://meet.google.com/abc-xyz-123',
+      title: 'Task 1',
+      description: 'This is the first task.',
+      status: 'Pending',
     },
     {
       id: 2,
-      title: 'Sprint Planning',
-      time: '1:00 PM - 2:00 PM',
-      link: 'https://meet.google.com/def-uvw-456',
+      title: 'Task 2',
+      description: 'This is the second task.',
+      status: 'In Progress',
     },
-    {
-      id: 3,
-      title: 'Client Review',
-      time: '3:00 PM - 4:00 PM',
-      link: 'https://meet.google.com/ghi-rst-789',
-    },
-  ];
+  ]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddTask = (newTask) => {
+    const newId = tasks.length + 1;
+    setTasks([...tasks, { id: newId, ...newTask, status: 'Pending' }]);
+  };
+
+  const handleDelete = (id) => {
+    const updatedTasks = tasks.filter((task) => task.id !== id);
+    setTasks(updatedTasks);
+  };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Manage Google Meets</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Manage Tasks</h1>
 
-      {/* Add Meet Button */}
+      {/* Add Task Button */}
       <div className="mb-6">
-        <Link
-          to="/admin/manage-meets/add"
+        <button
+          onClick={() => setIsModalOpen(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
-          Add Meet
-        </Link>
+          Add Task
+        </button>
+        <AddModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAdd={handleAddTask}
+          title="Add Task"
+        />
       </div>
 
       {/* Table */}
@@ -46,13 +58,13 @@ function GoogleMeetAd() {
                 Sl No
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Meeting Title
+                Title
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Time
+                Description
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Meeting Link
+                Status
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -60,24 +72,33 @@ function GoogleMeetAd() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {meetings.map((meeting, index) => (
-              <tr key={meeting.id}>
+            {tasks.map((task, index) => (
+              <tr key={task.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {index + 1}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {meeting.title}
+                  {task.title}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {meeting.time}
+                  {task.description}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline">
-                  <a href={meeting.link} target="_blank" rel="noopener noreferrer">
-                    Join Meeting
-                  </a>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      task.status === 'Completed'
+                        ? 'bg-green-100 text-green-800'
+                        : task.status === 'In Progress'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {task.status}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div className="flex space-x-2">
+                    {/* View Button */}
                     <button className="text-blue-600 hover:text-blue-900">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -93,6 +114,8 @@ function GoogleMeetAd() {
                         />
                       </svg>
                     </button>
+
+                    {/* Edit Button */}
                     <button className="text-yellow-600 hover:text-yellow-900">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +126,12 @@ function GoogleMeetAd() {
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                       </svg>
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+
+                    {/* Delete Button */}
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDelete(task.id)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -128,4 +156,4 @@ function GoogleMeetAd() {
   );
 }
 
-export default GoogleMeetAd;
+export default TasksMg;

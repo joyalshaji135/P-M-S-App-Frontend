@@ -10,7 +10,7 @@ function OwnerTasks() {
               description: 'Tasks related to software development.',
               status: 'Active',
             },
-            {
+            { 
               id: 2,
               name: 'Testing',
               description: 'Tasks related to quality assurance and testing.',
