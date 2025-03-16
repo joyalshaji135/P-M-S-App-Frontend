@@ -163,7 +163,7 @@ function TeamMembersOwner() {
           responsive
         />
       </div>
-    </div>
+    </div>  
   );
 }
 

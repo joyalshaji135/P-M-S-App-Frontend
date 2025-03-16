@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import MemberSidebar from './MemberSidebar';
 import Header from '../../components/Header';
-import ManagerSidebar from './ManagerSidebar';
 
-function ManagerLayout() {
-  const dashboardName = "Team Manager";
+
+function MemberLayout() {
+  const dashboardName = "Member";
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default to open
 
   const toggleSidebar = () => {
@@ -13,8 +14,8 @@ function ManagerLayout() {
 
   return (
     <div className="flex h-screen bg-white">
-      {/* Manager Sidebar */}
-      <ManagerSidebar isSidebarOpen={isSidebarOpen} />
+      {/* Member Sidebar */}
+      <MemberSidebar isSidebarOpen={isSidebarOpen} />
 
       {/* Main Content */}
       <div
@@ -33,4 +34,4 @@ function ManagerLayout() {
   );
 }
 
-export default ManagerLayout;
+export default MemberLayout;

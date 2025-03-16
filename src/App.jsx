@@ -73,6 +73,34 @@ import ViewRecruitmentCo from './Pages/company-owner/recruitments/ViewRecruitmen
 import MeetingsCo from './Pages/company-owner/meetings/MeetingsCo';
 import AddMeetingsCo from './Pages/company-owner/meetings/AddMeetingsCo';
 import ViewMeetingsCo from './Pages/company-owner/meetings/ViewMeetingsCo';
+import MembersMg from './Pages/team-manager/MembersMg';
+import AddMembersMg from './Pages/team-manager/AddMembersMg';
+import ViewMembersMg from './Pages/team-manager/ViewMembersMg';
+import AddTasksMg from './Pages/team-manager/AddTasksMg';
+import ViewTasksMg from './Pages/team-manager/ViewTasksMg';
+import AddProjectMg from './Pages/team-manager/AddProjectMg';
+import ViewProjectMg from './Pages/team-manager/ViewProjectMg';
+import AddMeetingsMg from './Pages/team-manager/AddMeetingsMg';
+import ViewMeetings from './Pages/team-manager/ViewMeetings';
+import ManagerFeedback from './Pages/team-manager/ManagerFeedback';
+import AddFeedbackMg from './Pages/team-manager/AddFeedbackMg';
+import ViewFeedbackMg from './Pages/team-manager/ViewFeedbackMg';
+import ManagerTodo from './Pages/team-manager/ManagerToDo';
+import AddToDoMg from './Pages/team-manager/AddToDoMg';
+import ViewTodoMg from './Pages/team-manager/ViewToDoMg';
+import MemberLayout from './Pages/team-member/MemberLayout';
+import MemberHome from './Pages/team-member/MemberHome';
+import TasksMb from './Pages/team-member/TasksMb';
+import AddTasksMb from './Pages/team-member/AddTasksMb';
+import ViewTasksMb from './Pages/team-member/ViewTasksMb';
+import ProjectsMb from './Pages/team-member/ProjectsMb';
+import MemberFeedback from './Pages/team-member/MemberFeedback';
+import AddFeedbackMb from './Pages/team-member/AddFeedbackMb';
+import MeetingsMb from './Pages/team-member/MeetingsMb';
+import ToDoMb from './Pages/team-member/ToDoMb';
+import AddToDoMb from './Pages/team-member/AddToDoMb';
+import ViewToDoMb from './Pages/team-member/ViewToDoMb';
+import DocumentsMb from './Pages/team-member/DocumentsMb';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -137,18 +165,69 @@ function App() {
       </Route>
 
       {/* Team Member Dashboard */}
-      <Route path="/member" element={<TeamMemberDashboard />}>
-        {/* <Route index element={<Dashboard />} />
-        <Route path="tasks" element={<Tasks />} />
-        <Route path="reports" element={<Reports />} /> */}
+      <Route path="/team-member" element={<MemberLayout/>}>
+        <Route index element={<MemberHome/>}  />
+
+        <Route path="tasks" element={<TasksMb/>}/>
+        <Route path='tasks/add' element={<AddTasksMb/>} />
+        <Route path='tasks/edit/:id' element={<AddTasksMb/>} />
+        <Route path='tasks/view/:id' element={<ViewTasksMb/>} />
+
+        <Route path='projects' element={<ProjectsMb/>} />
+
+        <Route path='feedback' element={<MemberFeedback/>} />
+        <Route path='feedbacks/add' element={<AddFeedbackMb/>} />
+
+        <Route path='meetings' element={<MeetingsMb/>} />
+
+        <Route path='to-do' element={<ToDoMb/>} />
+        <Route path='to-do/add' element={<AddToDoMb/>} />
+        <Route path='to-do/edit/:id' element={<AddToDoMb/>} />
+        <Route path='to-do/view/:id' element={<ViewToDoMb/>} />
+
+        <Route path='documents' element={<DocumentsMb/>} />
+
+
+
       </Route>
 
       {/* Team Manager Dashboard */}
       <Route path="/team-manager" element={<ManagerLayout/>}>
         <Route index element={<ManagerHome/>} />
-        <Route path="google-meet" element={<ManagerGoogleMeet/>}/>
-        <Route path="project" element={<ManagerProject/>}/>
+
+            <Route path="team-members" element={<MembersMg/>}/>
+            <Route path='team-members/add' element={<AddMembersMg/>} />
+            <Route path='team-members/edit/:id' element={<AddMembersMg/>} />
+            <Route path='team-members/view/:id' element={<ViewMembersMg/>} />
+
         <Route path="tasks" element={<ManagerTask/>}/>
+        <Route path='tasks/add' element={<AddTasksMg/>} />
+        <Route path='tasks/edit/:id' element={<AddTasksMg/>} />
+        <Route path='tasks/view/:id' element={<ViewTasksMg/>} />
+
+        <Route path="projects" element={<ManagerProject/>}/>
+        <Route path='projects/add' element={<AddProjectMg/>} />
+        <Route path='projects/edit/:id' element={<AddProjectMg/>} />
+        <Route path='projects/view/:id' element={<ViewProjectMg/>} />
+
+        <Route path="meetings" element={<ManagerGoogleMeet/>}/>
+        <Route path='meetings/add' element={<AddMeetingsMg/>} />
+        <Route path='meetings/edit/:id' element={<AddMeetingsMg/>} />
+        <Route path='meetings/view/:id' element={<ViewMeetings/>} />
+
+        <Route path='feedbacks' element={<ManagerFeedback/>}/>
+        <Route path='feedbacks/add' element={<AddFeedbackMg/>} />
+        <Route path='feedbacks/edit/:id' element={<AddFeedbackMg/>} />
+        <Route path='feedbacks/view/:id' element={<ViewFeedbackMg/>} />
+
+        <Route path='to-do' element={<ManagerTodo/>}/> 
+        <Route path='to-do/add' element={<AddToDoMg/>} />
+        <Route path='to-do/edit/:id' element={<AddToDoMg/>} />
+        <Route path='to-do/view/:id' element={<ViewTodoMg/>} />
+
+
+
+
         {/* <Route path="tasks" element={<Tasks />} />
         <Route path="reports" element={<Reports />} />
         <Route path="analytics" element={<Analytics />} /> */}

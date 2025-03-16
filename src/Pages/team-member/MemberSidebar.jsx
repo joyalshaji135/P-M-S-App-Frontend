@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FcParallelTasks } from 'react-icons/fc';
-import { MdOutlineHome, MdOutlineEvent, MdOutlineVideoCall } from 'react-icons/md';
-import { FaPeopleGroup } from 'react-icons/fa6';
-import { VscFileSubmodule } from 'react-icons/vsc';
+import { FcParallelTasks } from "react-icons/fc";
+import { MdOutlineHome, MdOutlineEvent, MdOutlineVideoCall } from "react-icons/md";
+import { FaTasks, FaProjectDiagram, FaRegComments } from "react-icons/fa";
+import { VscFileSubmodule, VscChecklist } from "react-icons/vsc";
 
-function ManagerSidebar({ isSidebarOpen }) {
+function MemberSidebar({ isSidebarOpen }) {
   const [isLookupOpen, setIsLookupOpen] = useState(false);
 
   const toggleLookup = () => {
@@ -15,7 +15,7 @@ function ManagerSidebar({ isSidebarOpen }) {
   return (
     <aside
       className={`h-screen fixed top-0 left-0 z-40 bg-white w-64 p-3 border-r border-gray-200 transition-transform ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       <div className="h-full overflow-y-auto">
@@ -29,10 +29,10 @@ function ManagerSidebar({ isSidebarOpen }) {
 
         {/* Sidebar Links */}
         <ul className="space-y-2 font-medium">
-          {/* Dashboard */}
+          {/* Home */}
           <li>
             <NavLink
-              to="/team-manager"
+              to="/team-member"
               end
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
@@ -41,59 +41,89 @@ function ManagerSidebar({ isSidebarOpen }) {
               }
             >
               <MdOutlineHome className="text-xl" />
-              <span className="ml-2">Dashboard</span>
-            </NavLink>
-          </li>
-
-          {/* Team Members */}
-          <li>
-            <NavLink
-              to="/team-manager/team-members"
-              className={({ isActive }) =>
-                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                }`
-              }
-            >
-              <FaPeopleGroup className="text-xl" />
-              <span className="ml-2">Team Members</span>
+              <span className="ml-2">Home</span>
             </NavLink>
           </li>
 
           {/* Tasks */}
           <li>
             <NavLink
-              to="/team-manager/tasks"
+              to="/team-member/tasks"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
                 }`
               }
             >
-              <VscFileSubmodule className="text-xl" />
+              <FaTasks className="text-xl" />
               <span className="ml-2">Tasks</span>
             </NavLink>
           </li>
 
-          {/* Project */}
+          {/* Projects */}
           <li>
             <NavLink
-              to="/team-manager/projects"
+              to="/team-member/projects"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
                 }`
               }
             >
-              <VscFileSubmodule className="text-xl" />
-              <span className="ml-2">Project</span>
+              <FaProjectDiagram className="text-xl" />
+              <span className="ml-2">Projects</span>
             </NavLink>
           </li>
 
           {/* Feedback */}
           <li>
             <NavLink
-              to="/team-manager/feedbacks"
+              to="/team-member/feedback"
+              className={({ isActive }) =>
+                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
+                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
+                }`
+              }
+            >
+              <FaRegComments className="text-xl" />
+              <span className="ml-2">Feedback</span>
+            </NavLink>
+          </li>
+
+          {/* Meetings */}
+          <li>
+            <NavLink
+              to="/team-member/meetings"
+              className={({ isActive }) =>
+                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
+                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
+                }`
+              }
+            >
+              <MdOutlineVideoCall className="text-xl" />
+              <span className="ml-2">Meetings</span>
+            </NavLink>
+          </li>
+
+          {/* To-Do */}
+          <li>
+            <NavLink
+              to="/team-member/to-do"
+              className={({ isActive }) =>
+                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
+                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
+                }`
+              }
+            >
+              <VscChecklist className="text-xl" />
+              <span className="ml-2">To-Do</span>
+            </NavLink>
+          </li>
+
+          {/* File Documents */}
+          <li>
+            <NavLink
+              to="/team-member/documents"
               className={({ isActive }) =>
                 `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
                   isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
@@ -101,35 +131,7 @@ function ManagerSidebar({ isSidebarOpen }) {
               }
             >
               <VscFileSubmodule className="text-xl" />
-              <span className="ml-2">Feedback</span>
-            </NavLink>
-          </li>
-
-          {/* Google Meet */}
-          <li>
-            <NavLink
-              to="/team-manager/meetings"
-              className={({ isActive }) =>
-                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                }`
-              }
-            >
-              <MdOutlineVideoCall className="text-xl" />
-              <span className="ml-2">Google Meet</span>
-            </NavLink>
-          </li> 
-          <li>
-            <NavLink
-              to="/team-manager/to-do"
-              className={({ isActive }) =>
-                `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
-                }`
-              }
-            >
-              <MdOutlineVideoCall className="text-xl" />
-              <span className="ml-2">To-Do</span>
+              <span className="ml-2">File Documents</span>
             </NavLink>
           </li>
         </ul>
@@ -138,4 +140,4 @@ function ManagerSidebar({ isSidebarOpen }) {
   );
 }
 
-export default ManagerSidebar;
+export default MemberSidebar;
