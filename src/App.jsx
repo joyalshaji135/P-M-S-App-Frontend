@@ -91,6 +91,19 @@ import ViewFeedbackMg from './Pages/team-manager/ViewFeedbackMg';
 import ManagerTodo from './Pages/team-manager/ManagerToDo';
 import AddToDoMg from './Pages/team-manager/AddToDoMg';
 import ViewTodoMg from './Pages/team-manager/ViewToDoMg';
+import MemberLayout from './Pages/team-member/MemberLayout';
+import MemberHome from './Pages/team-member/MemberHome';
+import TasksMb from './Pages/team-member/TasksMb';
+import AddTasksMb from './Pages/team-member/AddTasksMb';
+import ViewTasksMb from './Pages/team-member/ViewTasksMb';
+import ProjectsMb from './Pages/team-member/ProjectsMb';
+import MemberFeedback from './Pages/team-member/MemberFeedback';
+import AddFeedbackMb from './Pages/team-member/AddFeedbackMb';
+import MeetingsMb from './Pages/team-member/MeetingsMb';
+import ToDoMb from './Pages/team-member/ToDoMb';
+import AddToDoMb from './Pages/team-member/AddToDoMb';
+import ViewToDoMb from './Pages/team-member/ViewToDoMb';
+import DocumentsMb from './Pages/team-member/DocumentsMb';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -155,10 +168,30 @@ function App() {
       </Route>
 
       {/* Team Member Dashboard */}
-      <Route path="/member" element={<TeamMemberDashboard />}>
-        {/* <Route index element={<Dashboard />} />
-        <Route path="tasks" element={<Tasks />} />
-        <Route path="reports" element={<Reports />} /> */}
+      <Route path="/team-member" element={<MemberLayout/>}>
+        <Route index element={<MemberHome/>}  />
+
+        <Route path="tasks" element={<TasksMb/>}/>
+        <Route path='tasks/add' element={<AddTasksMb/>} />
+        <Route path='tasks/edit/:id' element={<AddTasksMb/>} />
+        <Route path='tasks/view/:id' element={<ViewTasksMb/>} />
+
+        <Route path='projects' element={<ProjectsMb/>} />
+
+        <Route path='feedback' element={<MemberFeedback/>} />
+        <Route path='feedbacks/add' element={<AddFeedbackMb/>} />
+
+        <Route path='meetings' element={<MeetingsMb/>} />
+
+        <Route path='to-do' element={<ToDoMb/>} />
+        <Route path='to-do/add' element={<AddToDoMb/>} />
+        <Route path='to-do/edit/:id' element={<AddToDoMb/>} />
+        <Route path='to-do/view/:id' element={<ViewToDoMb/>} />
+
+        <Route path='documents' element={<DocumentsMb/>} />
+
+
+
       </Route>
 
       {/* Team Manager Dashboard */}
