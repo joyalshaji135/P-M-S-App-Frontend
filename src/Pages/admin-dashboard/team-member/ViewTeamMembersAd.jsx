@@ -49,7 +49,9 @@ function ViewTeamMembersAd() {
           {/* Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-            <p className="text-gray-900">{member.address}</p>
+            <p className="text-gray-900">
+              {member.address.street}, {member.address.city}, {member.address.state}, {member.address.district}, {member.address.zipCode}
+            </p>
           </div>
 
           {/* Role */}
@@ -68,6 +70,46 @@ function ViewTeamMembersAd() {
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <p className="text-gray-900">{member.description}</p>
+          </div>
+
+          {/* Skills */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+            <div className="space-y-2">
+              {member.skills.map((skill, index) => (
+                <div key={index} className="p-3 border border-gray-200 rounded-md">
+                  <p className="text-gray-900"><strong>Skill Name:</strong> {skill.skillName}</p>
+                  <p className="text-gray-900"><strong>Proficiency:</strong> {skill.proficiency}</p>
+                  <p className="text-gray-900"><strong>Years of Experience:</strong> {skill.yearsOfExperience}</p>
+                  <p className="text-gray-900"><strong>Certification:</strong> {skill.certification || 'N/A'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Company Information */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company Information</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-md">
+              <div>
+                <p className="text-gray-900"><strong>Name:</strong> {member.company.name}</p>
+                <p className="text-gray-900"><strong>Registration Number:</strong> {member.company.registrationNumber}</p>
+                <p className="text-gray-900"><strong>Email:</strong> {member.company.email}</p>
+                <p className="text-gray-900"><strong>Phone:</strong> {member.company.phone}</p>
+              </div>
+              <div>
+                <p className="text-gray-900"><strong>Industry:</strong> {member.company.industry}</p>
+                <p className="text-gray-900"><strong>Website:</strong> {member.company.website}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Company Address */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Company Address</label>
+            <p className="text-gray-900">
+              {member.company.address.street}, {member.company.address.city}, {member.company.address.state}, {member.company.address.district}, {member.company.address.zipCode}
+            </p>
           </div>
         </div>
       </div>

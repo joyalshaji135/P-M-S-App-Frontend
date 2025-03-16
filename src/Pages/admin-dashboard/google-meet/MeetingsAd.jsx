@@ -2,39 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 
-function FileDocumentsAd() {
-  const [documents, setDocuments] = useState([]);
+function MeetingsAd() {
+  const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const [filteredMeetings, setFilteredMeetings] = useState([]);
 
   // Fetch data from localStorage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('documents')) || [];
-    setDocuments(storedData);
-    setFilteredDocuments(storedData); // Initialize filteredDocuments with all data
+    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
+    setMeetings(storedData);
+    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
   }, []);
 
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
-      const filtered = documents.filter(
-        (document) =>
-          document.fileName.toLowerCase().includes(searchText.toLowerCase()) ||
-          document.type.toLowerCase().includes(searchText.toLowerCase()) ||
-          document.uploadDate.toLowerCase().includes(searchText.toLowerCase())
+      const filtered = meetings.filter(
+        (meeting) =>
+          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.meetingTime.toLowerCase().includes(searchText.toLowerCase()) // Updated to meetingTime
       );
-      setFilteredDocuments(filtered);
+      setFilteredMeetings(filtered);
     } else {
-      setFilteredDocuments(documents); // Reset to all documents if search text is empty
+      setFilteredMeetings(meetings); // Reset to all meetings if search text is empty
     }
-  }, [searchText, documents]);
+  }, [searchText, meetings]);
 
   // Handle delete functionality
   const handleDelete = (id) => {
-    const updatedDocuments = documents.filter((document) => document.id !== id);
-    localStorage.setItem('documents', JSON.stringify(updatedDocuments));
-    setDocuments(updatedDocuments); // Update state to reflect the deletion
-    setFilteredDocuments(updatedDocuments); // Update filtered documents as well
+    const updatedMeetings = meetings.filter((meeting) => meeting.id !== id);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    setMeetings(updatedMeetings); // Update state to reflect the deletion
+    setFilteredMeetings(updatedMeetings); // Update filtered meetings as well
   };
 
   // Table columns
@@ -45,26 +44,34 @@ function FileDocumentsAd() {
       sortable: true,
     },
     {
-      name: 'File Name',
-      selector: (row) => row.fileName,
+      name: 'Meeting Title',
+      selector: (row) => row.title,
       sortable: true,
     },
     {
-      name: 'File Type',
-      selector: (row) => row.type,
+      name: 'Meeting Time', // Updated column name
+      selector: (row) => row.meetingTime, // Updated to meetingTime
       sortable: true,
     },
     {
-      name: 'Upload Date',
-      selector: (row) => row.uploadDate,
-      sortable: true,
+      name: 'Meeting Link',
+      cell: (row) => (
+        <a
+          href={row.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
+        >
+          Join Meeting
+        </a>
+      ),
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/documents/view/${row.id}`}>
+          <Link to={`/admin/meetings/view/${row.id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +90,7 @@ function FileDocumentsAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/documents/edit/${row.id}`}>
+          <Link to={`/admin/meetings/edit/${row.id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -123,7 +130,7 @@ function FileDocumentsAd() {
     <div className="flex-1 p-6 overflow-y-auto">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Documents</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Manage Google Meets</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
@@ -135,7 +142,7 @@ function FileDocumentsAd() {
           />
           {/* Add Button */}
           <Link
-            to="/admin/documents/add"
+            to="/admin/meetings/add"
             className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
             Add +
@@ -147,7 +154,7 @@ function FileDocumentsAd() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredDocuments}
+          data={filteredMeetings}
           pagination
           highlightOnHover
           responsive
@@ -157,4 +164,4 @@ function FileDocumentsAd() {
   );
 }
 
-export default FileDocumentsAd;
+export default MeetingsAd;

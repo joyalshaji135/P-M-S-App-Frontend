@@ -12,7 +12,17 @@ function AddEventsAd() {
     location: '',
     date: '',
     time: '',
+    description: '',
+    industry: '',
+    priority: '',
+    eventPost: '',
+    Domain: '',
   });
+
+  // Dropdown options
+  const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Entertainment'];
+  const priorities = ['Low', 'Medium', 'High'];
+  const domains = ['Marketing', 'Sales', 'Operations', 'HR', 'IT'];
 
   // Fetch data from local storage on component mount
   useEffect(() => {
@@ -118,6 +128,91 @@ function AddEventsAd() {
               value={formData.time}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter event description"
+              rows="4"
+              required
+            />
+          </div>
+
+          {/* Industry Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <select
+              name="industry"
+              value={formData.industry}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Industry</option>
+              {industries.map((industry, index) => (
+                <option key={index} value={industry}>
+                  {industry}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Priority Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Priority</option>
+              {priorities.map((priority, index) => (
+                <option key={index} value={priority}>
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Domain Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+            <select
+              name="Domain"
+              value={formData.Domain}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Domain</option>
+              {domains.map((domain, index) => (
+                <option key={index} value={domain}>
+                  {domain}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Event Post */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Event Post</label>
+            <textarea
+              name="eventPost"
+              value={formData.eventPost}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter event post"
+              rows="4"
               required
             />
           </div>
