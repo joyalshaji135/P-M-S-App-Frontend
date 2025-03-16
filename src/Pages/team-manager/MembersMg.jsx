@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 
-function ManagerTask() {
-  const [tasks, setTasks] = useState([]); // Initialize tasks as an empty array
+function MembersMg() {
+  const [members, setMembers] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
 
-  // Fetch tasks from localStorage on component mount
+  // Fetch data from localStorage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('tasksMg')) || [];
-    setTasks(storedData);
-    setFilteredTasks(storedData);
+    const storedData = JSON.parse(localStorage.getItem('membersMg')) || [];
+    setMembers(storedData);
+    setFilteredMembers(storedData); // Initialize filteredMembers with all data
   }, []);
 
   // Handle search functionality
-  const handleSearch = (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    setSearchText(searchValue);
-
-    const filtered = tasks.filter(
-      (task) =>
-        task.taskName.toLowerCase().includes(searchValue) ||
-        task.taskTitle.toLowerCase().includes(searchValue) ||
-        task.taskStatus.toLowerCase().includes(searchValue)
-    );
-    setFilteredTasks(filtered);
-  };
+  useEffect(() => {
+    if (searchText) {
+      const filtered = members.filter(
+        (member) =>
+          member.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          member.email.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredMembers(filtered);
+    } else {
+      setFilteredMembers(members); // Reset to all members if search text is empty
+    }
+  }, [searchText, members]);
 
   // Handle delete functionality
-  const handleDeleteTask = (id) => {
-    const updatedTasks = tasks.filter((task) => task.id !== id);
-    setTasks(updatedTasks);
-    setFilteredTasks(updatedTasks);
-    localStorage.setItem('tasksMg', JSON.stringify(updatedTasks)); // Update localStorage
+  const handleDelete = (id) => {
+    const updatedMembers = members.filter((member) => member.id !== id);
+    localStorage.setItem('membersMg', JSON.stringify(updatedMembers));
+    setMembers(updatedMembers); // Update state to reflect the deletion
+    setFilteredMembers(updatedMembers); // Update filtered members as well
   };
 
   // Table columns
@@ -44,13 +44,13 @@ function ManagerTask() {
       sortable: true,
     },
     {
-      name: 'Task Name',
-      selector: (row) => row.taskName,
+      name: 'Name',
+      selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: 'Task Title',
-      selector: (row) => row.taskTitle,
+      name: 'Email',
+      selector: (row) => row.email,
       sortable: true,
     },
     {
@@ -58,14 +58,12 @@ function ManagerTask() {
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.taskStatus === 'Completed'
+            row.status === 'Active'
               ? 'bg-green-100 text-green-800'
-              : row.taskStatus === 'In Progress'
-              ? 'bg-yellow-100 text-yellow-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {row.taskStatus}
+          {row.status}
         </span>
       ),
       sortable: true,
@@ -75,7 +73,7 @@ function ManagerTask() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/team-manager/tasks/view/${row.id}`}>
+          <Link to={`/team-manager/team-members/view/${row.id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -93,24 +91,10 @@ function ManagerTask() {
             </button>
           </Link>
 
-          {/* Edit Button */}
-          <Link to={`/team-manager/tasks/edit/${row.id}`}>
-            <button className="text-yellow-600 hover:text-yellow-900">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
-            </button>
-          </Link>
-
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDeleteTask(row.id)}
+            onClick={() => handleDelete(row.id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -134,31 +118,31 @@ function ManagerTask() {
     <div className="flex-1 p-6 overflow-y-auto">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Tasks</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Members Management</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
             type="text"
-            placeholder="Search tasks..."
+            placeholder="Search..."
             value={searchText}
-            onChange={handleSearch}
+            onChange={(e) => setSearchText(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {/* Add Button */}
           <Link
-            to="/team-manager/tasks/add"
+            to="/team-manager/team-members/add"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
           >
-            Add Task
+            Add +
           </Link>
         </div>
       </div>
 
-      {/* DataTable */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredTasks}
+          data={filteredMembers}
           pagination
           highlightOnHover
           responsive
@@ -168,4 +152,4 @@ function ManagerTask() {
   );
 }
 
-export default ManagerTask;
+export default MembersMg;

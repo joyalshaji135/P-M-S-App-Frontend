@@ -55,6 +55,7 @@ function AdminSidebar({ isSidebarOpen }) {
                 }`
               }
             >
+              <FaPeopleGroup className="text-xl" />
               <span className="ml-2">Company Owner</span>
             </NavLink>
           </li>
@@ -69,6 +70,7 @@ function AdminSidebar({ isSidebarOpen }) {
                 }`
               }
             >
+              <FaPeopleGroup className="text-xl" />
               <span className="ml-2">Team Managers</span>
             </NavLink>
           </li>
@@ -113,6 +115,7 @@ function AdminSidebar({ isSidebarOpen }) {
                 }`
               }
             >
+              <MdOutlineEvent className="text-xl" />
               <span className="ml-2">Manage Recruitment</span>
             </NavLink>
           </li>
