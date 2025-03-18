@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LuWorkflow } from "react-icons/lu";
 import { MdEmail, MdLock } from "react-icons/md";
+import { loginApi } from '../api/admin-dashboard-api/login-api/LoginApi';
 
 function IconInput({ children, placeholder, type, name, onChange }) {
     return (
@@ -8,9 +9,9 @@ function IconInput({ children, placeholder, type, name, onChange }) {
             <div className='icon-wrapper w-14 flex justify-center items-center absolute'>
                 <span className='text-lg opacity-80 text-gray-500'>{children}</span>
             </div>
-            <input 
-                type={type} 
-                placeholder={placeholder} 
+            <input
+                type={type}
+                placeholder={placeholder}
                 name={name}
                 onChange={onChange}
                 className='w-full h-full pl-14 pr-4 rounded-lg focus:outline-none bg-transparent'
@@ -43,10 +44,18 @@ function Login() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Data Submitted:", formData);
+        
+        try {
+            const response = await loginApi(formData);
+            console.log("Login Success:", response);
+            alert("Login Success");
+        } catch (error) {
+            console.error("Login Failed:", error);
+        }
     };
+
 
     if (isLoading) {
         return (
@@ -69,18 +78,18 @@ function Login() {
                     <h1 className='text-2xl font-semibold mt-6 text-neutral-900 opacity-80 text-center'>Log in to your account</h1>
                     <form onSubmit={handleSubmit}>
                         <div className="mt-6">
-                            <IconInput 
-                                type='email' 
-                                placeholder='Email' 
-                                name="email" 
+                            <IconInput
+                                type='email'
+                                placeholder='Email'
+                                name="email"
                                 onChange={handleChange}
                             >
                                 <MdEmail />
                             </IconInput>
-                            <IconInput 
-                                type='password' 
-                                placeholder='Password' 
-                                name="password" 
+                            <IconInput
+                                type='password'
+                                placeholder='Password'
+                                name="password"
                                 onChange={handleChange}
                             >
                                 <MdLock />
@@ -102,8 +111,8 @@ function Login() {
                                 <option value="tester">Company Owner</option>
                             </select>
                         </div>
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             className="w-full bg-blue-600 text-white py-2 rounded-lg mt-6 hover:bg-blue-700 transition duration-300 text-sm"
                         >
                             Log In
@@ -112,10 +121,10 @@ function Login() {
                 </div>
                 <div className='illustration-section w-1/2 bg-blue-600 flex justify-center items-center'>
                     <div className="illu-wrap">
-                        <img 
-                            src="https://via.placeholder.com/600x800" 
-                            alt="Illustration" 
-                            className="h-full w-full object-cover" 
+                        <img
+                            src="https://via.placeholder.com/600x800"
+                            alt="Illustration"
+                            className="h-full w-full object-cover"
                         />
                     </div>
                 </div>
