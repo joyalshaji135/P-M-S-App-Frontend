@@ -107,6 +107,9 @@ import DocumentsMb from './Pages/team-member/DocumentsMb';
 function App() {
   return (
     <Routes>
+
+      <Route path="/" element={<Login />} />
+      
       <Route path="/login" element={<Login />} />
       {/* <Route path='/login' element={<Log/>}/> */}
 

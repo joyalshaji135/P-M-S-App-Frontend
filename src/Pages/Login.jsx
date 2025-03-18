@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LuWorkflow } from "react-icons/lu";
 import { MdEmail, MdLock } from "react-icons/md";
 import { loginApi } from '../api/admin-dashboard-api/login-api/LoginApi';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function IconInput({ children, placeholder, type, name, onChange }) {
     return (
@@ -27,12 +28,14 @@ function Login() {
         role: ''
     });
     const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate
 
-    // Simulate page loading animation
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 2000); // 2 seconds loading animation
+        }, 2000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -44,18 +47,44 @@ function Login() {
         });
     };
 
+    const validateForm = () => {
+        const { email, password, role } = formData;
+        if (!email || !password || !role) {
+            alert("All fields are required.");
+            return false;
+        }
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            alert("Please enter a valid email address.");
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+        if (!validateForm() || isSubmitting) return;
+
+        setIsSubmitting(true);
         try {
+            
             const response = await loginApi(formData);
             console.log("Login Success:", response);
             alert("Login Success");
+            // Redirect to the home page after successful login
+            navigate(
+                response.customer.role === 'admin' && formData.role === 'admin' ? '/admin' :
+                response.customer.role === 'company-owners' && formData.role === 'company-owners' ? '/owner' :
+                response.customer.role === 'team-manager' && formData.role === 'team-manager' ? '/team-manager' :
+                response.customer.role === 'team-member' && formData.role === 'team-member' ? '/team-member' :
+                '/' // Default route
+            );
         } catch (error) {
             console.error("Login Failed:", error);
+            alert("Login Failed: " + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
-
 
     if (isLoading) {
         return (
@@ -95,7 +124,6 @@ function Login() {
                                 <MdLock />
                             </IconInput>
                         </div>
-                        {/* Role Select Dropdown */}
                         <div className="mt-6">
                             <label className="block text-gray-500 text-sm mb-1">Select Role</label>
                             <select
@@ -106,17 +134,37 @@ function Login() {
                             >
                                 <option value="">Select a Role</option>
                                 <option value="admin">Admin</option>
-                                <option value="developer">Team Member</option>
-                                <option value="manager">Team Manager</option>
-                                <option value="tester">Company Owner</option>
+                                <option value="team-member">Team Member</option>
+                                <option value="team-manager">Team Manager</option>
+                                <option value="company-owners">Company Owner</option>
                             </select>
+                        </div>
+                        <div className="mt-4 flex items-center">
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="mr-2"
+                            />
+                            <label htmlFor="rememberMe" className="text-sm text-gray-600">Remember Me</label>
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white py-2 rounded-lg mt-6 hover:bg-blue-700 transition duration-300 text-sm"
+                            disabled={isSubmitting}
+                            className="w-full bg-blue-600 text-white py-2 rounded-lg mt-6 hover:bg-blue-700 transition duration-300 text-sm disabled:bg-blue-400 disabled:cursor-not-allowed"
                         >
-                            Log In
+                            {isSubmitting ? "Logging In..." : "Log In"}
                         </button>
+                        <div className="mt-4 text-right">
+                            <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                                Forgot Password?
+                            </a>
+                        </div>
+                        <div className="mt-4 text-center">
+                            <span className="text-sm text-gray-600">Don't have an account? </span>
+                            <a href="/signup" className="text-sm text-blue-600 hover:underline">Sign Up</a>
+                        </div>
                     </form>
                 </div>
                 <div className='illustration-section w-1/2 bg-blue-600 flex justify-center items-center'>
