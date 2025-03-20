@@ -1,17 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { getAllTeamMembers } from '../../../api/admin/team-member/TeamMembersApi'; // Adjust the import path
+import { GrOverview } from "react-icons/gr";
+import { MdDelete } from "react-icons/md";
+import { toast } from "react-toastify";
 
 function MembersMg() {
   const [members, setMembers] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredMembers, setFilteredMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from API on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('membersMg')) || [];
-    setMembers(storedData);
-    setFilteredMembers(storedData); // Initialize filteredMembers with all data
+    const fetchData = async () => {
+      try {
+        const response = await getAllTeamMembers();
+
+        if (!response || !response.success || !Array.isArray(response.teamMembers)) {
+          throw new Error('Invalid API response or missing teamMembers array');
+        }
+        setMembers(response.teamMembers);
+        setFilteredMembers(response.teamMembers);
+        toast.success(response.message || 'Data fetched successfully');
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Handle search functionality
@@ -19,21 +41,20 @@ function MembersMg() {
     if (searchText) {
       const filtered = members.filter(
         (member) =>
-          member.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          member.email.toLowerCase().includes(searchText.toLowerCase())
+          (member.name && member.name.toLowerCase().includes(searchText.toLowerCase())) ||
+          (member.email && member.email.toLowerCase().includes(searchText.toLowerCase()))
       );
       setFilteredMembers(filtered);
     } else {
-      setFilteredMembers(members); // Reset to all members if search text is empty
+      setFilteredMembers(members);
     }
   }, [searchText, members]);
 
   // Handle delete functionality
-  const handleDelete = (id) => {
-    const updatedMembers = members.filter((member) => member.id !== id);
-    localStorage.setItem('membersMg', JSON.stringify(updatedMembers));
-    setMembers(updatedMembers); // Update state to reflect the deletion
-    setFilteredMembers(updatedMembers); // Update filtered members as well
+  const handleDelete = (_id) => {
+    const updatedMembers = members.filter((member) => member._id !== _id);
+    setMembers(updatedMembers);
+    setFilteredMembers(updatedMembers);
   };
 
   // Table columns
@@ -45,12 +66,12 @@ function MembersMg() {
     },
     {
       name: 'Name',
-      selector: (row) => row.name,
+      selector: (row) => row.name || 'N/A',
       sortable: true,
     },
     {
       name: 'Email',
-      selector: (row) => row.email,
+      selector: (row) => row.email || 'N/A',
       sortable: true,
     },
     {
@@ -63,7 +84,7 @@ function MembersMg() {
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.status || 'Unknown'}
         </span>
       ),
       sortable: true,
@@ -73,46 +94,33 @@ function MembersMg() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/team-manager/team-members/view/${row.id}`}>
+          <Link to={`/team-manager/team-members/view/${row._id}`}> {/* Use _id instead of id */}
             <button className="text-blue-600 hover:text-blue-900">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path
-                  fillRule="evenodd"
-                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              {/* View Icon */}
+              <GrOverview />
             </button>
           </Link>
 
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)} 
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
+            {/* Delete Icon */}
+            <MdDelete />
           </button>
         </div>
       ),
     },
   ];
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
@@ -120,7 +128,6 @@ function MembersMg() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Members Management</h1>
         <div className="flex items-center space-x-4">
-          {/* Search Bar */}
           <input
             type="text"
             placeholder="Search..."
@@ -128,7 +135,6 @@ function MembersMg() {
             onChange={(e) => setSearchText(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {/* Add Button */}
           <Link
             to="/team-manager/team-members/add"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
@@ -142,7 +148,7 @@ function MembersMg() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredMembers}
+          data={filteredMembers || []}
           pagination
           highlightOnHover
           responsive
