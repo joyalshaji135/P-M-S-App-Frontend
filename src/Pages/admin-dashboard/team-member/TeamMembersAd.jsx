@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
+import { getAllTeamManagers } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
 
 function TeamMembers() {
   // State for team members data
@@ -26,6 +27,16 @@ function TeamMembers() {
     setTeamMembers(updatedData);
     localStorage.setItem('teamMembers', JSON.stringify(updatedData));
   };
+
+ useEffect(() => {
+    getAllTeamManagers()
+      .then((response) => {
+        setTeamMembers(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching team members:', error);
+      });
+  }, []);
 
   // Columns definition
   const columns = [

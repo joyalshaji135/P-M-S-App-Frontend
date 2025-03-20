@@ -73,9 +73,9 @@ import ViewRecruitmentCo from './Pages/company-owner/recruitments/ViewRecruitmen
 import MeetingsCo from './Pages/company-owner/meetings/MeetingsCo';
 import AddMeetingsCo from './Pages/company-owner/meetings/AddMeetingsCo';
 import ViewMeetingsCo from './Pages/company-owner/meetings/ViewMeetingsCo';
-import MembersMg from './Pages/team-manager/MembersMg';
-import AddMembersMg from './Pages/team-manager/AddMembersMg';
-import ViewMembersMg from './Pages/team-manager/ViewMembersMg';
+import MembersMg from './Pages/team-manager/team-member/MembersMg';
+import AddMembersMg from './Pages/team-manager/team-member/AddMembersMg';
+import ViewMembersMg from './Pages/team-manager/team-member/ViewMembersMg';
 import AddTasksMg from './Pages/team-manager/AddTasksMg';
 import ViewTasksMg from './Pages/team-manager/ViewTasksMg';
 import AddProjectMg from './Pages/team-manager/AddProjectMg';

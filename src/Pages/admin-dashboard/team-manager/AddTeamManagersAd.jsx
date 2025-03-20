@@ -173,7 +173,7 @@ function AddTeamManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Namefsf</label>
             <input
               type="text"
               name="name"
