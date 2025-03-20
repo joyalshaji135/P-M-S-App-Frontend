@@ -10,7 +10,8 @@ function CompanyOwners() {
   const [searchText, setSearchText] = useState('');
 
   // Fetch data from local storage on component mount
-  useEffect(() => {
+ 
+
     const fetchData = async () => {
       try {
         const data = await getAllCompanyOwners();
@@ -19,8 +20,9 @@ function CompanyOwners() {
         console.error('Error fetching company owners:', error);
       }
     };
-    fetchData();
-  }, []);
+     useEffect(() => {
+       fetchData();
+     }, []);
 
   // Filter data based on search input
   const filteredData = companyOwners.filter(

@@ -1,19 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getEventProgramById } from '../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi';
 
 function ViewEventsAd() {
   const { id } = useParams(); // Get the id from the URL
   const [event, setEvent] = useState(null);
 
   // Fetch data from local storage on component mount
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('events')) || [];
-    const eventToView = storedData.find((event) => event.id === parseInt(id));
-    if (eventToView) {
-      setEvent(eventToView);
-    }
-  }, [id]);
-
+  // useEffect(() => {
+  //   const storedData = JSON.parse(localStorage.getItem('events')) || [];
+  //   const eventToView = storedData.find((event) => event.id === parseInt(id));
+  //   if (eventToView) {
+  //     setEvent(eventToView);
+  //   }
+  // }, [id]);
+  console.log("event",event);
+const fetchEventById = async () => {
+  try {
+    const response = await getEventProgramById(id);
+    setEvent(response.eventPrograms);
+  } catch (error) {
+    console.error('Error fetching event by ID:', error);
+  }
+}
+useEffect(() => {
+  if (id) {
+  fetchEventById();
+  }
+}, [id]);
   if (!event) {
     return <div>Loading...</div>;
   }
@@ -26,55 +40,75 @@ function ViewEventsAd() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Event Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
-            <p className="text-gray-900">{event.name}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Event Name
+            </label>
+            <p className="text-gray-900">{event?.name || "N/A"}</p>
           </div>
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-            <p className="text-gray-900">{event.location}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Location
+            </label>
+            <p className="text-gray-900">{event.location || "N/A"}</p>
           </div>
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-            <p className="text-gray-900">{event.date}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
+            <p className="text-gray-900">{event.createdAt || "N/A"}</p>
           </div>
 
           {/* Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-            <p className="text-gray-900">{event.time}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Time
+            </label>
+            <p className="text-gray-900">{event.time || "N/A"}</p>
           </div>
 
           {/* Description */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <p className="text-gray-900">{event.description}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <p className="text-gray-900">
+              {event.description || "N/A"}
+            </p>
           </div>
 
           {/* Industry */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Industry
+            </label>
             <p className="text-gray-900">{event.industry}</p>
           </div>
 
           {/* Priority */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Priority
+            </label>
             <p className="text-gray-900">{event.priority}</p>
           </div>
 
           {/* Domain */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Domain
+            </label>
             <p className="text-gray-900">{event.Domain}</p>
           </div>
 
           {/* Event Post */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Post</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Event Post
+            </label>
             <p className="text-gray-900">{event.eventPost}</p>
           </div>
         </div>
