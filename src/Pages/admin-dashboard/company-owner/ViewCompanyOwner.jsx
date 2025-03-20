@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getCompanyOwnerById } from '../../../api/pages-api/admin-dashboard-api/company-owner-api/CompanyOwnerApi';
 
 function ViewCompanyOwner() {
   const { id } = useParams(); // Get the id from the URL
@@ -7,11 +8,15 @@ function ViewCompanyOwner() {
 
   // Fetch data from local storage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('companyOwners')) || [];
-    const ownerToView = storedData.find((owner) => owner.id === parseInt(id));
-    if (ownerToView) {
-      setOwner(ownerToView);
-    }
+    const fetchData = async () => {
+      try {
+        const data = await getCompanyOwnerById(id);
+        setOwner(data.companyOwner);
+      } catch (error) {
+        console.error('Error fetching company owner:', error);
+      }
+    };
+    fetchData();
   }, [id]);
 
   if (!owner) {
@@ -26,11 +31,6 @@ function ViewCompanyOwner() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Photo and Name */}
           <div className="flex items-center space-x-4">
-            <img
-              src={owner.profilePicture || 'https://via.placeholder.com/50'}
-              alt={owner.name}
-              className="w-16 h-16 rounded-full object-cover"
-            />
             <span className="text-xl font-medium">{owner.name}</span>
           </div>
 
@@ -67,14 +67,14 @@ function ViewCompanyOwner() {
           {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <p className="text-gray-900">{owner.status}</p>
+            <p className="text-gray-900">{owner.status ? 'Active' : 'Not Active'}</p>
           </div>
 
           {/* Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <p className="text-gray-900">
-              {owner.address.street}, {owner.address.city}, {owner.address.state}, {owner.address.district}, {owner.address.zipCode}
+              {owner.address.street}, <br /> {owner.address.city}, <br /> {owner.address.state}, <br /> {owner.address.district}, <br /> {owner.address.zipCode}
             </p>
           </div>
 
@@ -104,12 +104,6 @@ function ViewCompanyOwner() {
                 <p className="text-gray-900">{owner.company.registrationNumber}</p>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Company Address</label>
-                <p className="text-gray-900">
-                  {owner.company.address.street}, {owner.company.address.city}, {owner.company.address.state}, {owner.company.address.district}, {owner.company.address.zipCode}
-                </p>
-              </div>
-              <div>
                 <label className="block text-sm text-gray-600 mb-1">Website</label>
                 <p className="text-gray-900">{owner.company.website}</p>
               </div>
@@ -126,12 +120,6 @@ function ViewCompanyOwner() {
                 <p className="text-gray-900">{owner.company.industry}</p>
               </div>
             </div>
-          </div>
-
-          {/* Description */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <p className="text-gray-900">{owner.description}</p>
           </div>
         </div>
       </div>

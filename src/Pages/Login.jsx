@@ -71,6 +71,7 @@ function Login() {
             console.log("Login Success:", response);
             alert("Login Success");
             // Redirect to the home page after successful login
+            
             navigate(
                 response.customer.role === 'admin' && formData.role === 'admin' ? '/admin' :
                 response.customer.role === 'company-owners' && formData.role === 'company-owners' ? '/owner' :

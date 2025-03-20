@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { addCompanyOwner, getCompanyOwnerById, updateCompanyOwnerById } from "../../../api/pages-api/admin-dashboard-api/company-owner-api/CompanyOwnerApi";
 
 function AddCompanyOwner() {
   const navigate = useNavigate();
@@ -7,63 +8,53 @@ function AddCompanyOwner() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    name: '',
-    email: '',
-    phone: '',
-    role: 'company-owners', // Default role
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    phone: "",
+    role: "company-owners", // Default role
     address: {
-      street: '',
-      city: '',
-      state: '',
-      district: '',
-      zipCode: '',
+      street: "",
+      city: "",
+      state: "",
+      district: "",
+      zipCode: "",
     },
     preferences: {
       newsletter: false,
       notifications: false,
     },
     company: {
-      name: '',
-      registrationNumber: '',
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        district: '',
-        zipCode: '',
-      },
-      website: '',
-      email: '',
-      phone: '',
-      industry: '',
+      name: "",
+      registrationNumber: "",
+      website: "",
+      email: "",
+      phone: "",
+      industry: "",
     },
-    dateOfBirth: '',
-    gender: 'male',
-    profilePicture: null,
-    description: '',
-    status: 'Active', // Default status
+    dateOfBirth: "",
+    gender: "male",
   });
 
-  // Fetch data from local storage on component mount
+  // Fetch data from API on component mount
   useEffect(() => {
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('companyOwners')) || [];
-      const ownerToEdit = storedData.find((owner) => owner.id === parseInt(id));
-      if (ownerToEdit) {
-        setFormData(ownerToEdit); // Pre-fill the form with existing data
-      }
+      const fetchData = async () => {
+        try {
+          const data = await getCompanyOwnerById(id);
+          setFormData(data.companyOwner);
+        } catch (error) {
+          console.error("Error fetching company owner:", error);
+        }
+      };
+      fetchData();
     }
   }, [id]);
 
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
       setFormData({
         ...formData,
         [parent]: {
@@ -86,7 +77,7 @@ function AddCompanyOwner() {
       ...formData,
       [parent]: {
         ...formData[parent],
-        [name]: type === 'checkbox' ? checked : value,
+        [name]: type === "checkbox" ? checked : value,
       },
     });
   };
@@ -107,43 +98,45 @@ function AddCompanyOwner() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('companyOwners')) || [];
+    try {
+      if (id) {
+        // If editing, update the existing entry
+        await updateCompanyOwnerById(id, formData);
+      } else {
+        // If adding, create a new entry
+        await addCompanyOwner(formData);
+      }
 
-    if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((owner) =>
-        owner.id === parseInt(id) ? formData : owner
-      );
-      localStorage.setItem('companyOwners', JSON.stringify(updatedData));
-    } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('companyOwners', JSON.stringify(updatedData));
+      // Redirect to the Company Owners page
+      navigate("/admin/company-owner");
+    } catch (error) {
+      console.error("Error updating company owner:", error);
     }
-
-    // Redirect to the Company Owners page
-    navigate('/admin/company-owner');
   };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-        {id ? 'Edit Company Owner' : 'Add Company Owner'}
+        {id ? "Edit Company Owner" : "Add Company Owner"}
       </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md"
+      >
         {/* Grid Layout for Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -157,7 +150,9 @@ function AddCompanyOwner() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -171,7 +166,9 @@ function AddCompanyOwner() {
 
             {/* Phone Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -185,7 +182,9 @@ function AddCompanyOwner() {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
               <select
                 name="role"
                 value={formData.role}
@@ -200,37 +199,11 @@ function AddCompanyOwner() {
               </select>
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter password"
-                required
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Confirm password"
-                required
-              />
-            </div>
-
             {/* Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Address
+              </label>
               <input
                 type="text"
                 name="address.street"
@@ -283,7 +256,9 @@ function AddCompanyOwner() {
           <div className="space-y-6">
             {/* Company Details */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Details</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Company Details
+              </label>
               <input
                 type="text"
                 name="company.name"
@@ -302,51 +277,7 @@ function AddCompanyOwner() {
                 placeholder="Registration Number"
                 required
               />
-              <input
-                type="text"
-                name="company.address.street"
-                value={formData.company.address.street}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-                placeholder="Company Street"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.city"
-                value={formData.company.address.city}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-                placeholder="Company City"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.state"
-                value={formData.company.address.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-                placeholder="Company State"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.district"
-                value={formData.company.address.district}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-                placeholder="Company District"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.zipCode"
-                value={formData.company.address.zipCode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
-                placeholder="Company Zip Code"
-                required
-              />
+
               <input
                 type="text"
                 name="company.website"
@@ -387,11 +318,13 @@ function AddCompanyOwner() {
 
             {/* Date of Birth */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth
+              </label>
               <input
                 type="date"
                 name="dateOfBirth"
-                value={formData.dateOfBirth}
+                value={formData.dateOfBirth.split("T")[0]} // Extract the date part
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -400,7 +333,9 @@ function AddCompanyOwner() {
 
             {/* Gender */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Gender
+              </label>
               <select
                 name="gender"
                 value={formData.gender}
@@ -415,8 +350,10 @@ function AddCompanyOwner() {
             </div>
 
             {/* Photo Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+            {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Profile Picture
+              </label>
               <input
                 type="file"
                 name="profilePicture"
@@ -432,48 +369,22 @@ function AddCompanyOwner() {
                   className="mt-2 w-16 h-16 rounded-full object-cover"
                 />
               )}
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </div>
+            </div> */}
+          
           </div>
-        </div>
-
-        {/* Description (Full Width) */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
-            placeholder="Enter description"
-            required
-          ></textarea>
         </div>
 
         {/* Preferences (Full Width) */}
         <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Preferences</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Preferences
+          </label>
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
               name="newsletter"
               checked={formData.preferences.newsletter}
-              onChange={(e) => handleNestedInputChange(e, 'preferences')}
+              onChange={(e) => handleNestedInputChange(e, "preferences")}
               className="mr-2"
             />
             <span>Subscribe to Newsletter</span>
@@ -483,7 +394,7 @@ function AddCompanyOwner() {
               type="checkbox"
               name="notifications"
               checked={formData.preferences.notifications}
-              onChange={(e) => handleNestedInputChange(e, 'preferences')}
+              onChange={(e) => handleNestedInputChange(e, "preferences")}
               className="mr-2"
             />
             <span>Enable Notifications</span>
@@ -496,7 +407,7 @@ function AddCompanyOwner() {
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {id ? 'Update' : 'Save'}
+            {id ? "Update" : "Save"}
           </button>
         </div>
       </form>

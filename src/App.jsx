@@ -101,6 +101,7 @@ import ToDoMb from './Pages/team-member/ToDoMb';
 import AddToDoMb from './Pages/team-member/AddToDoMb';
 import ViewToDoMb from './Pages/team-member/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
+import ProtectedRoute from './helper/protectedRoute';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -116,7 +117,7 @@ function App() {
       {/* <Route path="/register" element={<Reg />} /> */}
 
       <Route path='/messages' element={<MessagesPage/>} />
-
+      <Route element={<ProtectedRoute />}>
       {/* Admin Dashboard */}
       <Route path="/admin" element={<AdminLayout/>}>
         <Route index element={<AdminHome/>} /> {/* Default route for /admin */}
@@ -126,7 +127,7 @@ function App() {
         <Route path="company-owner/edit/:id" element={<AddCompanyOwner/>}/>
         <Route path="company-owner/view/:id" element={<ViewCompanyOwner/>}/>
 
-         <Route path="team-managers" element={<TeamManagersAd/>}/>
+        <Route path="team-managers" element={<TeamManagersAd/>}/>
         <Route path="team-managers/add" element={<AddTeamManagersAd/>}/>
         <Route path="team-managers/edit/:id" element={<AddTeamManagersAd/>}/>
         <Route path="team-managers/view/:id" element={<ViewTeamManager/>}/> 
@@ -165,6 +166,7 @@ function App() {
         {/* <Route path="projects" element={<Projects />} />
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} /> */}
+       
       </Route>
 
       {/* Team Member Dashboard */}
@@ -287,7 +289,7 @@ function App() {
         {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
       </Route>
-  
+      </Route>
     </Routes>
   );
 }

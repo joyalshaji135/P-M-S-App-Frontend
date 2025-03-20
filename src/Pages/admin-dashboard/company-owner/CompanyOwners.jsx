@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
+import { getAllCompanyOwners, deleteCompanyOwnerById } from '../../../api/pages-api/admin-dashboard-api/company-owner-api/CompanyOwnerApi';
+
 
 function CompanyOwners() {
   // State for company owners data
@@ -9,22 +11,44 @@ function CompanyOwners() {
 
   // Fetch data from local storage on component mount
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('companyOwners')) || [];
-    setCompanyOwners(storedData);
+    const fetchData = async () => {
+      try {
+        const data = await getAllCompanyOwners();
+        setCompanyOwners(data.companyOwners);
+      } catch (error) {
+        console.error('Error fetching company owners:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Filter data based on search input
   const filteredData = companyOwners.filter(
     (owner) =>
       owner.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      owner.companyName.toLowerCase().includes(searchText.toLowerCase())
+      owner.company.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   // Function to delete a company owner
-  const handleDelete = (id) => {
-    const updatedData = companyOwners.filter((owner) => owner.id !== id);
-    setCompanyOwners(updatedData);
-    localStorage.setItem('companyOwners', JSON.stringify(updatedData));
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are Sure ..."
+    )
+    if(!confirmDelete)
+      return
+
+    try {
+      const response = await deleteCompanyOwnerById(id)
+    
+      if (response.success)
+      {
+        const updatedOwners = companyOwners.filter((owner) => owner._id !== id);
+        setCompanyOwners(updatedOwners);
+      }
+      
+    } catch (error) {
+      console.error('Error deleting company owner:', error);
+    }
   };
 
   // Columns definition
@@ -34,11 +58,6 @@ function CompanyOwners() {
       sortable: true,
       cell: (row) => (
         <div className="flex items-center space-x-4">
-          <img
-            src={row.photo || 'https://via.placeholder.com/50'} // Use the actual photo if available
-            alt={row.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
           <div>
             <p className="font-medium text-black text-sm">{row.name}</p>
           </div>
@@ -47,7 +66,7 @@ function CompanyOwners() {
     },
     {
       name: 'Company Name',
-      selector: (row) => row.companyName,
+      selector: (row) => row.company.name,
       sortable: true,
     },
     {
@@ -61,7 +80,7 @@ function CompanyOwners() {
               : 'border-red-800 bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.status ? "Active" : "Inactive"}
         </span>
       ),
     },
@@ -74,7 +93,7 @@ function CompanyOwners() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/company-owner/view/${row.id}`}>
+          <Link to={`/admin/company-owner/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +112,7 @@ function CompanyOwners() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/company-owner/edit/${row.id}`}>
+          <Link to={`/admin/company-owner/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -107,9 +126,10 @@ function CompanyOwners() {
           </Link>
 
           {/* Delete Button */}
+          <Link to={`/admin/company-owner/`}>
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -124,6 +144,7 @@ function CompanyOwners() {
               />
             </svg>
           </button>
+          </Link>
         </div>
       ),
       ignoreRowClick: true,

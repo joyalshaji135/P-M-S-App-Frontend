@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
+import { deleteTeamManagerById, getAllTeamManagers } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
 
 function TeamManagersAd() {
   // State for team managers data
   const [teamManagers, setTeamManagers] = useState([]);
   const [searchText, setSearchText] = useState('');
 
-  // Fetch data from local storage on component mount
+  // Fetch data getAllTeamManagers
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('teamManagers')) || [];
-    setTeamManagers(storedData);
+    const fetchData = async () => {
+      try {
+        const data = await getAllTeamManagers();
+        setTeamManagers(data.teamManagers);
+      } catch (error) {
+        console.error('Error fetching team managers:', error);
+      }
+    };
+    fetchData();
   }, []);
+
+  
 
   // Filter data based on search input
   const filteredData = teamManagers.filter(
@@ -21,10 +31,27 @@ function TeamManagersAd() {
   );
 
   // Function to delete a team manager
-  const handleDelete = (id) => {
-    const updatedData = teamManagers.filter((manager) => manager.id !== id);
-    setTeamManagers(updatedData);
-    localStorage.setItem('teamManagers', JSON.stringify(updatedData));
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are Sure ..."
+    )
+    if(!confirmDelete)
+      return
+
+    // Delete the team manager Api
+    try {
+      const response = await deleteTeamManagerById(id)
+      if (response.success)
+      {
+        const updatedManagers = teamManagers.filter((manager) => manager._id !== id);
+        setTeamManagers(updatedManagers);
+      }
+      const updatedManagers = teamManagers.filter((manager) => manager._id !== id);
+      setTeamManagers(updatedManagers);
+    }
+    catch (error) {
+      console.error('Error deleting team manager:', error);
+    }
   };
 
   // Columns definition
@@ -34,11 +61,6 @@ function TeamManagersAd() {
       sortable: true,
       cell: (row) => (
         <div className="flex items-center space-x-4">
-          <img
-            src={row.photo || 'https://via.placeholder.com/50'} // Use the actual photo if available
-            alt={row.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
           <div>
             <p className="font-medium text-black text-sm">{row.name}</p>
           </div>
@@ -46,8 +68,8 @@ function TeamManagersAd() {
       ),
     },
     {
-      name: 'Description',
-      selector: (row) => row.description,
+      name: 'Email',
+      selector: (row) => row.email,
       sortable: true,
     },
     {
@@ -61,7 +83,7 @@ function TeamManagersAd() {
               : 'border-red-800 bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.status ? "Active" : "Inactive"}
         </span>
       ),
     },
@@ -70,7 +92,7 @@ function TeamManagersAd() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/team-managers/view/${row.id}`}>
+          <Link to={`/admin/team-managers/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +111,7 @@ function TeamManagersAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/team-managers/edit/${row.id}`}>
+          <Link to={`/admin/team-managers/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +127,7 @@ function TeamManagersAd() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

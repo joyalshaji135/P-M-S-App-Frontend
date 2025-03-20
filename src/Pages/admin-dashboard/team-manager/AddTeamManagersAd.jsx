@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getTeamManagerById } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
 
 function AddTeamManager() {
   const navigate = useNavigate();
@@ -7,13 +8,10 @@ function AddTeamManager() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
     name: '',
     email: '',
     phone: '',
     department: '',
-    description: '',
-    photo: null,
     status: 'Active', // Default status
     role: 'team-managers',
     password: '',
@@ -41,29 +39,24 @@ function AddTeamManager() {
       email: '',
       phone: '',
       industry: '',
-      website: '',
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        district: '',
-        zipCode: '',
-      },
+      website: ''
     },
   });
 
-  // Fetch data from local storage on component mount
+  // Fetch data from Database
   useEffect(() => {
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('teamManagers')) || [];
-      const managerToEdit = storedData.find((manager) => manager.id === parseInt(id));
-      if (managerToEdit) {
-        setFormData(managerToEdit); // Pre-fill the form with existing data
-      }
-    }
-  }, [id]);
-
+      const fetchData = async () => {
+              try {
+                const data = await getTeamManagerById(id);
+                setFormData(data.teamManager);
+              } catch (error) {
+                console.error("Error fetching company owner:", error);
+              }
+    };
+    fetchData();
+  }
+}, [id]);
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -505,51 +498,7 @@ function AddTeamManager() {
                 placeholder="Website"
                 required
               />
-              <input
-                type="text"
-                name="company.address.street"
-                value={formData.company.address.street}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company Street"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.city"
-                value={formData.company.address.city}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company City"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.state"
-                value={formData.company.address.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company State"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.district"
-                value={formData.company.address.district}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company District"
-                required
-              />
-              <input
-                type="text"
-                name="company.address.zipCode"
-                value={formData.company.address.zipCode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Company Zip Code"
-                required
-              />
+
             </div>
           </div>
         </div>
