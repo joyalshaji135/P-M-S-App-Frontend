@@ -187,42 +187,6 @@ function ViewTeamManager() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
               <p className="text-gray-900">{manager.company.website}</p>
             </div>
-  
-            {/* Company Address */}
-            <div className="col-span-2">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Company Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Company Street */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
-                  <p className="text-gray-900">{manager.company.address.street}</p>
-                </div>
-  
-                {/* Company City */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                  <p className="text-gray-900">{manager.company.address.city}</p>
-                </div>
-  
-                {/* Company State */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                  <p className="text-gray-900">{manager.company.address.state}</p>
-                </div>
-  
-                {/* Company District */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
-                  <p className="text-gray-900">{manager.company.address.district}</p>
-                </div>
-  
-                {/* Company Zip Code */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900">{manager.company.address.zipCode}</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
   

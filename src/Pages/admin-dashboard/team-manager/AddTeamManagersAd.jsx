@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getTeamManagerById } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
+import { addTeamManager, getTeamManagerById, updateTeamManagerById } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
 
 function AddTeamManager() {
   const navigate = useNavigate();
@@ -11,15 +11,10 @@ function AddTeamManager() {
     name: '',
     email: '',
     phone: '',
-    department: '',
-    status: 'Active', // Default status
+    status: 'true', // Default status
     role: 'team-managers',
-    password: '',
-    confirmPassword: '',
-    isDefault: false,
     dateOfBirth: '',
     gender: 'male',
-    profilePicture: '',
     lastLogin: '',
     preferences: {
       newsletter: false,
@@ -139,28 +134,27 @@ function AddTeamManager() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('teamManagers')) || [];
-
-    if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((manager) =>
-        manager.id === parseInt(id) ? formData : manager
-      );
-      localStorage.setItem('teamManagers', JSON.stringify(updatedData));
-    } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('teamManagers', JSON.stringify(updatedData));
+  
+    try {
+      if (id) {
+        // If editing, update the existing team manager
+        await updateTeamManagerById(id, formData);
+        alert('Team Manager updated successfully!');
+      } else {
+        // If adding, create a new team manager
+        await addTeamManager(formData);
+        alert('Team Manager added successfully!');
+      }
+  
+      // Redirect to the Team Managers page
+      navigate('/admin/team-managers');
+    } catch (error) {
+      console.error('Error saving team manager:', error);
+      alert('Failed to save team manager. Please try again.');
     }
-
-    // Redirect to the Team Managers page
-    navigate('/admin/team-managers');
   };
-
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -213,20 +207,6 @@ function AddTeamManager() {
             />
           </div>
 
-          {/* Department */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter department"
-              required
-            />
-          </div>
-
           {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -237,12 +217,12 @@ function AddTeamManager() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
             </select>
           </div>
 
-          {/* Photo Upload */}
+          {/* Photo Upload
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Photo</label>
             <input
@@ -260,7 +240,7 @@ function AddTeamManager() {
                 className="mt-2 w-16 h-16 rounded-full object-cover"
               />
             )}
-          </div>
+          </div> */}
 
           {/* Role */}
           <div>
@@ -276,46 +256,20 @@ function AddTeamManager() {
             />
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter password"
-              required
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Confirm password"
-              required
-            />
-          </div>
-
           {/* Date of Birth */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth.split("T")[0]} // Extract the date part
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
 
           {/* Gender */}
           <div>
@@ -333,26 +287,13 @@ function AddTeamManager() {
             </select>
           </div>
 
-          {/* Profile Picture URL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture URL</label>
-            <input
-              type="text"
-              name="profilePicture"
-              value={formData.profilePicture}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter profile picture URL"
-            />
-          </div>
-
           {/* Last Login */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Last Login</label>
             <input
-              type="datetime-local"
+              type="date"
               name="lastLogin"
-              value={formData.lastLogin}
+              value={formData.lastLogin.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -563,20 +504,6 @@ function AddTeamManager() {
           >
             <span className="text-lg">+</span> Add Skill
           </button>
-        </div>
-
-        {/* Description (Full Width) */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="4"
-            placeholder="Enter description"
-            required
-          ></textarea>
         </div>
 
         {/* Save Button */}

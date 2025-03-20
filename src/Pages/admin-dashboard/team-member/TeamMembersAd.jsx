@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
+import { deleteTeamMemberById, getAllTeamMembers } from '../../../api/pages-api/admin-dashboard-api/team-member-api/TeamMemberApi';
 
 function TeamMembers() {
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([]);
   const [searchText, setSearchText] = useState('');
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getAllTeamMembers api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('teamMembers')) || [];
-    setTeamMembers(storedData);
+    const fetchData = async () => {
+      try {
+        const data = await getAllTeamMembers();
+        setTeamMembers(data.teamMembers);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+      }
+    };
+    fetchData();
   }, []);
+  
 
   // Filter data based on search input
   const filteredData = teamMembers.filter(
@@ -20,11 +29,28 @@ function TeamMembers() {
       member.description.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Function to delete a team member
-  const handleDelete = (id) => {
-    const updatedData = teamMembers.filter((member) => member.id !== id);
-    setTeamMembers(updatedData);
-    localStorage.setItem('teamMembers', JSON.stringify(updatedData));
+ // Function to delete a team member
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are Sure ..."
+    )
+    if(!confirmDelete)
+      return
+
+    // Delete the team member Api
+    try {
+      const response = await deleteTeamMemberById(id)
+      if (response.success)
+      {
+        const updatedMembers = teamMembers.filter((member) => member._id !== id);
+        setTeamMembers(updatedMembers);
+      }
+      const updatedMembers = teamMembers.filter((member) => member._id !== id);
+      setTeamMembers(updatedMembers);
+    }
+    catch (error) {
+      console.error('Error deleting team member:', error);
+    }
   };
 
   // Columns definition
@@ -34,11 +60,6 @@ function TeamMembers() {
       sortable: true,
       cell: (row) => (
         <div className="flex items-center space-x-4">
-          <img
-            src={row.photo || 'https://via.placeholder.com/50'}
-            alt={row.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
           <div>
             <p className="font-medium text-black text-sm">{row.name}</p>
           </div>
@@ -46,13 +67,13 @@ function TeamMembers() {
       ),
     },
     {
-      name: 'Role',
-      selector: (row) => row.description,
+      name: 'email',
+      selector: (row) => row.email,
       sortable: true,
     },
     {
       name: 'Status',
-      selector: (row) => row.role,
+      selector: (row) => row.status,
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold border ${
@@ -70,7 +91,7 @@ function TeamMembers() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/team-members/view/${row.id}`}>
+          <Link to={`/admin/team-members/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +110,7 @@ function TeamMembers() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/team-members/edit/${row.id}`}>
+          <Link to={`/admin/team-members/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +126,7 @@ function TeamMembers() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
