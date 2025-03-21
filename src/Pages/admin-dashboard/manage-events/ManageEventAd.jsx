@@ -1,19 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import DataTable from 'react-data-table-component';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import DataTable from "react-data-table-component";
+import { Link } from "react-router-dom";
+import {
+  getAllEventPrograms,
+  statusUpdateEventProgramById,
+} from "../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi";
+import { toast } from "react-toastify";
 
 function ManageEventAd() {
   const [events, setEvents] = useState([]);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [filteredEvents, setFilteredEvents] = useState([]);
 
   // Fetch events from localStorage on component mount
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('events')) || [];
-    setEvents(storedData);
-    setFilteredEvents(storedData); // Initialize filteredEvents with all events
-  }, []);
-
+  // useEffect(() => {
+  //   const storedData = JSON.parse(localStorage.getItem('events')) || [];
+  //   setEvents(storedData);
+  //   setFilteredEvents(storedData); // Initialize filteredEvents with all events
+  // }, []);
+  console.log("events", events);
+  console.log("filteredEvents", filteredEvents);
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
@@ -27,38 +33,95 @@ function ManageEventAd() {
       setFilteredEvents(events); // Reset to all events if search text is empty
     }
   }, [searchText, events]);
-
+  const fetchEvents = async () => {
+    try {
+      const response = await getAllEventPrograms();
+      if (response.success) {
+        setEvents(response.eventPrograms);
+        setFilteredEvents(response.eventPrograms); // Initialize filteredEvents with all events
+      } else {
+        console.error("Failed to fetch events:", response.message);
+        setEvents([]);
+        setFilteredEvents([]);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   // Handle event deletion
   const handleDelete = (id) => {
     const updatedEvents = events.filter((event) => event.id !== id);
-    localStorage.setItem('events', JSON.stringify(updatedEvents));
+    localStorage.setItem("events", JSON.stringify(updatedEvents));
     setEvents(updatedEvents); // Update state to reflect the deletion
     setFilteredEvents(updatedEvents); // Update filtered events as well
   };
+  const handleStatusUpdate = async (id, currentStatus) => {
+    try {
+      const updatedStatus = Boolean(!currentStatus); // Toggle boolean value
+
+      const response = await statusUpdateEventProgramById(id, updatedStatus);
+
+      if (response.success) {
+        toast.success(response.message || "Status updated successfully");
+        fetchEvents(); // Refresh the table after updating
+      } else {
+        console.error("Failed to update status:", response.message);
+        toast.error(response.message || "Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error(error.message || "Failed to update status");
+    }
+  };
+
 
   // Table columns
   const columns = [
     {
-      name: 'Event Name',
+      name: "Event Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: 'Date & Time',
-      selector: (row) => `${row.date} ${row.time}`,
+      name: "Priority",
+      selector: (row) => row.priority,
       sortable: true,
     },
     {
-      name: 'Location',
-      selector: (row) => row.location,
+      name: "Industry",
+      selector: (row) => `${row.industry}`,
       sortable: true,
     },
     {
-      name: 'Actions',
+      name: "Event Post",
+      selector: (row) => row.eventPost,
+      sortable: true,
+    },
+    {
+      name: "Status",
+      selector: (row) => {
+        return (
+          <button
+            onClick={() => handleStatusUpdate(row._id, row.status)}
+            className={`px-3 py-1 text-white rounded-md ${
+              row.status ? "bg-success" : "bg-danger"
+            }`}
+          >
+            {row.status }
+          </button>
+        );
+      },
+      sortable: true,
+    },
+    {
+      name: "Actions",
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/events/view/${row.id}`}>
+          <Link to={`/admin/events/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
