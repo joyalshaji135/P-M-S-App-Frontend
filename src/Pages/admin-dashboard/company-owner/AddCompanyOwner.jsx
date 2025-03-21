@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 
 function AddCompanyOwner() {
   const navigate = useNavigate();
-  // const { id } = useParams();
+  const { id } = useParams();
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -42,19 +42,19 @@ function AddCompanyOwner() {
 
   // Fetch data from API on component mount
 
-  // const fetchData = async () => {
-  //   try {
-  //     const data = await getCompanyOwnerById(id);
-  //     setFormData(data.companyOwner);
-  //   } catch (error) {
-  //     console.error("Error fetching company owner:", error);
-  //   }
-  // };
-  //  useEffect(() => {
-  //    if (id) {
-  //      fetchData();
-  //    }
-  //  }, [id]);
+  const fetchData = async () => {
+    try {
+      const data = await getCompanyOwnerById(id);
+      setFormData(data.companyOwner);
+    } catch (error) {
+      console.error("Error fetching company owner:", error);
+    }
+  };
+   useEffect(() => {
+     if (id) {
+       fetchData();
+     }
+   }, [id]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -108,23 +108,38 @@ function AddCompanyOwner() {
     e.preventDefault();
 
     try {
-     
+      if (id) {
         // If editing, update the existing entry
-      const response =  await addCompanyOwner( formData);
-     if(response.success){
-      toast.success(response.message || "Company Owner Updated Successfully");
-      navigate(-1);
-     }else{
-      toast.error(response.message || "Failed to update Company Owner");
-     }
-     
+        await updateCompanyOwnerById(id, formData);
+      } else {
+        // If adding, create a new entry
+        await addCompanyOwner(formData);
+      }
 
       // Redirect to the Company Owners page
-      
+      navigate("/admin/company-owner");
     } catch (error) {
       console.error("Error updating company owner:", error);
-      toast.error("Failed to update Company Owner");
     }
+    // try {
+     
+      
+    //     // If editing, update the existing entry
+    //   const response =  await addCompanyOwner( formData);
+    //  if(response.success){
+    //   toast.success(response.message || "Company Owner Updated Successfully");
+    //   navigate(-1);
+    //  }else{
+    //   toast.error(response.message || "Failed to update Company Owner");
+    //  }
+     
+
+    //   // Redirect to the Company Owners page
+      
+    // } catch (error) {
+    //   console.error("Error updating company owner:", error);
+    //   toast.error("Failed to update Company Owner");
+    // }
   };
 
   return (

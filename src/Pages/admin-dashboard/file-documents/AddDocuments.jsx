@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { addDocumentFile, getDocumentFileById, updateDocumentFileById } from '../../../api/pages-api/admin-dashboard-api/document-file-api/DocumentFileApi';
 
 function AddDocuments() {
   const navigate = useNavigate();
@@ -7,7 +8,6 @@ function AddDocuments() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
     name: '',
     description: '',
     industry: '',
@@ -15,16 +15,19 @@ function AddDocuments() {
     fileDocument: '',
   });
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getDocumentFileById
   useEffect(() => {
-    if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('documents')) || [];
-      const documentToEdit = storedData.find((document) => document.id === parseInt(id));
-      if (documentToEdit) {
-        setFormData(documentToEdit); // Pre-fill the form with existing data
+    // Fetch data from getDocumentFileById api
+    const fetchData = async () => {
+      try {
+        const response = await getDocumentFileById(id);
+        const data = response.documentFile;
+        setFormData(data);
+      } catch (error) {
+        console.error('Error fetching document:', error);
       }
-    }
+    };
+    fetchData();
   }, [id]);
 
   // Handle input changes
@@ -46,22 +49,18 @@ function AddDocuments() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('documents')) || [];
-
+    // Add or update the document
     if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((document) =>
-        document.id === parseInt(id) ? formData : document
-      );
-      localStorage.setItem('documents', JSON.stringify(updatedData));
+      // Update document
+      await updateDocumentFileById(id, formData);
+      // ...
     } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('documents', JSON.stringify(updatedData));
+      // Add document
+      await addDocumentFile(formData);
+      // ...
     }
 
     // Redirect to the Manage Documents page
@@ -117,10 +116,10 @@ function AddDocuments() {
               required
             >
               <option value="">Select industry</option>
-              <option value="Technology">Technology</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Finance">Finance</option>
-              <option value="Education">Education</option>
+              <option value="60d21b4667d0d8992e610c90">Technology</option>
+              <option value="60d21b4667d0d8992e610c90">Healthcare</option>
+              <option value="60d21b4667d0d8992e610c90">Finance</option>
+              <option value="60d21b4667d0d8992e610c90">Education</option>
             </select>
           </div>
 
@@ -143,12 +142,13 @@ function AddDocuments() {
 
           {/* File Document */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">File Document</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">File Document URL</label>
             <div className="flex items-center">
               <input
-                type="file"
+                type="text"
                 name="fileDocument"
-                onChange={handleFileChange}
+                value={formData.fileDocument}
+                onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />

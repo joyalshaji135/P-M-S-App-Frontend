@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { addGoogleMeetSession, getGoogleMeetSessionById, updateGoogleMeetSessionById } from '../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi';
 
 function AddMeetingsAd() {
   const navigate = useNavigate();
@@ -7,40 +8,44 @@ function AddMeetingsAd() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    title: '',
-    time: '',
-    link: '',
-    industryProject: '',
+    name: '',
+    description: '',
     customer: '',
-    meetingDate: '',
     meetingTime: '',
+    meetingLink: '',
+    industryProject: '',
+    meetingDate: '',
     meetingStatus: '',
+    industryProjects: ''
   });
 
   // State for dropdown options
   const [industryProjects, setIndustryProjects] = useState([]);
   const [customers, setCustomers] = useState([]);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getGoogleMeetSessionById
   useEffect(() => {
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
-      const meetingToEdit = storedData.find((meeting) => meeting.id === parseInt(id));
-      if (meetingToEdit) {
-        setFormData(meetingToEdit); // Pre-fill the form with existing data
-      }
+      // Fetch data from getGoogleMeetSessionById api
+      const fetchData = async () => {
+        try {
+          const response = await getGoogleMeetSessionById(id);
+          const data = response.googleMeet;
+          setFormData(data);
+        } catch (error) {
+          console.error('Error fetching meeting:', error);
+        }
+      };
+      fetchData();
     }
-
     // Fetch industryProjects and customers (example data)
     setIndustryProjects([
-      { _id: '1', name: 'Project 1' },
-      { _id: '2', name: 'Project 2' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Project 1' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Project 2' },
     ]);
     setCustomers([
-      { _id: '1', name: 'Customer 1' },
-      { _id: '2', name: 'Customer 2' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Customer 1' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Customer 2' },
     ]);
   }, [id]);
 
@@ -54,24 +59,17 @@ function AddMeetingsAd() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
-
+    // Add or update meeting
     if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((meeting) =>
-        meeting.id === parseInt(id) ? formData : meeting
-      );
-      localStorage.setItem('meetings', JSON.stringify(updatedData));
+      // Update meeting
+      await updateGoogleMeetSessionById(id, formData);
     } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('meetings', JSON.stringify(updatedData));
+      // Add meeting
+      await addGoogleMeetSession(formData);
     }
-
     // Redirect to the Manage Meetings page
     navigate('/admin/meetings');
   };
@@ -91,13 +89,26 @@ function AddMeetingsAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Title</label>
             <input
               type="text"
-              name="title"
-              value={formData.title}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter meeting title"
               required
             />
+          </div>
+
+          {/* Description */}
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter meeting description"
+              required
+            ></textarea>
           </div>
 
           {/* Industry Project */}
@@ -144,7 +155,7 @@ function AddMeetingsAd() {
             <input
               type="date"
               name="meetingDate"
-              value={formData.meetingDate}
+              value={formData.meetingDate.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -169,8 +180,8 @@ function AddMeetingsAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
             <input
               type="url"
-              name="link"
-              value={formData.link}
+              name="meetingLink"
+              value={formData.meetingLink}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter meeting link"

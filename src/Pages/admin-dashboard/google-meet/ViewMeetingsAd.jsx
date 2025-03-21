@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getGoogleMeetSessionById } from '../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi';
 
 function ViewMeetingsAd() {
   const { id } = useParams(); // Get the id from the URL
   const [meeting, setMeeting] = useState(null);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getGoogleMeetSessionById api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
-    const meetingToView = storedData.find((meeting) => meeting.id === parseInt(id));
-    if (meetingToView) {
-      setMeeting(meetingToView);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await getGoogleMeetSessionById(id);
+        const data = response.googleMeet;
+        setMeeting(data);
+      } catch (error) {
+        console.error('Error fetching Google Meet session:', error);
+      }
+    };
+    fetchData();
   }, [id]);
 
-  if (!meeting) {
-    return <div>Loading...</div>;
-  }
+  // if (!meeting) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
@@ -27,26 +33,32 @@ function ViewMeetingsAd() {
           {/* Meeting Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Title</label>
-            <p className="text-gray-900">{meeting.title}</p>
+            <p className="text-gray-900">{meeting?.name}</p>
+          </div>
+
+          {/* Meeting Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Description</label>
+            <p className="text-gray-900">{meeting?.description}</p>
           </div>
 
           {/* Meeting Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
-            <p className="text-gray-900">{new Date(meeting.meetingDate).toLocaleDateString()}</p>
+            <p className="text-gray-900">{meeting?.meetingDate}</p>
           </div>
 
           {/* Meeting Time */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Time</label>
-            <p className="text-gray-900">{meeting.meetingTime}</p>
+            <p className="text-gray-900">{meeting?.meetingTime}</p>
           </div>
 
           {/* Meeting Link */}
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
             <a
-              href={meeting.meetingLink}
+              href={meeting?.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
@@ -58,13 +70,7 @@ function ViewMeetingsAd() {
           {/* Meeting Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Status</label>
-            <p className="text-gray-900">{meeting.meetingStatus}</p>
-          </div>
-
-          {/* Description */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <p className="text-gray-900">{meeting.description}</p>
+            <p className="text-gray-900">{meeting?.meetingStatus}</p>
           </div>
         </div>
       </div>

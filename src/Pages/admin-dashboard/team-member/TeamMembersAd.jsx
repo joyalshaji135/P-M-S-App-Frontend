@@ -53,16 +53,6 @@ function TeamMembers() {
     }
   };
 
- useEffect(() => {
-    getAllTeamManagers()
-      .then((response) => {
-        setTeamMembers(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching team members:', error);
-      });
-  }, []);
-
   // Columns definition
   const columns = [
     {

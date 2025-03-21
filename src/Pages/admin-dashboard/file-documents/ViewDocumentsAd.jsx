@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getDocumentFileById } from '../../../api/pages-api/admin-dashboard-api/document-file-api/DocumentFileApi';
 
 function ViewDocumentsAd() {
   const { id } = useParams(); // Get the id from the URL
   const [document, setDocument] = useState(null);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getDocumentById api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('documents')) || [];
-    const documentToView = storedData.find((doc) => doc.id === parseInt(id));
-    if (documentToView) {
-      setDocument(documentToView);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await getDocumentFileById(id);
+        const data = response.documentFile;
+        setDocument(data);
+      } catch (error) {
+        console.error('Error fetching document:', error);
+      }
+    };
+    fetchData();
   }, [id]);
 
   if (!document) {
@@ -27,25 +33,25 @@ function ViewDocumentsAd() {
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <p className="text-gray-900">{document.name}</p>
+            <p className="text-gray-900">{document?.name}</p>
           </div>
 
           {/* Description */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <p className="text-gray-900 whitespace-pre-line">{document.description}</p>
+            <p className="text-gray-900 whitespace-pre-line">{document?.description}</p>
           </div>
 
           {/* Industry */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
-            <p className="text-gray-900">{document.industry}</p>
+            <p className="text-gray-900">{document?.industry}</p>
           </div>
 
           {/* Priority */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <p className="text-gray-900">{document.priority}</p>
+            <p className="text-gray-900">{document?.priority}</p>
           </div>
 
           {/* File Document */}
@@ -53,12 +59,12 @@ function ViewDocumentsAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">File Document</label>
             <p className="text-gray-900">
               <a
-                href={document.fileDocument}
+                href={document?.fileDocument}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
               >
-                {document.fileDocument}
+                {document?.fileDocument}
               </a>
             </p>
           </div>
