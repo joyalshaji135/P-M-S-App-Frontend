@@ -162,8 +162,10 @@ function App() {
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} /> */}
         </Route>
+        </Route>
 
         {/* Team Member Dashboard */}
+        <Route element={<ProtectedRoute />}>
         <Route path="/team-member" element={<MemberLayout />}>
           <Route index element={<MemberHome />} />
 
@@ -186,7 +188,7 @@ function App() {
 
           <Route path="documents" element={<DocumentsMb />} />
         </Route>
-
+        </Route>
         {/* Team Manager Dashboard */}
         <Route path="/team-manager" element={<ManagerLayout />}>
           <Route index element={<ManagerHome />} />
@@ -277,7 +279,7 @@ function App() {
           {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
         </Route>
-      </Route>
+      
     </Routes>
   );
 }

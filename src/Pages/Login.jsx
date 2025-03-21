@@ -75,8 +75,8 @@ function Login() {
             navigate(
                 response.customer.role === 'admin' && formData.role === 'admin' ? '/admin' :
                 response.customer.role === 'company-owners' && formData.role === 'company-owners' ? '/owner' :
-                response.customer.role === 'team-manager' && formData.role === 'team-manager' ? '/team-manager' :
-                response.customer.role === 'team-member' && formData.role === 'team-member' ? '/team-member' :
+                response.customer.role === 'team-managers' && formData.role === 'team-managers' ? '/team-manager' :
+                response.customer.role === 'team-members' && formData.role === 'team-members' ? '/team-member' :
                 '/' // Default route
             );
         } catch (error) {
@@ -135,8 +135,8 @@ function Login() {
                             >
                                 <option value="">Select a Role</option>
                                 <option value="admin">Admin</option>
-                                <option value="team-member">Team Member</option>
-                                <option value="team-manager">Team Manager</option>
+                                <option value="team-members">Team Member</option>
+                                <option value="team-managers">Team Manager</option>
                                 <option value="company-owners">Company Owner</option>
                             </select>
                         </div>
