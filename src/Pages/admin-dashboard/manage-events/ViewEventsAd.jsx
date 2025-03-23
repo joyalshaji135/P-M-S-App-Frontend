@@ -67,7 +67,7 @@ useEffect(() => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Time
             </label>
-            <p className="text-gray-900">{event.time || "N/A"}</p>
+            <p className="text-gray-900">{event.eventTime || "N/A"}</p>
           </div>
 
           {/* Description */}

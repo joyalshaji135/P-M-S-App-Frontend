@@ -190,6 +190,7 @@ function App() {
         </Route>
         </Route>
         {/* Team Manager Dashboard */}
+        <Route element={<ProtectedRoute />}>
         <Route path="/team-manager" element={<ManagerLayout />}>
           <Route index element={<ManagerHome />} />
 
@@ -227,8 +228,10 @@ function App() {
         <Route path="reports" element={<Reports />} />
         <Route path="analytics" element={<Analytics />} /> */}
         </Route>
+        </Route>
 
         {/* Company Owner Dashboard */}
+        <Route element={<ProtectedRoute />}>
         <Route path="/owner" element={<OwnerLayout />}>
           <Route index element={<OwnerHome />} />
 
@@ -278,6 +281,7 @@ function App() {
           <Route path="meetings/view/:id" element={<ViewMeetingsCo />} />
           {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
+        </Route>
         </Route>
       
     </Routes>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
-import { getAllEventPrograms, statusUpdateEventProgramById } from '../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi';
+import { deleteEventProgramById, getAllEventPrograms, statusUpdateEventProgramById } from '../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi';
 import { toast } from 'react-toastify';
 
 function ManageEventAd() {
@@ -9,14 +9,6 @@ function ManageEventAd() {
   const [searchText, setSearchText] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
 
-  // Fetch events from localStorage on component mount
-  // useEffect(() => {
-  //   const storedData = JSON.parse(localStorage.getItem('events')) || [];
-  //   setEvents(storedData);
-  //   setFilteredEvents(storedData); // Initialize filteredEvents with all events
-  // }, []);
-console.log("events",events);
-console.log("filteredEvents",filteredEvents);
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
@@ -49,11 +41,26 @@ useEffect(() => {
   fetchEvents();
 },[]);
   // Handle event deletion
-  const handleDelete = (id) => {
-    const updatedEvents = events.filter((event) => event.id !== id);
-    localStorage.setItem('events', JSON.stringify(updatedEvents));
-    setEvents(updatedEvents); // Update state to reflect the deletion
-    setFilteredEvents(updatedEvents); // Update filtered events as well
+  const handleDelete = async (id) => {
+        // Delete the team member Api
+        try {
+          const response = await deleteEventProgramById(id)
+          if (response.success)
+          {
+            const updatedEvents = events.filter((event) => event._id!== id);
+            setEvents(updatedEvents);
+            setFilteredEvents(updatedEvents); // Refresh the table after deleting
+            toast.success(response.message || 'Event deleted successfully');
+          }
+          else
+          {
+            console.error('Failed to delete event:', response.message);
+            toast.error(response.message || 'Failed to delete event');
+          }
+        } catch (error) {
+          console.error('Error deleting event:', error);
+          toast.error(error.message || 'Failed to delete event');
+        }
   };
 const handleStatusUpdate = async (id, currentStatus) => {
   try {
@@ -137,7 +144,7 @@ const handleStatusUpdate = async (id, currentStatus) => {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/events/edit/${row.id}`}>
+          <Link to={`/admin/events/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -153,7 +160,7 @@ const handleStatusUpdate = async (id, currentStatus) => {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

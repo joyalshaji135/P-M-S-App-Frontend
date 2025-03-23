@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { createEventProgram } from '../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createEventProgram, updateEventProgramById, getEventProgramById } from "../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi";
+import { toast } from "react-toastify";
 
 function AddEventsAd() {
   const navigate = useNavigate();
@@ -8,32 +9,31 @@ function AddEventsAd() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    name: '',
-    location: '',
-    date: '',
-    time: '',
-    description: '',
-    industry: '',
-    priority: '',
-    eventPost: '',
-    Domain: '',
+    name: "",
+    location: "",
+    eventTime: "",
+    eventDate: "",
+    description: "",
+    industry: "",
+    priority: "",
+    eventPost: "",
+    Domain: "",
   });
 
   // Dropdown options
-const industries = [
-  { key: "technology", value: "Technology" },
-  { key: "healthcare", value: "Healthcare" },
-  { key: "finance", value: "Finance" },
-  { key: "education", value: "Education" },
-  { key: "entertainment", value: "Entertainment" },
-];
+  const industries = [
+    { key: "60d21b4667d0d8992e610c85", value: "Technology" },
+    { key: "60d21b4667d0d8992e610c85", value: "Healthcare" },
+    { key: "60d21b4667d0d8992e610c85", value: "Finance" },
+    { key: "60d21b4667d0d8992e610c85", value: "Education" },
+    { key: "60d21b4667d0d8992e610c85", value: "Entertainment" },
+  ];
 
-const priorities = [
-  { key: "low", value: "Low" },
-  { key: "medium", value: "Medium" },
-  { key: "high", value: "High" },
-];
+  const priorities = [
+    { key: "low", value: "Low" },
+    { key: "medium", value: "Medium" },
+    { key: "high", value: "High" },
+  ];
   const domains = [
     { key: "marketing", value: "Marketing" },
     { key: "sales", value: "Sales" },
@@ -42,17 +42,20 @@ const priorities = [
     { key: "it", value: "IT" },
   ];
 
-  // Fetch data from local storage on component mount
-  // useEffect(() => {
-  //   if (id) {
-  //     // If id exists, fetch the data for editing
-  //     const storedData = JSON.parse(localStorage.getItem('events')) || [];
-  //     const eventToEdit = storedData.find((event) => event.id === parseInt(id));
-  //     if (eventToEdit) {
-  //       setFormData(eventToEdit); // Pre-fill the form with existing data
-  //     }
-  //   }
-  // }, [id]);
+  // Fetch event program data getEventProgramById
+  useEffect(() => {
+    if (id) {
+      // If editing, fetch the event program data
+      getEventProgramById(id)
+        .then((data) => {
+          setFormData(data.eventPrograms);
+        })
+        .catch((error) => {
+          console.error("Error fetching event program:", error);
+          toast.error(error.message || "Failed to fetch event program");
+        });
+    }
+  }, [id]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -63,45 +66,24 @@ const priorities = [
     });
   };
 
-  // Handle form submission
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-
-  //   // Get existing data from local storage
-  //   const storedData = JSON.parse(localStorage.getItem('events')) || [];
-
-  //   if (id) {
-  //     // If editing, update the existing entry
-  //     const updatedData = storedData.map((event) =>
-  //       event.id === parseInt(id) ? formData : event
-  //     );
-  //     localStorage.setItem('events', JSON.stringify(updatedData));
-  //   } else {
-  //     // If adding, create a new entry
-  //     const updatedData = [...storedData, formData];
-  //     localStorage.setItem('events', JSON.stringify(updatedData));
-  //   }
-
-  //   // Redirect to the Events page
-  //   navigate('/admin/events');
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await createEventProgram(formData);
-      if (response.success) {
-        toast.success(response.message || "Event Program Created Successfully");
-        navigate('/admin/events');
+      if (id) {
+        // If editing, update the existing team manager
+        await updateEventProgramById(id, formData);
+        toast.success("Event updated successfully");
+      } else {
+        // If adding, create a new team manager
+        await createEventProgram(formData);
+        toast.success("Event created successfully");
       }
-      else{
-        toast.error(response.message || "Failed to create Event Program");
-      }
+      navigate("/admin/events");
     } catch (error) {
       console.error("Error creating event program:", error);
       toast.error(error.message || "Failed to create event program");
     }
-  }
+  };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
@@ -155,8 +137,8 @@ const priorities = [
             </label>
             <input
               type="date"
-              name="date"
-              value={formData.date}
+              name="eventDate"
+              value={formData.eventDate.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -170,8 +152,8 @@ const priorities = [
             </label>
             <input
               type="time"
-              name="time"
-              value={formData.time}
+              name="eventTime"
+              value={formData.eventTime}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
