@@ -2,11 +2,27 @@ import React, { useState } from 'react';
 import { FaBars, FaBell } from 'react-icons/fa';
 import { MdSpaceDashboard } from 'react-icons/md';
 import MessageModal from './MessageModal';
+import ProfileModal from './ProfileModal';
+
 
 
 function Header({ dashboardName, toggleSidebar }) {
   const [open, setOpen] = useState(false); // State for modal
   const unreadNotifications = 3; // Example: Number of unread notifications
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const user = {
+    name: "John Doe",
+    email: "john.doe@example.com"
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      console.log("Logging out...");
+      // Implement logout logic here
+    }
+  };
 
   return (
     <div className="bg-white shadow-sm p-4 flex justify-between items-center mb-2">
@@ -43,13 +59,19 @@ function Header({ dashboardName, toggleSidebar }) {
         </button>
 
         {/* User Avatar */}
-        <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full">
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full"
+        >
           👤
         </button>
       </div>
 
       {/* Message Modal (Placeholder) */}
       <MessageModal open={open} onClose={() => setOpen(false)} />
+        <ProfileModal open={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} onLogout={handleLogout} />
+    
+        
     </div>
   );
 }
