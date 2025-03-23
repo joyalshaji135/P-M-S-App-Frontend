@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addDocumentFile, getDocumentFileById, updateDocumentFileById } from '../../../api/pages-api/admin-dashboard-api/document-file-api/DocumentFileApi';
+import { toast } from 'react-toastify';
 
 function AddDocuments() {
   const navigate = useNavigate();
@@ -51,21 +52,32 @@ function AddDocuments() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+try{
+
 
     // Add or update the document
     if (id) {
       // Update document
-      await updateDocumentFileById(id, formData);
+   var response =   await updateDocumentFileById(id, formData);
       // ...
     } else {
       // Add document
-      await addDocumentFile(formData);
+    var response =   await addDocumentFile(formData);
       // ...
     }
-
+if(response.success){
+  toast.success(response.message || "Document saved successfully");
+  navigate(-1);
+}
     // Redirect to the Manage Documents page
     navigate('/admin/documents');
-  };
+  }
+
+   catch (error) {
+  console.error('Error saving document:', error);
+  toast.error(error.message || 'Failed to save document');
+}
+  }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">

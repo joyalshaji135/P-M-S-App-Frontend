@@ -79,7 +79,7 @@ export const updateRecruitmentPostById = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error("Error updating recruitment post by ID:", error);
-    throw error;
+   throw new Error(error.response?.data?.error || "Failed to add team manager");
   }
 };
 
@@ -99,6 +99,8 @@ export const addRecruitmentPost = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Error adding recruitment post:", error);
-    throw error;
+   throw new Error(
+     error.response?.data?.message || "Failed to add team manager"
+   );
   }
 };

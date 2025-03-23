@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addGoogleMeetSession, getGoogleMeetSessionById, updateGoogleMeetSessionById } from '../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi';
+import { toast } from 'react-toastify';
 
 function AddMeetingsAd() {
   const navigate = useNavigate();
@@ -61,19 +62,31 @@ function AddMeetingsAd() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+try {
+  
 
     // Add or update meeting
     if (id) {
       // Update meeting
-      await updateGoogleMeetSessionById(id, formData);
+    var response =  await updateGoogleMeetSessionById(id, formData);
     } else {
       // Add meeting
-      await addGoogleMeetSession(formData);
+    var response = await addGoogleMeetSession(formData);
     }
-    // Redirect to the Manage Meetings page
-    navigate('/admin/meetings');
-  };
-
+    if(response.success){
+      toast.success(response.message || "Meeting saved successfully");
+    navigate(-1);
+    }
+    else{
+      toast.error(response.message || "Failed to save meeting");
+    }
+  }
+   
+catch (error) {
+  console.error("Error adding meeting:", error);
+  toast.error(error.message || "Failed to save meeting");
+}
+}
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">

@@ -64,8 +64,9 @@ useEffect(() => {
   };
 const handleStatusUpdate = async (id, currentStatus) => {
   try {
-    const updatedStatus = !currentStatus; // Toggle status (true → false, false → true)
-
+    // Toggle between "Active" and "Inactive"
+    const updatedStatus = !currentStatus ;
+console.log("updatedStatus", updatedStatus);
     const response = await statusUpdateEventProgramById(id, {
       status: updatedStatus,
     });
@@ -110,8 +111,10 @@ const handleStatusUpdate = async (id, currentStatus) => {
       selector: (row) => (
         <button
           onClick={() => handleStatusUpdate(row._id, row.status)}
-          className={`px-3 py-1 text-white rounded-md ${
-            row.status ? "bg-green-500" : "bg-red-500"
+          className={`px-3 py-1 rounded-full text-sm font-medium border transition duration-300 ${
+            row.status
+              ? "border-green-600 bg-green-100 text-green-700 hover:bg-green-200"
+              : "border-red-600 bg-red-100 text-red-700 hover:bg-red-200"
           }`}
         >
           {row.status ? "Active" : "Inactive"}

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getGoogleMeetSessionById } from '../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getGoogleMeetSessionById } from "../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi";
 
 function ViewMeetingsAd() {
   const { id } = useParams(); // Get the id from the URL
@@ -14,63 +14,98 @@ function ViewMeetingsAd() {
         const data = response.googleMeet;
         setMeeting(data);
       } catch (error) {
-        console.error('Error fetching Google Meet session:', error);
+        console.error("Error fetching Google Meet session:", error);
       }
     };
     fetchData();
   }, [id]);
 
-  // if (!meeting) {
-  //   return <div>Loading...</div>;
-  // }
+  if (!meeting) {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Loading...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">View Meeting</h1>
+    <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+        View Meeting
+      </h1>
 
+      {/* Main Card */}
       <div className="bg-white p-8 rounded-lg shadow-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Meeting Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Title</label>
-            <p className="text-gray-900">{meeting?.name}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Title
+            </label>
+            <p className="text-gray-900 font-medium">
+              {meeting?.name || "N/A"}
+            </p>
           </div>
 
           {/* Meeting Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Description</label>
-            <p className="text-gray-900">{meeting?.description}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Description
+            </label>
+            <p className="text-gray-900">{meeting?.description || "N/A"}</p>
           </div>
 
           {/* Meeting Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Date</label>
-            <p className="text-gray-900">{meeting?.meetingDate}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Date
+            </label>
+            <p className="text-gray-900">
+              {meeting?.meetingDate
+                ? new Date(meeting.meetingDate).toLocaleDateString()
+                : "N/A"}
+            </p>
           </div>
 
           {/* Meeting Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Time</label>
-            <p className="text-gray-900">{meeting?.meetingTime}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Time
+            </label>
+            <p className="text-gray-900">{meeting?.meetingTime || "N/A"}</p>
           </div>
 
           {/* Meeting Link */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+          <div className="">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Link
+            </label>
             <a
               href={meeting?.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline"
             >
-              Join Meeting
+              {meeting?.meetingLink || "N/A"}
             </a>
           </div>
 
           {/* Meeting Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Status</label>
-            <p className="text-gray-900">{meeting?.meetingStatus}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meeting Status
+            </label>
+            <p
+              className={`text-gray-900 ${
+                meeting?.meetingStatus === "Scheduled"
+                  ? "text-green-600"
+                  : meeting?.meetingStatus === "Completed"
+                  ? "text-gray-600"
+                  : "text-red-600"
+              }`}
+            >
+              {meeting?.meetingStatus || "N/A"}
+            </p>
           </div>
         </div>
       </div>

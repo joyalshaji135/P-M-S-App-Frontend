@@ -81,7 +81,9 @@ export const updateTeamManagerById = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error("Error updating team manager by ID:", error);
-    throw error;
+    throw new Error(
+      error.response?.data?.error || "Failed to add team manager"
+    );
   }
 };
 
@@ -102,6 +104,8 @@ export const addTeamManager = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Error adding team manager:", error);
-    throw error;
+    throw new Error(
+      error.response?.data?.message || "Failed to add team manager"
+    );
   }
 };

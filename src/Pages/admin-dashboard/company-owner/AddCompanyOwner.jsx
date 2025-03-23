@@ -104,43 +104,33 @@ function AddCompanyOwner() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      if (id) {
-        // If editing, update the existing entry
-        await updateCompanyOwnerById(id, formData);
-      } else {
-        // If adding, create a new entry
-        await addCompanyOwner(formData);
-      }
+  try {
+    let response;
 
-      // Redirect to the Company Owners page
-      navigate("/admin/company-owner");
-    } catch (error) {
-      console.error("Error updating company owner:", error);
+    if (id) {
+      // If editing, update the existing entry
+      response = await updateCompanyOwnerById(id, formData);
+    } else {
+      // If adding, create a new entry
+      response = await addCompanyOwner(formData);
     }
-    // try {
-     
-      
-    //     // If editing, update the existing entry
-    //   const response =  await addCompanyOwner( formData);
-    //  if(response.success){
-    //   toast.success(response.message || "Company Owner Updated Successfully");
-    //   navigate(-1);
-    //  }else{
-    //   toast.error(response.message || "Failed to update Company Owner");
-    //  }
-     
 
-    //   // Redirect to the Company Owners page
-      
-    // } catch (error) {
-    //   console.error("Error updating company owner:", error);
-    //   toast.error("Failed to update Company Owner");
-    // }
-  };
+    if (response?.success) {
+      toast.success(response.message || "Operation completed successfully");
+      navigate("/admin/company-owner"); // Redirect to the Company Owners page
+    } else {
+      toast.error(
+        response.message || "Failed to perform the operation"
+      );
+    }
+  } catch (error) {
+    console.log("Error updating company owner:", );
+    toast.error(error.message || "Failed to perform the operation");
+  }
+};
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">

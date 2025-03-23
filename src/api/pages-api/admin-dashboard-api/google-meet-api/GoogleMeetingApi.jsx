@@ -79,7 +79,9 @@ export const updateGoogleMeetSessionById = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error("Error updating Google Meet session by ID:", error);
-    throw error;
+    throw new Error(
+      error.response?.data?.error || "Failed to add team manager"
+    );
   }
 };
 
@@ -99,6 +101,8 @@ export const addGoogleMeetSession = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Error adding Google Meet session:", error);
-    throw error;
+   throw new Error(
+     error.response?.data?.message || "Failed to add team manager"
+   );
   }
 };

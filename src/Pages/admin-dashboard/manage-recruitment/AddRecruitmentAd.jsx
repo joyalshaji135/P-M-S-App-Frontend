@@ -55,14 +55,15 @@ function AddRecruitmentAd() {
     try {
           if (id) {
             // If editing, update the existing team manager
-            await updateRecruitmentPostById(id, formData);
-            toast.success("Recruitment updated successfully");
+        var response =    await updateRecruitmentPostById(id, formData);
           } else {
             // If adding, create a new team manager
-            await addRecruitmentPost(formData);
-            toast.success("Recruitment created successfully");
+       var response =     await addRecruitmentPost(formData);
           }
-          navigate("/admin/recruitment");
+          if(response?.success){
+          toast.success(response.message || "Recruitment created successfully");          
+        navigate(-1);  
+        }      
         } catch (error) {
           console.error("Error creating event program:", error);
           toast.error(error.message || "Failed to create event program");
