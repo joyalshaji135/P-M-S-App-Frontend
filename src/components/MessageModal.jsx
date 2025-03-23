@@ -36,8 +36,8 @@ function MessageModal({ open, onClose }) {
           </div>
           <div className="space-y-3">
             {notifications.map((notification) => (
-              <div key={notification.id} className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-700">{notification.message}</p>
+              <div key={notification.id} className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-black">{notification.message}</p>
                 <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
               </div>
             ))}
@@ -48,7 +48,7 @@ function MessageModal({ open, onClose }) {
               to="/messages"
               className="w-full  text-center block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
             >
-              View All Messages
+              View All Notifications
             </Link>
           </div>
         </div>
