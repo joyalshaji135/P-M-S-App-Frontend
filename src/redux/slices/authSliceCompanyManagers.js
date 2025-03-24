@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginArtist } from "../../api/websiteApiSection/artistApi"; // Make sure this import matches your API path
+import  // Make sure this import matches your API path
 
 // Async thunk for artist login
-export const Login_Artist = createAsyncThunk(
+export const Login_CompanyManagers = createAsyncThunk(
   "artist/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
