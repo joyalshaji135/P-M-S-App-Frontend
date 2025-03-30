@@ -82,8 +82,14 @@ export const updateCompanyOwnerById = async (id, data) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating company owner by ID:", error);
-    throw error; // You can handle this error in your component
+     console.error(
+       error.response?.data?.error || "Error adding company owner:",
+       error
+     );
+     // Throw the server's error message or a default message
+     throw new Error(
+       error.response?.data?.error || "Failed to add company owner"
+     );
   }
 };
 
@@ -104,7 +110,14 @@ export const addCompanyOwner = async (data) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error adding company owner:", error);
-    throw error; // You can handle this error in your component
+     console.error(
+       error.response?.data?.message || "Error adding company owner:",
+       error
+     );
+     // Throw the server's error message or a default message
+     throw new Error(
+       error.response?.data?.message || "Failed to add company owner"
+     );
+    
   }
 }

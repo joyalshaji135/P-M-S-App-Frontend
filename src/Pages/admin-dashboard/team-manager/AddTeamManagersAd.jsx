@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addTeamManager, getTeamManagerById, updateTeamManagerById } from '../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi';
+import { toast } from 'react-toastify';
 
 function AddTeamManager() {
   const navigate = useNavigate();
@@ -140,19 +141,23 @@ function AddTeamManager() {
     try {
       if (id) {
         // If editing, update the existing team manager
-        await updateTeamManagerById(id, formData);
-        alert('Team Manager updated successfully!');
+      var response = await updateTeamManagerById(id, formData);
+        
       } else {
         // If adding, create a new team manager
-        await addTeamManager(formData);
-        alert('Team Manager added successfully!');
+      var response = await addTeamManager(formData);
+       
       }
-  
-      // Redirect to the Team Managers page
-      navigate('/admin/team-managers');
+  if (response?.success) {                         
+  toast.success(response.message || 'Team Manager saved successfully');
+  navigate(-1);
+  }else{
+  console.error('Failed to save team manager:', response.message);
+  toast.error(response.message || 'Failed to save team manager');
+  }
     } catch (error) {
       console.error('Error saving team manager:', error);
-      alert('Failed to save team manager. Please try again.');
+     toast.error(error.message || 'Failed to save team manager');
     }
   };
   return (

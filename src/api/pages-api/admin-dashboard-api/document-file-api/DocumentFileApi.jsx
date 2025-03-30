@@ -79,7 +79,9 @@ export const updateDocumentFileById = async (id, data) => {
     return response.data;
   } catch (error) {
     console.error("Error updating document file by ID:", error);
-    throw error;
+    throw new Error(
+      error.response?.data?.message || "Failed to add team manager"
+    );
   }
 };
 
@@ -99,6 +101,8 @@ export const addDocumentFile = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Error adding document file:", error);
-    throw error;
+    throw new Error(
+     error.response?.data?.message || "Failed to add team manager"
+   );
   }
 };

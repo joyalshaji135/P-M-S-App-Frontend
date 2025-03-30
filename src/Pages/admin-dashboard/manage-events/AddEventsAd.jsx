@@ -138,7 +138,11 @@ function AddEventsAd() {
             <input
               type="date"
               name="eventDate"
-              value={formData.eventDate.split("T")[0]}
+              value={
+                formData?.eventDate
+                  ? new Date(formData.eventDate).toISOString().split("T")[0]
+                  : ""
+              }
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required

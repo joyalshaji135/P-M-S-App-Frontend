@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { FaPlus, FaTrash } from 'react-icons/fa'; // Import icons
-import { addTeamMember, getTeamMemberById, updateTeamMemberById } from '../../../api/pages-api/admin-dashboard-api/team-member-api/TeamMemberApi';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FaPlus, FaTrash } from "react-icons/fa"; // Import icons
+import {
+  addTeamMember,
+  getTeamMemberById,
+  updateTeamMemberById,
+} from "../../../api/pages-api/admin-dashboard-api/team-member-api/TeamMemberApi";
+import { toast } from "react-toastify";
 
 function AddTeamMembersAd() {
   const navigate = useNavigate();
@@ -9,26 +14,26 @@ function AddTeamMembersAd() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    name: "",
+    email: "",
+    phone: "",
     address: {
-      street: '',
-      city: '',
-      state: '',
-      district: '',
-      zipCode: '',
+      street: "",
+      city: "",
+      state: "",
+      district: "",
+      zipCode: "",
     },
-    role: '',
-    status: 'Active',
+    role: "",
+    status: "Active",
     skills: [],
     company: {
-      name: '',
-      registrationNumber: '',
-      email: '',
-      phone: '',
-      industry: '',
-      website: '',
+      name: "",
+      registrationNumber: "",
+      email: "",
+      phone: "",
+      industry: "",
+      website: "",
     },
   });
 
@@ -40,7 +45,7 @@ function AddTeamMembersAd() {
         const data = response.teamMember;
         setFormData(data);
       } catch (error) {
-        console.error('Error fetching team member:', error);
+        console.error("Error fetching team member:", error);
       }
     };
     if (id) {
@@ -51,8 +56,8 @@ function AddTeamMembersAd() {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
       setFormData({
         ...formData,
         [parent]: {
@@ -100,10 +105,10 @@ function AddTeamMembersAd() {
       skills: [
         ...formData.skills,
         {
-          skillName: '',
-          proficiency: 'beginner',
+          skillName: "",
+          proficiency: "beginner",
           yearsOfExperience: 0,
-          certification: '',
+          certification: "",
         },
       ],
     });
@@ -119,41 +124,47 @@ function AddTeamMembersAd() {
   };
 
   // Handle form submission
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-    
-      try {
-        if (id) {
-          // If editing, update the existing team manager
-          await updateTeamMemberById(id, formData);
-          alert('Team Member updated successfully!');
-        } else {
-          // If adding, create a new team manager
-          await addTeamMember(formData);
-          alert('Team Member added successfully!');
-        }
-    
-        // Redirect to the Team Managers page
-        navigate('/admin/team-members');
-      } catch (error) {
-        console.error('Error saving team members:', error);
-        alert('Failed to save team members. Please try again.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (id) {
+        // If editing, update the existing team manager
+        var response = await updateTeamMemberById(id, formData);
+      } else {
+        // If adding, create a new team manager
+        var response = await addTeamMember(formData);
       }
-    };
+      if (response?.success) {
+        toast.success(response.message || "Team member saved successfully");
+        navigate(-1);
+      } else {
+        toast.error(response.message || "Failed to save team member");
+      }
+    } catch (error) {
+      console.error("Error saving team members:", error);
+      toast.error(error.message || "Failed to save team members");
+    }
+  };
 
   return (
     <div className="flex-1 p-4 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-        {id ? 'Edit Team Member' : 'Add Team Member'}
+        {id ? "Edit Team Member" : "Add Team Member"}
       </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-md"
+      >
         {/* Grid Layout for Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
             <input
               type="text"
               name="name"
@@ -167,7 +178,9 @@ function AddTeamMembersAd() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -181,7 +194,9 @@ function AddTeamMembersAd() {
 
           {/* Phone Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
             <input
               type="tel"
               name="phone"
@@ -195,7 +210,9 @@ function AddTeamMembersAd() {
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Address
+            </label>
             <input
               type="text"
               name="address.street"
@@ -245,7 +262,9 @@ function AddTeamMembersAd() {
 
           {/* Role */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Role
+            </label>
             <input
               type="text"
               name="role"
@@ -259,7 +278,9 @@ function AddTeamMembersAd() {
 
           {/* Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
             <select
               name="status"
               value={formData.status}
@@ -283,7 +304,9 @@ function AddTeamMembersAd() {
                   type="text"
                   name="skillName"
                   value={skill.skillName}
-                  onChange={(e) => handleSkillsChange(index, 'skillName', e.target.value)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "skillName", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Skill Name"
                   required
@@ -291,7 +314,9 @@ function AddTeamMembersAd() {
                 <select
                   name="proficiency"
                   value={skill.proficiency}
-                  onChange={(e) => handleSkillsChange(index, 'proficiency', e.target.value)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "proficiency", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
@@ -303,7 +328,13 @@ function AddTeamMembersAd() {
                   type="number"
                   name="yearsOfExperience"
                   value={skill.yearsOfExperience}
-                  onChange={(e) => handleSkillsChange(index, 'yearsOfExperience', e.target.value)}
+                  onChange={(e) =>
+                    handleSkillsChange(
+                      index,
+                      "yearsOfExperience",
+                      e.target.value
+                    )
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Years of Experience"
                   required
@@ -312,7 +343,9 @@ function AddTeamMembersAd() {
                   type="text"
                   name="certification"
                   value={skill.certification}
-                  onChange={(e) => handleSkillsChange(index, 'certification', e.target.value)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "certification", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Certification"
                 />
@@ -337,7 +370,9 @@ function AddTeamMembersAd() {
 
         {/* Company Information */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Company Information</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Company Information
+          </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -402,7 +437,7 @@ function AddTeamMembersAd() {
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {id ? 'Update' : 'Save'}
+            {id ? "Update" : "Save"}
           </button>
         </div>
       </form>
