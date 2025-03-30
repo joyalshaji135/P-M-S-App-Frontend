@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createEventProgram, updateEventProgramById, getEventProgramById } from "../../../api/pages-api/admin-dashboard-api/event-program-api/EventProgramApi";
+import { toast } from "react-toastify";
 
 function AddEventsAd() {
   const navigate = useNavigate();
@@ -7,32 +9,51 @@ function AddEventsAd() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    name: '',
-    location: '',
-    date: '',
-    time: '',
-    description: '',
-    industry: '',
-    priority: '',
-    eventPost: '',
-    Domain: '',
+    name: "",
+    location: "",
+    eventTime: "",
+    eventDate: "",
+    description: "",
+    industry: "",
+    priority: "",
+    eventPost: "",
+    Domain: "",
   });
 
   // Dropdown options
-  const industries = ['Technology', 'Healthcare', 'Finance', 'Education', 'Entertainment'];
-  const priorities = ['Low', 'Medium', 'High'];
-  const domains = ['Marketing', 'Sales', 'Operations', 'HR', 'IT'];
+  const industries = [
+    { key: "60d21b4667d0d8992e610c85", value: "Technology" },
+    { key: "60d21b4667d0d8992e610c85", value: "Healthcare" },
+    { key: "60d21b4667d0d8992e610c85", value: "Finance" },
+    { key: "60d21b4667d0d8992e610c85", value: "Education" },
+    { key: "60d21b4667d0d8992e610c85", value: "Entertainment" },
+  ];
 
-  // Fetch data from local storage on component mount
+  const priorities = [
+    { key: "low", value: "Low" },
+    { key: "medium", value: "Medium" },
+    { key: "high", value: "High" },
+  ];
+  const domains = [
+    { key: "marketing", value: "Marketing" },
+    { key: "sales", value: "Sales" },
+    { key: "operations", value: "Operations" },
+    { key: "hr", value: "HR" },
+    { key: "it", value: "IT" },
+  ];
+
+  // Fetch event program data getEventProgramById
   useEffect(() => {
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('events')) || [];
-      const eventToEdit = storedData.find((event) => event.id === parseInt(id));
-      if (eventToEdit) {
-        setFormData(eventToEdit); // Pre-fill the form with existing data
-      }
+      // If editing, fetch the event program data
+      getEventProgramById(id)
+        .then((data) => {
+          setFormData(data.eventPrograms);
+        })
+        .catch((error) => {
+          console.error("Error fetching event program:", error);
+          toast.error(error.message || "Failed to fetch event program");
+        });
     }
   }, [id]);
 
@@ -45,42 +66,43 @@ function AddEventsAd() {
     });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('events')) || [];
-
-    if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((event) =>
-        event.id === parseInt(id) ? formData : event
-      );
-      localStorage.setItem('events', JSON.stringify(updatedData));
-    } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('events', JSON.stringify(updatedData));
+    try {
+      if (id) {
+        // If editing, update the existing team manager
+        await updateEventProgramById(id, formData);
+        toast.success("Event updated successfully");
+      } else {
+        // If adding, create a new team manager
+        await createEventProgram(formData);
+        toast.success("Event created successfully");
+      }
+      navigate("/admin/events");
+    } catch (error) {
+      console.error("Error creating event program:", error);
+      toast.error(error.message || "Failed to create event program");
     }
-
-    // Redirect to the Events page
-    navigate('/admin/events');
   };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-        {id ? 'Edit Event' : 'Add Event'}
+        {id ? "Edit Event" : "Add Event"}
       </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md"
+      >
         {/* Grid Layout for Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
             <input
               type="text"
               name="name"
@@ -94,7 +116,9 @@ function AddEventsAd() {
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Location
+            </label>
             <input
               type="text"
               name="location"
@@ -108,11 +132,17 @@ function AddEventsAd() {
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
             <input
               type="date"
-              name="date"
-              value={formData.date}
+              name="eventDate"
+              value={
+                formData?.eventDate
+                  ? new Date(formData.eventDate).toISOString().split("T")[0]
+                  : ""
+              }
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -121,11 +151,13 @@ function AddEventsAd() {
 
           {/* Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Time
+            </label>
             <input
               type="time"
-              name="time"
-              value={formData.time}
+              name="eventTime"
+              value={formData.eventTime}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -134,7 +166,9 @@ function AddEventsAd() {
 
           {/* Description */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
             <textarea
               name="description"
               value={formData.description}
@@ -148,7 +182,9 @@ function AddEventsAd() {
 
           {/* Industry Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Industry
+            </label>
             <select
               name="industry"
               value={formData.industry}
@@ -157,9 +193,9 @@ function AddEventsAd() {
               required
             >
               <option value="">Select Industry</option>
-              {industries.map((industry, index) => (
-                <option key={index} value={industry}>
-                  {industry}
+              {industries.map((industry) => (
+                <option key={industry.key} value={industry.key}>
+                  {industry.value}
                 </option>
               ))}
             </select>
@@ -167,7 +203,9 @@ function AddEventsAd() {
 
           {/* Priority Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Priority
+            </label>
             <select
               name="priority"
               value={formData.priority}
@@ -176,9 +214,9 @@ function AddEventsAd() {
               required
             >
               <option value="">Select Priority</option>
-              {priorities.map((priority, index) => (
-                <option key={index} value={priority}>
-                  {priority}
+              {priorities.map((priority) => (
+                <option key={priority.key} value={priority.key}>
+                  {priority.value}
                 </option>
               ))}
             </select>
@@ -186,7 +224,9 @@ function AddEventsAd() {
 
           {/* Domain Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Domain
+            </label>
             <select
               name="Domain"
               value={formData.Domain}
@@ -194,10 +234,10 @@ function AddEventsAd() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select Domain</option>
-              {domains.map((domain, index) => (
-                <option key={index} value={domain}>
-                  {domain}
+              <option value="">Select Priority</option>
+              {domains.map((domain) => (
+                <option key={domain.key} value={domain.key}>
+                  {domain.value}
                 </option>
               ))}
             </select>
@@ -205,7 +245,9 @@ function AddEventsAd() {
 
           {/* Event Post */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Post</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Event Post
+            </label>
             <textarea
               name="eventPost"
               value={formData.eventPost}
@@ -224,7 +266,7 @@ function AddEventsAd() {
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {id ? 'Update' : 'Save'}
+            {id ? "Update" : "Save"}
           </button>
         </div>
       </form>

@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { deleteRecruitmentPostById, getAllRecruitmentPosts } from '../../../api/pages-api/admin-dashboard-api/manage-recruitment-api/RecruitmentApi';
+import { toast } from 'react-toastify';
 
 function ManageRecruitmentAd() {
   const [recruitmentData, setRecruitmentData] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from getAllRecruitmentPosts api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('recruitmentData')) || [];
-    setRecruitmentData(storedData);
-    setFilteredData(storedData); // Initialize filteredData with all data
+    const fetchData = async () => {
+      try {
+        const data = await getAllRecruitmentPosts();
+        setRecruitmentData(data.recruitmentPosts);
+      } catch (error) {
+        console.error('Error fetching recruitment data:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Handle search functionality
@@ -30,11 +38,22 @@ function ManageRecruitmentAd() {
   }, [searchText, recruitmentData]);
 
   // Handle delete functionality
-  const handleDelete = (id) => {
-    const updatedData = recruitmentData.filter((recruitment) => recruitment.id !== id);
-    localStorage.setItem('recruitmentData', JSON.stringify(updatedData));
-    setRecruitmentData(updatedData); // Update state to reflect the deletion
-    setFilteredData(updatedData); // Update filtered data as well
+  const handleDelete = async (id) => {
+   try {
+             const response = await deleteRecruitmentPostById(id)
+             if (response.success) {
+               const updatedRecruitment = recruitmentData.filter((recruitment) => recruitment._id !== id);
+               setRecruitmentData(updatedRecruitment);
+               setFilteredData(updatedRecruitment); // Refresh the table after deleting
+               toast.success(response.message || 'Recruitment deleted successfully');
+             } else {
+               console.error('Failed to delete Recruitment:', response.message);
+               toast.error(response.message || 'Failed to delete Recruitment');
+             }
+           } catch (error) {
+             console.error('Error deleting Recruitment:', error);
+             toast.error(error.message || 'Failed to delete event');
+           }
   };
 
   // Table columns
@@ -46,12 +65,12 @@ function ManageRecruitmentAd() {
     },
     {
       name: 'Candidate Name',
-      selector: (row) => row.candidateName,
+      selector: (row) => row.name,
       sortable: true,
     },
     {
       name: 'Position',
-      selector: (row) => row.position,
+      selector: (row) => row.recruitmentPosition,
       sortable: true,
     },
     {
@@ -59,14 +78,14 @@ function ManageRecruitmentAd() {
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === 'Offer Sent'
+            row.recruitmentStatus === 'Active'
               ? 'bg-green-100 text-green-800'
-              : row.status === 'Interview Scheduled'
+              : row.recruitmentStatus === 'Inactive'
               ? 'bg-blue-100 text-blue-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.recruitmentStatus}
         </span>
       ),
       sortable: true,
@@ -76,7 +95,7 @@ function ManageRecruitmentAd() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/recruitment/view/${row.id}`}>
+          <Link to={`/admin/recruitment/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +114,7 @@ function ManageRecruitmentAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/recruitment/edit/${row.id}`}>
+          <Link to={`/admin/recruitment/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +130,7 @@ function ManageRecruitmentAd() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { getAllGoogleMeetSessions } from '../../../api/pages-api/admin-dashboard-api/google-meet-api/GoogleMeetingApi';
 
 function MeetingsAd() {
   const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from getAllGoogleMeetSessions api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
-    setMeetings(storedData);
-    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
+    const fetchData = async () => {
+      try {
+        const data = await getAllGoogleMeetSessions();
+        setMeetings(data.googleMeets);
+      } catch (error) {
+        console.error('Error fetching Google Meet sessions:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Handle search functionality
@@ -19,7 +26,7 @@ function MeetingsAd() {
     if (searchText) {
       const filtered = meetings.filter(
         (meeting) =>
-          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.name.toLowerCase().includes(searchText.toLowerCase()) ||
           meeting.meetingTime.toLowerCase().includes(searchText.toLowerCase()) // Updated to meetingTime
       );
       setFilteredMeetings(filtered);
@@ -45,7 +52,7 @@ function MeetingsAd() {
     },
     {
       name: 'Meeting Title',
-      selector: (row) => row.title,
+      selector: (row) => row.name,
       sortable: true,
     },
     {
@@ -57,7 +64,7 @@ function MeetingsAd() {
       name: 'Meeting Link',
       cell: (row) => (
         <a
-          href={row.link}
+          href={row.meetingLink}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
@@ -71,7 +78,7 @@ function MeetingsAd() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/meetings/view/${row.id}`}>
+          <Link to={`/admin/meetings/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +97,7 @@ function MeetingsAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/meetings/edit/${row.id}`}>
+          <Link to={`/admin/meetings/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +113,7 @@ function MeetingsAd() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,50 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createTeamMembers } from "../../../api/admin/team-member/TeamMembersApi";
+import { toast } from "react-toastify";
 
 function AddMembersMg() {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get the id from the URL
+  const { id } = useParams();
 
   // State for form data
   const [formData, setFormData] = useState({
     id: Date.now(),
-    name: '',
-    email: '',
-    phone: '',
-    role: 'team-members',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    phone: "",
+    role: "team-members",
+    password: "",
+    confirmPassword: "",
     isDefault: false,
-    dateOfBirth: '',
-    gender: 'male',
-    profilePicture: '',
-    lastLogin: '',
+    dateOfBirth: "",
+    gender: "male",
+    profilePicture: "",
+    lastLogin: "",
     newsletter: true,
     notifications: true,
-    street: '',
-    city: '',
-    state: '',
-    district: '',
-    zipCode: '',
-    skills: [{ skillName: '', proficiency: '', yearsOfExperience: '', certification: '' }],
-    companyName: '',
-    registrationNumber: '',
-    companyEmail: '',
-    companyPhone: '',
-    industry: '',
-    website: '',
-    companyStreet: '',
-    companyCity: '',
-    companyState: '',
-    companyDistrict: '',
-    companyZipCode: '',
+    street: "",
+    city: "",
+    state: "",
+    district: "",
+    zipCode: "",
+    skills: [
+      {
+        skillName: "",
+        proficiency: "",
+        yearsOfExperience: "",
+        certification: "",
+      },
+    ],
+    companyName: "",
+    registrationNumber: "",
+    companyEmail: "",
+    companyPhone: "",
+    industry: "",
+    website: "",
+    companyStreet: "",
+    companyCity: "",
+    companyState: "",
+    companyDistrict: "",
+    companyZipCode: "",
   });
 
   // Fetch data from local storage on component mount
   useEffect(() => {
     if (id) {
-      const storedData = JSON.parse(localStorage.getItem('membersMg')) || [];
-      const memberToEdit = storedData.find((member) => member.id === parseInt(id));
+      const storedData = JSON.parse(localStorage.getItem("membersMg")) || [];
+      const memberToEdit = storedData.find(
+        (member) => member.id === parseInt(id)
+      );
       if (memberToEdit) {
         setFormData(memberToEdit);
       }
@@ -64,7 +75,10 @@ function AddMembersMg() {
   const handleSkillChange = (index, e) => {
     const { name, value } = e.target;
     const updatedSkills = [...formData.skills];
-    updatedSkills[index][name] = value;
+    updatedSkills[index] = {
+      ...updatedSkills[index],
+      [name]: value,
+    };
     setFormData({
       ...formData,
       skills: updatedSkills,
@@ -75,44 +89,92 @@ function AddMembersMg() {
   const addSkillField = () => {
     setFormData({
       ...formData,
-      skills: [...formData.skills, { skillName: '', proficiency: '', yearsOfExperience: '', certification: '' }],
+      skills: [
+        ...formData.skills,
+        {
+          skillName: "",
+          proficiency: "beginner",
+          yearsOfExperience: "",
+          certification: "",
+        }, // Set default proficiency
+      ],
     });
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const storedData = JSON.parse(localStorage.getItem('membersMg')) || [];
+    const updatedSkills = formData.skills.map((skill) => ({
+      ...skill,
+      proficiency: skill.proficiency || "beginner", // Set default if empty
+    }));
 
-    if (id) {
-      const updatedData = storedData.map((member) =>
-        member.id === parseInt(id) ? formData : member
-      );
-      localStorage.setItem('membersMg', JSON.stringify(updatedData));
-    } else {
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('membersMg', JSON.stringify(updatedData));
+    setFormData({
+      ...formData,
+      skills: updatedSkills,
+    });
+
+    const data = {
+      ...formData,
+      skills: updatedSkills, // Use the updated skills
+      address: {
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        district: formData.district,
+        zipCode: formData.zipCode,
+      },
+      company: {
+        name: formData.companyName,
+        registrationNumber: formData.registrationNumber,
+        email: formData.companyEmail,
+        phone: formData.companyPhone,
+        industry: formData.industry,
+        website: formData.website,
+        address: {
+          street: formData.companyStreet,
+          city: formData.companyCity,
+          state: formData.companyState,
+          district: formData.companyDistrict,
+          zipCode: formData.companyZipCode,
+        },
+      },
+      preferences: {
+        newsletter: formData.newsletter,
+        notifications: formData.notifications,
+      },
+    };
+
+    try {
+      const response = await createTeamMembers(data);
+      toast.success("Team member created successfully");
+      navigate("/team-manager/team-members");
+    } catch (error) {
+      console.error("Error creating/updating team member:", error);
     }
-
-    navigate('/team-manager/team-members');
   };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 ">
-        {id ? 'Edit Member' : 'Add Member'}
+        {id ? "Edit Member" : "Add Member"}
       </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg  space-y-8">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg  space-y-8"
+      >
         {/* Team Member Information Section */}
         <div className="space-y-6">
           {/* <h2 className="text-xl font-semibold text-gray-800">Team Member Information</h2> */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name*
+              </label>
               <input
                 type="text"
                 name="name"
@@ -126,7 +188,9 @@ function AddMembersMg() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email*
+              </label>
               <input
                 type="email"
                 name="email"
@@ -140,7 +204,9 @@ function AddMembersMg() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone*
+              </label>
               <input
                 type="text"
                 name="phone"
@@ -154,7 +220,9 @@ function AddMembersMg() {
 
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Role*
+              </label>
               <select
                 name="role"
                 value={formData.role}
@@ -171,7 +239,9 @@ function AddMembersMg() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password*
+              </label>
               <input
                 type="password"
                 name="password"
@@ -185,7 +255,9 @@ function AddMembersMg() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password*
+              </label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -199,7 +271,9 @@ function AddMembersMg() {
 
             {/* Date of Birth */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date of Birth
+              </label>
               <input
                 type="date"
                 name="dateOfBirth"
@@ -212,13 +286,15 @@ function AddMembersMg() {
 
             {/* Gender */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Gender
+              </label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                // required
               >
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -228,7 +304,9 @@ function AddMembersMg() {
 
             {/* Profile Picture */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Profile Picture URL
+              </label>
               <input
                 type="url"
                 name="profilePicture"
@@ -247,13 +325,15 @@ function AddMembersMg() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Newsletter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Receive Newsletter</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Receive Newsletter
+              </label>
               <select
                 name="newsletter"
                 value={formData.newsletter}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                // required
               >
                 <option value={true}>Yes</option>
                 <option value={false}>No</option>
@@ -262,13 +342,15 @@ function AddMembersMg() {
 
             {/* Notifications */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Receive Notifications</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Receive Notifications
+              </label>
               <select
                 name="notifications"
                 value={formData.notifications}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                // required
               >
                 <option value={true}>Yes</option>
                 <option value={false}>No</option>
@@ -283,7 +365,9 @@ function AddMembersMg() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Street */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Street*
+              </label>
               <input
                 type="text"
                 name="street"
@@ -297,7 +381,9 @@ function AddMembersMg() {
 
             {/* City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                City*
+              </label>
               <input
                 type="text"
                 name="city"
@@ -311,7 +397,9 @@ function AddMembersMg() {
 
             {/* State */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                State*
+              </label>
               <input
                 type="text"
                 name="state"
@@ -325,7 +413,9 @@ function AddMembersMg() {
 
             {/* District */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                District*
+              </label>
               <input
                 type="text"
                 name="district"
@@ -339,7 +429,9 @@ function AddMembersMg() {
 
             {/* Zip Code */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Zip Code*
+              </label>
               <input
                 type="text"
                 name="zipCode"
@@ -357,10 +449,15 @@ function AddMembersMg() {
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-800">Skills</h2>
           {formData.skills.map((skill, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              key={index}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
               {/* Skill Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Skill Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Skill Name
+                </label>
                 <input
                   type="text"
                   name="skillName"
@@ -368,29 +465,34 @@ function AddMembersMg() {
                   onChange={(e) => handleSkillChange(index, e)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter skill name"
-                  required
+                  // required
                 />
               </div>
 
               {/* Proficiency */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Proficiency</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Proficiency
+                </label>
                 <select
                   name="proficiency"
                   value={skill.proficiency}
                   onChange={(e) => handleSkillChange(index, e)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  // required
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
                   <option value="advanced">Advanced</option>
+                  <option value="expert">Expert</option>
                 </select>
               </div>
 
               {/* Years of Experience */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Years of Experience
+                </label>
                 <input
                   type="number"
                   name="yearsOfExperience"
@@ -398,13 +500,15 @@ function AddMembersMg() {
                   onChange={(e) => handleSkillChange(index, e)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter years"
-                  required
+                  // required
                 />
               </div>
 
               {/* Certification */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Certification</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Certification
+                </label>
                 <input
                   type="text"
                   name="certification"
@@ -427,11 +531,15 @@ function AddMembersMg() {
 
         {/* Company Information Section */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Company Information</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Company Information
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Company Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Company Name
+              </label>
               <input
                 type="text"
                 name="companyName"
@@ -439,13 +547,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter company name"
-                required
+                // required
               />
             </div>
 
             {/* Registration Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Registration Number
+              </label>
               <input
                 type="text"
                 name="registrationNumber"
@@ -453,13 +563,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter registration number"
-                required
+                // required
               />
             </div>
 
             {/* Company Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Company Email
+              </label>
               <input
                 type="email"
                 name="companyEmail"
@@ -467,13 +579,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter company email"
-                required
+                // required
               />
             </div>
 
             {/* Company Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Company Phone
+              </label>
               <input
                 type="text"
                 name="companyPhone"
@@ -481,13 +595,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter company phone"
-                required
+                // required
               />
             </div>
 
             {/* Industry */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Industry
+              </label>
               <input
                 type="text"
                 name="industry"
@@ -495,13 +611,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter industry"
-                required
+                // required
               />
             </div>
 
             {/* Website */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Website
+              </label>
               <input
                 type="url"
                 name="website"
@@ -516,11 +634,15 @@ function AddMembersMg() {
 
         {/* Company Address Section */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Company Address</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Company Address
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Company Street */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Street
+              </label>
               <input
                 type="text"
                 name="companyStreet"
@@ -528,13 +650,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter street"
-                required
+                // required
               />
             </div>
 
             {/* Company City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                City
+              </label>
               <input
                 type="text"
                 name="companyCity"
@@ -542,13 +666,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter city"
-                required
+                // required
               />
             </div>
 
             {/* Company State */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                State
+              </label>
               <input
                 type="text"
                 name="companyState"
@@ -556,13 +682,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter state"
-                required
+                // required
               />
             </div>
 
             {/* Company District */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                District
+              </label>
               <input
                 type="text"
                 name="companyDistrict"
@@ -570,13 +698,15 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter district"
-                required
+                // required
               />
             </div>
 
             {/* Company Zip Code */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Zip Code
+              </label>
               <input
                 type="text"
                 name="companyZipCode"
@@ -584,7 +714,7 @@ function AddMembersMg() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter zip code"
-                required
+                // required
               />
             </div>
           </div>
@@ -596,7 +726,7 @@ function AddMembersMg() {
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {id ? 'Update' : 'Save'}
+            {id ? "Update" : "Save"}
           </button>
         </div>
       </form>
