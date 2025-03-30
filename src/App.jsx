@@ -101,6 +101,7 @@ import ToDoMb from './Pages/team-member/ToDoMb';
 import AddToDoMb from './Pages/team-member/AddToDoMb';
 import ViewToDoMb from './Pages/team-member/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
+import ChatPage from './components/ChatPage';
 // import ProtectedRoute from './helper/protectedRoute';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
@@ -117,6 +118,7 @@ function App() {
       {/* <Route path="/register" element={<Reg />} /> */}
 
       <Route path="/messages" element={<MessagesPage />} />
+      <Route path="/chat" element={<ChatPage />} />
       {/* <Route element={<ProtectedRoute />}> */}
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminLayout />}>
