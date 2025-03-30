@@ -3,11 +3,13 @@ import DataTable from 'react-data-table-component';
 import { Link } from 'react-router-dom';
 import { deleteTeamMemberById, getAllTeamMembers } from '../../../api/pages-api/admin-dashboard-api/team-member-api/TeamMemberApi';
 
+
 function TeamMembers() {
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([]);
   const [searchText, setSearchText] = useState('');
 
+  
   // Fetch data from getAllTeamMembers api
   useEffect(() => {
     const fetchData = async () => {

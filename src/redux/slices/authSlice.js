@@ -1,80 +1,86 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import
-// Async thunk for login
-export const loginUser = createAsyncThunk(
-  "auth/login",
-  async ({ email, password }, { rejectWithValue }) => {
+import { loginApi } from "../../api/admin-dashboard-api/login-api/LoginApi";
+
+export const createAuthSlice = (role) => {
+  const loadUserFromLocalStorage = () => {
     try {
-      const response = await createTeamMembers(email, password);
-      return response;
+      const storedInfo = localStorage.getItem(role);
+      return storedInfo ? JSON.parse(storedInfo) : null;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Login failed");
+      console.error(`Error parsing ${role} info from local storage:`, error);
+      return null;
     }
-  }
-);
-// Utility function to handle localStorage operations
-const loadUserFromLocalStorage = () => {
-  try {
-    const storedInfo = localStorage.getItem("pms_admin");
-    return storedInfo ? JSON.parse(storedInfo) : null;
-  } catch (error) {
-    console.error("Error parsing user info from local storage:", error);
-    return null;
-  }
-};
+  };
 
-// Initial state
-const initialState = {
-  currentItsMeWebUser: loadUserFromLocalStorage(),
-  token: null,
-  error: null,
-  loading: false,
-};
+  const initialState = {
+    currentUser: loadUserFromLocalStorage(),
+    token: null,
+    error: null,
+    loading: false,
+    role,
+  };
 
-// Create slice
-const adminSlice = createSlice({
-  name: "pms_admin",
-  initialState,
-  reducers: {
-    signOutSuccess: (state) => {
-      state.currentPMSAdmin = null;
-      state.token = null;
-      state.error = null;
-      state.loading = false;
+  const loginUser = createAsyncThunk(
+    `${role}/login`,
+    async ({ email, password }, { rejectWithValue }) => {
       try {
-        localStorage.removeItem("pms_admin");
+        const response = await loginApi({ email, password, role });
+        return response;
       } catch (error) {
-        console.error("Error removing user info from local storage:", error);
+        return rejectWithValue(error.response?.data?.message || "Login failed");
       }
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(loginUser.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        const { user, token } = action.payload;
-        state.currentPMSAdmin = user;
-        state.token = token;
+    }
+  );
+
+  const slice = createSlice({
+    name: role,
+    initialState,
+    reducers: {
+      signOutSuccess: (state) => {
+        state.currentUser = null;
+        state.token = null;
         state.error = null;
         state.loading = false;
         try {
-          localStorage.setItem("pms_admin", JSON.stringify(user));
+          localStorage.removeItem(role);
         } catch (error) {
-          console.error("Error saving user info to local storage:", error);
+          console.error(`Error removing ${role} info from local storage:`, error);
         }
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-  },
-});
+      },
+      setLoading: (state, action) => {
+        state.loading = action.payload;
+      },
+      clearError: (state) => {
+        state.error = null;
+      },
+    },
+    extraReducers: (builder) => {
+      builder
+        .addCase(loginUser.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(loginUser.fulfilled, (state, action) => {
+          const { user, token } = action.payload;
+          state.currentUser = user;
+          state.token = token;
+          state.error = null;
+          state.loading = false;
+          try {
+            localStorage.setItem(role, JSON.stringify({ ...user, token }));
+          } catch (error) {
+            console.error(`Error saving ${role} info to local storage:`, error);
+          }
+        })
+        .addCase(loginUser.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload || "Login failed";
+        });
+    },
+  });
 
-// Export actions
-export const { signOutSuccess } = adminSlice.actions;
-
-// Export reducer
-export default adminSlice.reducer;
+  return {
+    reducer: slice.reducer,
+    actions: { ...slice.actions, loginUser },
+  };
+};
