@@ -101,7 +101,7 @@ import ToDoMb from './Pages/team-member/ToDoMb';
 import AddToDoMb from './Pages/team-member/AddToDoMb';
 import ViewToDoMb from './Pages/team-member/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
-import ProtectedRoute from './helper/protectedRoute';
+// import ProtectedRoute from './helper/protectedRoute';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -117,7 +117,7 @@ function App() {
       {/* <Route path="/register" element={<Reg />} /> */}
 
       <Route path="/messages" element={<MessagesPage />} />
-      <Route element={<ProtectedRoute />}>
+      {/* <Route element={<ProtectedRoute />}> */}
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHome />} />{" "}
@@ -162,10 +162,10 @@ function App() {
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} /> */}
         </Route>
-        </Route>
+        {/* </Route> */}
 
         {/* Team Member Dashboard */}
-        <Route element={<ProtectedRoute />}>
+        {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/team-member" element={<MemberLayout />}>
           <Route index element={<MemberHome />} />
 
@@ -188,9 +188,9 @@ function App() {
 
           <Route path="documents" element={<DocumentsMb />} />
         </Route>
-        </Route>
+        {/* </Route> */}
         {/* Team Manager Dashboard */}
-        <Route element={<ProtectedRoute />}>
+        {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/team-manager" element={<ManagerLayout />}>
           <Route index element={<ManagerHome />} />
 
@@ -228,10 +228,10 @@ function App() {
         <Route path="reports" element={<Reports />} />
         <Route path="analytics" element={<Analytics />} /> */}
         </Route>
-        </Route>
+        {/* </Route> */}
 
         {/* Company Owner Dashboard */}
-        <Route element={<ProtectedRoute />}>
+        {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/owner" element={<OwnerLayout />}>
           <Route index element={<OwnerHome />} />
 
@@ -282,7 +282,7 @@ function App() {
           {/* <Route path="analytics" element={<Analytics />} />
         <Route path="reports" element={<Reports />} /> */}
         </Route>
-        </Route>
+        {/* </Route> */}
       
     </Routes>
   );
