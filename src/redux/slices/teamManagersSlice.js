@@ -1,33 +1,41 @@
-// slices/teamManagersSlice.js
-import { createSlice } from '@reduxjs/toolkit';
-import { createAuthSlice } from './authSlice';
+import { createSlice } from "@reduxjs/toolkit";
+import { createAuthSlice } from "./authSlice";
 
-const { reducer, actions } = createAuthSlice('team-managers');
+// Create base auth slice for team-managers
+const authSlice = createAuthSlice("team-managers");
 
 const teamManagersSlice = createSlice({
-  name: 'team-managers',
-  initialState: reducer(undefined, { type: '' }),
+  name: "team-managers",
+  initialState: authSlice.reducer(undefined, { type: "" }), // Correctly retrieve initial state
   reducers: {
-    ...actions,
     // Team manager-specific reducers
     updateTeam: (state, action) => {
       if (state.currentUser) {
         state.currentUser.team = action.payload;
-        try {
-          localStorage.setItem('team-managers', JSON.stringify(state.currentUser));
-        } catch (error) {
-          console.error("Error updating team manager in local storage:", error);
-        }
       }
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(authSlice.actions.signOutSuccess, (state) => {
+        state.currentUser = null;
+        state.token = null;
+      })
+      .addCase(authSlice.actions.setLoading, (state, action) => {
+        state.loading = action.payload;
+      })
+      .addCase(authSlice.actions.clearError, (state) => {
+        state.error = null;
+      })
+      .addCase(authSlice.actions.loginUser.fulfilled, (state, action) => {
+        state.currentUser = action.payload.user;
+        state.token = action.payload.token;
+      });
+  },
 });
 
-export const { 
-  signOutSuccess, 
-  setLoading, 
-  clearError, 
-  updateTeam 
-} = teamManagersSlice.actions;
-export const loginUser = actions.loginUser;
+// Export team-manager-specific actions
+export const { updateTeam } = teamManagersSlice.actions;
+export const { signOutSuccess, setLoading, clearError, loginUser } = authSlice.actions; // Re-export auth actions
+
 export default teamManagersSlice.reducer;
