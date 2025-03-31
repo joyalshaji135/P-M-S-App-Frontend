@@ -102,6 +102,7 @@ import AddToDoMb from './Pages/team-member/AddToDoMb';
 import ViewToDoMb from './Pages/team-member/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
 import ProtectedRoute from './helper/protectedRoute';
+import LandingPage from './Pages/LandingPage';
 // import Log from './components/Log';
 // import Dashboard from './components/manager/Dashboard';
 
@@ -109,7 +110,7 @@ function App() {
   return (
     <Routes>
       
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<LandingPage/>} />
 
       <Route path="/login" element={<Login />} />
       {/* <Route path='/login' element={<Log/>}/> */}
