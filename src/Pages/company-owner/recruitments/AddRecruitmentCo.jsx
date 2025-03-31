@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { addRecruitmentPost, getRecruitmentPostById, updateRecruitmentPostById } from '../../../api/pages-api/company-owner-api/manage-recruitment-api/CORecruitmentApi';
+import { toast } from 'react-toastify';
 
 function AddRecruitmentCo() {
   const navigate = useNavigate();
@@ -7,21 +9,34 @@ function AddRecruitmentCo() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    candidateName: '',
+    name: '',
     position: '',
-    status: 'Interview Scheduled', // Default status
+    recruitmentStatus: 'Active', // Default status
+    industry: '',
+    priority: '',
+    recruitmentPost: '',
+    recruitmentPosition: '',
+    recruitmentLocation: '',
+    recruitmentSalary: '',
+    recruitmentStartDate: '',
+    recruitmentEndDate: '',
+    recruitmentContactPerson: '',
+    recruitmentContactNumber: '',
+    recruitmentEmail: '',
   });
 
-  // Fetch data from local storage on component mount (for editing)
+  // Fetch data from local storage on component mount
   useEffect(() => {
+    // getRecruitmentPostById api
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('recruitments')) || [];
-      const recruitmentToEdit = storedData.find((recruitment) => recruitment.id === parseInt(id));
-      if (recruitmentToEdit) {
-        setFormData(recruitmentToEdit); // Pre-fill the form with existing data
-      }
+      // not local storage
+      getRecruitmentPostById(id)
+        .then((data) => {
+          setFormData(data.recruitmentPost);
+        })
+        .catch((error) => {
+          console.error("Error fetching recruitment post by ID:", error);
+        });
     }
   }, [id]);
 
@@ -35,26 +50,27 @@ function AddRecruitmentCo() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('recruitments')) || [];
-
-    if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((recruitment) =>
-        recruitment.id === parseInt(id) ? formData : recruitment
-      );
-      localStorage.setItem('recruitments', JSON.stringify(updatedData));
-    } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('recruitments', JSON.stringify(updatedData));
-    }
-
-    // Redirect to the Recruitment page
-    navigate('/owner/recruitments');
+    try {
+          if (id) {
+            // If editing, update the existing team manager
+        var response =    await updateRecruitmentPostById(id, formData);
+          } else {
+            // If adding, create a new team manager
+       var response =     await addRecruitmentPost(formData);
+          }
+          if(response?.success){
+          toast.success(response.message || "Recruitment created successfully");          
+        navigate(-1);  
+        }      
+        } catch (error) {
+          console.error("Error creating event program:", error);
+          toast.error(error.message || "Failed to create event program");
+        }
+    
+    // Redirect to the Manage Recruitment page
+    navigate('/admin/recruitment');
   };
 
   return (
@@ -72,8 +88,8 @@ function AddRecruitmentCo() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
             <input
               type="text"
-              name="candidateName"
-              value={formData.candidateName}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter candidate name"
@@ -86,8 +102,8 @@ function AddRecruitmentCo() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
             <input
               type="text"
-              name="position"
-              value={formData.position}
+              name="recruitmentPosition"
+              value={formData.recruitmentPosition}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter position"
@@ -99,8 +115,8 @@ function AddRecruitmentCo() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
-              name="status"
-              value={formData.status}
+              name="recruitmentStatus"
+              value={formData.recruitmentStatus}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -109,6 +125,162 @@ function AddRecruitmentCo() {
               <option value="Offer Sent">Offer Sent</option>
               <option value="Rejected">Rejected</option>
             </select>
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <select
+              name="industry"
+              value={formData.industry}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="60d21b4667d0d8992e610c90">High Level Industry</option>
+              <option value="60d21b4667d0d8992e610c90">Medium Level Industry</option>
+              <option value="60d21b4667d0d8992e610c90">Low Level Industry</option>
+            </select>
+          </div>
+
+          {/* Priority */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          {/* Recruitment Post */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Post</label>
+            <input
+              type="text"
+              name="recruitmentPost"
+              value={formData.recruitmentPost}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment post"
+              required
+            />
+          </div>
+
+          {/* Recruitment Position */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Position</label>
+            <input
+              type="text"
+              name="recruitmentPosition"
+              value={formData.recruitmentPosition}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment position"
+              required
+            />
+          </div>
+
+          {/* Recruitment Location */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Location</label>
+            <input
+              type="text"
+              name="recruitmentLocation"
+              value={formData.recruitmentLocation}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment location"
+              required
+            />
+          </div>
+
+          {/* Recruitment Salary */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Salary</label>
+            <input
+              type="text"
+              name="recruitmentSalary"
+              value={formData.recruitmentSalary}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment salary"
+              required
+            />
+          </div>
+
+          {/* Recruitment Start Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Start Date</label>
+            <input
+              type="date"
+              name="recruitmentStartDate"
+              value={formData.recruitmentStartDate.split("T")[0]}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Recruitment End Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment End Date</label>
+            <input
+              type="date"
+              name="recruitmentEndDate"
+              value={formData.recruitmentEndDate.split("T")[0]}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Recruitment Contact Person */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Contact Person</label>
+            <input
+              type="text"
+              name="recruitmentContactPerson"
+              value={formData.recruitmentContactPerson}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment contact person"
+              required
+            />
+          </div>
+
+          {/* Recruitment Contact Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Contact Number</label>
+            <input
+              type="text"
+              name="recruitmentContactNumber"
+              value={formData.recruitmentContactNumber}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment contact number"
+              required
+            />
+          </div>
+
+          {/* Recruitment Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Email</label>
+            <input
+              type="email"
+              name="recruitmentEmail"
+              value={formData.recruitmentEmail}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter recruitment email"
+              required
+            />
           </div>
         </div>
 

@@ -1,35 +1,85 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
-// Generate initial dummy data
+// Dummy Data Generator Method
+const createDummyTask = ({
+  id,
+  taskTitle,
+  taskDescription,
+  taskStatus = 'Pending',
+  taskHours,
+  taskTakenTime = 0,
+  startDate,
+  endDate,
+  resourceId,
+  projectId,
+  taskModule
+}) => ({
+  id,
+  taskTitle,
+  taskDescription,
+  taskStatus,
+  taskHours,
+  taskTakenTime,
+  percentageOfCompleted: Math.round((taskTakenTime / taskHours) * 100) || 0,
+  startDate: new Date(startDate).toISOString(),
+  endDate: new Date(endDate).toISOString(),
+  resourceName: resourceId,
+  project: projectId,
+  taskModule
+});
+
+// Initial Dummy Data
 const initialTasks = [
-  {
+  createDummyTask({
     id: 1,
-    title: 'Complete project documentation',
-    description: 'Write detailed documentation for the entire project including API specifications and user guides.',
-    status: 'In Progress',
-    createdAt: new Date('2023-05-15')
-  },
-  {
+    taskTitle: 'API Integration',
+    taskDescription: 'Integrate third-party payment gateway API',
+    taskStatus: 'In Progress',
+    taskHours: 15,
+    taskTakenTime: 8,
+    startDate: '2024-03-01',
+    endDate: '2024-03-10',
+    resourceId: '67c7ecd97865c45ac8b983a8',
+    projectId: '67c4a06dca86d94bd5785077',
+    taskModule: 'Backend'
+  }),
+  createDummyTask({
     id: 2,
-    title: 'Review team performance',
-    description: 'Analyze quarterly performance metrics and prepare review reports for team members.',
-    status: 'Pending',
-    createdAt: new Date('2023-05-18')
-  },
-  {
-    id: 3,
-    title: 'Update security protocols',
-    description: 'Implement new security measures and update all systems with the latest patches.',
-    status: 'Completed',
-    createdAt: new Date('2023-05-10')
-  }
+    taskTitle: 'UI Redesign',
+    taskDescription: 'Redesign user dashboard interface',
+    taskHours: 20,
+    startDate: '2024-03-05',
+    endDate: '2024-03-15',
+    resourceId: '67c7ecd97865c45ac8b983a9',
+    projectId: '67c4a06dca86d94bd5785078',
+    taskModule: 'Frontend'
+  })
 ];
+
+// Resource and Project mappings
+const resources = {
+  '67c7ecd97865c45ac8b983a8': 'John Developer',
+  '67c7ecd97865c45ac8b983a9': 'Sarah Designer'
+};
+
+const projects = {
+  '67c4a06dca86d94bd5785077': 'E-commerce Platform',
+  '67c4a06dca86d94bd5785078': 'Mobile App Redesign'
+};
 
 function TasksMb() {
   const [tasks, setTasks] = useState(initialTasks);
   const [isEditing, setIsEditing] = useState(null);
-  const [expandedTask, setExpandedTask] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(4);
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTasks = tasks.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(tasks.length / itemsPerPage);
 
   // Animation variants
   const cardVariants = {
@@ -39,44 +89,205 @@ function TasksMb() {
       y: 0,
       transition: { duration: 0.3 }
     },
-    exit: { opacity: 0, x: -50 }
+    exit: { opacity: 0, x: -50 },
+    drag: { scale: 1.05, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }
   };
 
+  // Drag and drop handler
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(tasks);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setTasks(items);
+  };
+
+  // Status color mapping
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Completed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'In Progress':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-red-100 text-red-800 border-red-200';
+      case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  // Handle status updates
-  const handleStatusChange = (id, newStatus) => {
+  // Date formatting
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  // Update task handler
+  const handleUpdateTask = (id, field, value) => {
     setTasks(tasks.map(task => 
-      task.id === id ? { ...task, status: newStatus } : task
+      task.id === id ? { 
+        ...task, 
+        [field]: value,
+        percentageOfCompleted: field === 'taskTakenTime' 
+          ? Math.round((value / task.taskHours) * 100) 
+          : task.percentageOfCompleted
+      } : task
     ));
   };
 
-  // Update existing task
-  const handleUpdateTask = () => {
-    // In a real app, you would save to an API here
-    setIsEditing(null);
+  // Add new dummy task
+  const addDummyTask = () => {
+    const newTask = createDummyTask({
+      id: tasks.length + 1,
+      taskTitle: `New Task ${tasks.length + 1}`,
+      taskDescription: 'Sample task description',
+      taskHours: 10,
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 604800000), // +7 days
+      resourceId: '67c7ecd97865c45ac8b983a8',
+      projectId: '67c4a06dca86d94bd5785077',
+      taskModule: 'General'
+    });
+    setTasks([...tasks, newTask]);
   };
 
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-blue-50 min-h-screen">
-      <motion.h1 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-3xl font-bold text-gray-800 mb-8"
-      >
-        My Tasks
-      </motion.h1>
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-8">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold text-gray-800"
+        >
+          Task Management
+        </motion.h1>
+        <button
+          onClick={addDummyTask}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+        >
+          + Add Dummy Task
+        </button>
+      </div>
 
-      {/* Edit Task Modal (only appears when editing) */}
+      {/* Task List */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="tasks">
+          {(provided) => (
+            <div 
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              <AnimatePresence>
+                {currentTasks.map((task, index) => (
+                  <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                    {(provided) => (
+                      <motion.div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+                      >
+                        <div className="bg-blue-50 px-5 py-4 border-b border-blue-100">
+                          <div className="flex justify-between items-start">
+                            <h3 className="text-lg font-semibold text-gray-800 truncate">
+                              {task.taskTitle}
+                            </h3>
+                            <button
+                              onClick={() => setIsEditing(task.id)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                              {task.taskModule}
+                            </span>
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                              {projects[task.project]}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-5">
+                          <p className="text-gray-600 mb-4">
+                            {task.taskDescription}
+                          </p>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.taskStatus)} border`}>
+                                {task.taskStatus}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatDate(task.startDate)} - {formatDate(task.endDate)}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm">
+                              <div>
+                                <span className="font-medium">{task.taskTakenTime}h</span>
+                                <span className="text-gray-500">/{task.taskHours}h</span>
+                              </div>
+                              <div className="w-1/2 bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-blue-600 rounded-full h-2"
+                                  style={{ width: `${task.percentageOfCompleted}%` }}
+                                ></div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
+                                {resources[task.resourceName]}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </Draggable>
+                ))}
+              </AnimatePresence>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+
+      {/* Pagination Controls */}
+      <motion.div 
+        className="mt-6 flex justify-center items-center gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <button
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
+        >
+          Previous
+        </button>
+        <span className="text-sm text-gray-600">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
+        >
+          Next
+        </button>
+      </motion.div>
+
+      {/* Edit Modal */}
       <AnimatePresence>
         {isEditing && (
           <motion.div 
@@ -91,74 +302,91 @@ function TasksMb() {
               className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md"
             >
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Edit Task
+                Update Task Progress
               </h2>
               
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title *
+                    Task Title
                   </label>
-                  <input
-                    type="text"
-                    value={tasks.find(t => t.id === isEditing)?.title || ''}
-                    onChange={(e) => 
-                      setTasks(tasks.map(task => 
-                        task.id === isEditing ? 
-                        { ...task, title: e.target.value } : task
-                      ))
-                    }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
-                    required
-                  />
+                  <p className="px-4 py-2 bg-gray-100 rounded-lg">
+                    {tasks.find(t => t.id === isEditing)?.taskTitle}
+                  </p>
                 </div>
-                
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Start Date
+                    </label>
+                    <p className="px-4 py-2 bg-gray-100 rounded-lg">
+                      {formatDate(tasks.find(t => t.id === isEditing)?.startDate)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      End Date
+                    </label>
+                    <p className="px-4 py-2 bg-gray-100 rounded-lg">
+                      {formatDate(tasks.find(t => t.id === isEditing)?.endDate)}
+                    </p>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
-                  <textarea
-                    value={tasks.find(t => t.id === isEditing)?.description || ''}
-                    onChange={(e) => 
-                      setTasks(tasks.map(task => 
-                        task.id === isEditing ? 
-                        { ...task, description: e.target.value } : task
-                      ))
-                    }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 min-h-[120px]"
-                  />
+                  <p className="px-4 py-2 bg-gray-100 rounded-lg">
+                    {tasks.find(t => t.id === isEditing)?.taskDescription}
+                  </p>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={tasks.find(t => t.id === isEditing)?.status || 'Pending'}
-                    onChange={(e) => 
-                      setTasks(tasks.map(task => 
-                        task.id === isEditing ? 
-                        { ...task, status: e.target.value } : task
-                      ))
-                    }
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hours Spent
+                    </label>
+                    <input
+                      type="number"
+                      value={tasks.find(t => t.id === isEditing)?.taskTakenTime || ''}
+                      onChange={(e) => 
+                        handleUpdateTask(isEditing, 'taskTakenTime', e.target.value)
+                      }
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={tasks.find(t => t.id === isEditing)?.taskStatus}
+                      onChange={(e) => 
+                        handleUpdateTask(isEditing, 'taskStatus', e.target.value)
+                      }
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3">
                   <button
                     onClick={() => setIsEditing(null)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={handleUpdateTask}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    onClick={() => setIsEditing(null)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Save Changes
                   </button>
@@ -166,88 +394,6 @@ function TasksMb() {
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Tasks Grid */}
-      <AnimatePresence>
-        {tasks.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12 text-gray-500"
-          >
-            No tasks available
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence>
-              {tasks.map((task) => (
-                <motion.div
-                  key={task.id}
-                  layout
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  whileHover={{ y: -5 }}
-                  className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
-                >
-                  <div className="bg-blue-50 px-5 py-4 border-b border-blue-100">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-semibold text-gray-800 truncate">
-                        {task.title}
-                      </h3>
-                      <button
-                        onClick={() => setIsEditing(task.id)}
-                        className="text-blue-600 hover:text-blue-800"
-                        aria-label="Edit task"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-5">
-                    <div 
-                      className={`mb-4 ${expandedTask === task.id ? '' : 'line-clamp-3'} text-gray-600 cursor-pointer`}
-                      onClick={() => setExpandedTask(expandedTask === task.id ? null : task.id)}
-                    >
-                      {task.description || 'No description provided'}
-                      {task.description?.length > 100 && (
-                        <span className="text-blue-600 ml-1">
-                          {expandedTask === task.id ? 'Show less' : '...Read more'}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)} border`}>
-                        {task.status}
-                      </span>
-                      
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                        className="text-sm rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="px-5 py-3 bg-blue-50 border-t border-blue-100 text-xs text-gray-500 flex justify-between">
-                    <span>Task ID: {task.id}</span>
-                    <span>{task.createdAt.toLocaleDateString()}</span>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
         )}
       </AnimatePresence>
     </div>

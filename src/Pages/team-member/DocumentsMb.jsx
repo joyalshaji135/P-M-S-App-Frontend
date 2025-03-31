@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiDownload, FiFile, FiCalendar, FiX, FiArrowRight } from 'react-icons/fi';
+import { FiSearch, FiDownload, FiFile, FiX, FiArrowRight } from 'react-icons/fi';
 
 function DocumentsMb() {
   const [documents, setDocuments] = useState([]);
@@ -8,77 +8,64 @@ function DocumentsMb() {
   const [searchText, setSearchText] = useState('');
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-  // Enhanced mock data with different document types
+  // Industry mapping based on your example ID
+  const industries = {
+    '60d21b4667d0d8992e610c90': 'Technology',
+    '60d21b4667d0d8992e610c91': 'Finance',
+    '60d21b4667d0d8992e610c92': 'Healthcare'
+  };
+
+  // Mock data based on your API structure
   useEffect(() => {
     const mockDocuments = [
       {
-        id: 1,
-        name: 'Project Report Q3',
-        description: 'Detailed quarterly progress report with metrics and team performance',
-        date: '2023-10-15T10:00:00',
-        fileUrl: 'https://example.com/files/project-report.pdf',
-        type: 'pdf',
-        size: '2.4 MB',
-        category: 'Reports'
+        name: 'John Doe',
+        description: 'A detailed document outlining the project scope.',
+        industry: '60d21b4667d0d8992e610c90',
+        priority: 'High',
+        fileDocument: 'https://example.com/uploads/project_proposal.pdf'
       },
       {
-        id: 2,
-        name: 'Meeting Notes - October',
-        description: 'Key decisions and action items from team meetings',
-        date: '2023-10-16T14:30:00',
-        fileUrl: 'https://example.com/files/meeting-notes.docx',
-        type: 'doc',
-        size: '1.1 MB',
-        category: 'Minutes'
+        name: 'Jane Smith',
+        description: 'Quarterly financial report summary',
+        industry: '60d21b4667d0d8992e610c91',
+        priority: 'Medium',
+        fileDocument: 'https://example.com/uploads/financial_report.docx'
       },
       {
-        id: 3,
-        name: 'Budget Plan 2024',
-        description: 'Annual budget allocation with department breakdown',
-        date: '2023-10-17T09:00:00',
-        fileUrl: 'https://example.com/files/budget-plan.xlsx',
-        type: 'xls',
-        size: '3.2 MB',
-        category: 'Financial'
-      },
-      {
-        id: 4,
-        name: 'Product Roadmap',
-        description: 'Updated product development timeline and milestones',
-        date: '2023-10-18T11:00:00',
-        fileUrl: 'https://example.com/files/roadmap.pdf',
-        type: 'pdf',
-        size: '1.8 MB',
-        category: 'Plans'
-      },
-      {
-        id: 5,
-        name: 'User Research Findings',
-        description: 'Compiled data from recent user interviews and surveys',
-        date: '2023-10-19T16:45:00',
-        fileUrl: 'https://example.com/files/research.pdf',
-        type: 'pdf',
-        size: '4.5 MB',
-        category: 'Research'
+        name: 'Mike Johnson',
+        description: 'Healthcare compliance guidelines',
+        industry: '60d21b4667d0d8992e610c92',
+        priority: 'Low',
+        fileDocument: 'https://example.com/uploads/healthcare_guidelines.pdf'
       }
     ];
     setDocuments(mockDocuments);
     setFilteredDocuments(mockDocuments);
   }, []);
 
-  // Handle search and filter
+  // Filter and search logic
   useEffect(() => {
     const filtered = documents.filter(doc => {
       const matchesSearch = doc.name.toLowerCase().includes(searchText.toLowerCase()) || 
                           doc.description.toLowerCase().includes(searchText.toLowerCase());
       
-      const matchesFilter = filter === 'all' || doc.category.toLowerCase() === filter.toLowerCase();
+      const matchesFilter = filter === 'all' || doc.industry === filter;
       
       return matchesSearch && matchesFilter;
     });
     setFilteredDocuments(filtered);
+    setCurrentPage(1);
   }, [searchText, filter, documents]);
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredDocuments.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
 
   // Animation variants
   const cardVariants = {
@@ -104,19 +91,21 @@ function DocumentsMb() {
     }
   };
 
-  // Get file icon based on type
-  const getFileIcon = (type) => {
-    switch(type) {
-      case 'pdf':
-        return <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-medium">PDF</span>;
-      case 'doc':
-      case 'docx':
-        return <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">DOC</span>;
-      case 'xls':
-      case 'xlsx':
-        return <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-medium">XLS</span>;
-      default:
-        return <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">FILE</span>;
+  // Get file type from URL
+  const getFileType = (url) => {
+    const extension = url.split('.').pop().toLowerCase();
+    return extension === 'pdf' ? 'PDF' : 
+           extension === 'docx' ? 'DOC' : 
+           extension === 'xls' ? 'XLS' : 'FILE';
+  };
+
+  // Get priority badge style
+  const getPriorityBadge = (priority) => {
+    switch(priority.toLowerCase()) {
+      case 'high': return 'bg-red-100 text-red-600';
+      case 'medium': return 'bg-yellow-100 text-yellow-600';
+      case 'low': return 'bg-green-100 text-green-600';
+      default: return 'bg-gray-100 text-gray-600';
     }
   };
 
@@ -147,38 +136,21 @@ function DocumentsMb() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              All Documents
+              All Industries
             </button>
-            <button
-              onClick={() => setFilter('Reports')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'Reports' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Reports
-            </button>
-            <button
-              onClick={() => setFilter('Minutes')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'Minutes' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Minutes
-            </button>
-            <button
-              onClick={() => setFilter('Financial')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'Financial' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              Financial
-            </button>
+            {Object.entries(industries).map(([id, name]) => (
+              <button
+                key={id}
+                onClick={() => setFilter(id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === id 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
           </div>
           
           <div className="relative w-full md:w-64">
@@ -214,75 +186,96 @@ function DocumentsMb() {
           No documents found
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence>
-            {filteredDocuments.map((doc) => (
-              <motion.div
-                key={doc.id}
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                whileHover="hover"
-                className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
-              >
-                <div className="px-5 py-4 border-b border-gray-200">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        {doc.name}
-                      </h3>
-                      <span className="inline-block mt-1">
-                        {getFileIcon(doc.type)}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {currentItems.map((doc) => (
+                <motion.div
+                  key={doc.name}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover="hover"
+                  className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
+                >
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {doc.name}
+                        </h3>
+                        <span className="inline-block mt-1">
+                          <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
+                            {getFileType(doc.fileDocument)}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5 flex-grow">
+                    <p className="text-gray-600 mb-4 line-clamp-2">
+                      {doc.description}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        {industries[doc.industry]}
+                      </span>
+                      <span className={`px-2 py-1 ${getPriorityBadge(doc.priority)} text-xs rounded-full`}>
+                        {doc.priority}
                       </span>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {doc.size}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="p-5 flex-grow">
-                  <p className="text-gray-600 mb-4 line-clamp-2">
-                    {doc.description}
-                  </p>
-                  
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <FiCalendar className="mr-2" />
-                    {new Date(doc.date).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
                   </div>
                   
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                      {doc.category}
-                    </span>
+                  <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <button
+                      onClick={() => setSelectedDocument(doc)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    >
+                      Details <FiArrowRight className="ml-1" />
+                    </button>
+                    <a
+                      href={doc.fileDocument}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm flex items-center"
+                    >
+                      <FiDownload className="mr-1.5" /> Download
+                    </a>
                   </div>
-                </div>
-                
-                <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-                  <button
-                    onClick={() => setSelectedDocument(doc)}
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                  >
-                    Details <FiArrowRight className="ml-1" />
-                  </button>
-                  <a
-                    href={doc.fileUrl}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm flex items-center"
-                  >
-                    <FiDownload className="mr-1.5" /> Download
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Pagination Controls */}
+          <motion.div 
+            className="mt-6 flex justify-center items-center gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <button
+              onClick={() => setCurrentPage(p => p - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors flex items-center"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors flex items-center"
+            >
+              Next
+            </button>
+          </motion.div>
+        </>
       )}
 
       {/* Document Detail Modal */}
@@ -310,9 +303,8 @@ function DocumentsMb() {
                       {selectedDocument.name}
                     </h2>
                     <div className="mt-1 flex items-center">
-                      {getFileIcon(selectedDocument.type)}
-                      <span className="ml-2 text-sm text-gray-600">
-                        {selectedDocument.category} • {selectedDocument.size}
+                      <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
+                        {getFileType(selectedDocument.fileDocument)}
                       </span>
                     </div>
                   </div>
@@ -326,8 +318,8 @@ function DocumentsMb() {
               </div>
               
               <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="md:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
                     <p className="text-gray-700">
                       {selectedDocument.description}
@@ -335,28 +327,29 @@ function DocumentsMb() {
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Uploaded</h3>
-                    <p className="text-gray-700">
-                      {new Date(selectedDocument.date).toLocaleString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Details</h3>
+                    <div className="space-y-2">
+                      <p className="text-gray-700">
+                        <span className="font-medium">Industry:</span> {industries[selectedDocument.industry]}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Priority:</span> 
+                        <span className={`ml-2 ${getPriorityBadge(selectedDocument.priority)} px-2 py-1 rounded-full text-xs`}>
+                          {selectedDocument.priority}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                   
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-2">
                     <h3 className="text-sm font-medium text-gray-500 mb-2">File URL</h3>
                     <a 
-                      href={selectedDocument.fileUrl} 
+                      href={selectedDocument.fileDocument} 
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-800 break-all text-sm"
                     >
-                      {selectedDocument.fileUrl}
+                      {selectedDocument.fileDocument}
                     </a>
                   </div>
                 </div>
@@ -370,7 +363,7 @@ function DocumentsMb() {
                   Close
                 </button>
                 <a
-                  href={selectedDocument.fileUrl}
+                  href={selectedDocument.fileDocument}
                   download
                   target="_blank"
                   rel="noopener noreferrer"

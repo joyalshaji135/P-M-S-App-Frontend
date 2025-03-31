@@ -19,24 +19,21 @@ export const loginApi = async ({ email, password, role }) => {
       }
     );
 
-    // Extract token and customer from the response
-    const { token, customer } = response.data; 
-    console.log("API Response:", customer, token);
+    const { token, customer } = response.data;
 
-    // Save token and customer data in localStorage
-    localStorage.setItem("Token", token); // Save token under role-specific key
-    localStorage.setItem(role, JSON.stringify(customer)); // Save customer data under role-specific key
+    // Save token and customer data in localStorage with role-specific keys
+    localStorage.setItem(`${role}_Token`, token); // e.g., "team-managers_Token"
+    localStorage.setItem(`${role}_User`, JSON.stringify(customer)); // e.g., "team-managers_User"
 
-    // Return extracted token and customer data
-    return { token, user: customer }; 
+    return { token, user: customer };
   } catch (error) {
-    // Handle different types of errors
     if (error.response) {
-      throw new Error(error.response.data.message || "Login failed");
+      const errorMsg = error.response.data.message || "Login failed. Please check your credentials.";
+      throw new Error(errorMsg);
     } else if (error.request) {
-      throw new Error("No response from server");
+      throw new Error("Network error. Please check your connection.");
     } else {
-      throw new Error(error.message || "Error setting up request");
+      throw new Error("An unexpected error occurred. Please try again.");
     }
   }
 };

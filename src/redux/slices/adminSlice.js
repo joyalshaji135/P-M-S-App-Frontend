@@ -1,60 +1,42 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createAuthSlice } from "./authSlice";
 
-const { reducer, actions } = createAuthSlice("admin");
+const authSlice = createAuthSlice("admin");
 
 const adminSlice = createSlice({
   name: "admin",
-  initialState: {
-    ...reducer(undefined, { type: "" }),
-    currentUser: JSON.parse(localStorage.getItem("admin")), // Load admin user data from localStorage
-  },
+  initialState: authSlice.reducer(undefined, { type: "" }), // Get initial state from authSlice
   reducers: {
-    ...actions,
     updateAdminProfile: (state, action) => {
       if (state.currentUser) {
-        state.currentUser = { ...state.currentUser, ...action.payload };
-        try {
-          localStorage.setItem("admin", JSON.stringify(state.currentUser));
-        } catch (error) {
-          console.error("Error updating admin in local storage:", error);
-        }
+        state.currentUser = { 
+          ...state.currentUser, 
+          ...action.payload 
+        };
       }
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(actions.loginUser.pending, (state) => {
-        console.log("Login pending...");
-        state.loading = true;
+      .addCase(authSlice.actions.signOutSuccess, (state) => {
+        state.currentUser = null;
+        state.token = null;
+      })
+      .addCase(authSlice.actions.setLoading, (state, action) => {
+        state.loading = action.payload;
+      })
+      .addCase(authSlice.actions.clearError, (state) => {
         state.error = null;
       })
-      .addCase(actions.loginUser.fulfilled, (state, action) => {
-        const { customer, token } = action.payload;
-        console.log("Login successful:", customer, token);
-        state.currentUser = customer;
-        state.token = token;
-        state.loading = false;
-        state.error = null;
-        try {
-          localStorage.setItem("admin", JSON.stringify(customer));
-        } catch (error) {
-          console.error("Error saving admin data to local storage:", error);
-        }
-      })
-      .addCase(actions.loginUser.rejected, (state, action) => {
-        console.log("Login failed:", action.payload);
-        state.loading = false;
-        state.error = action.payload || "Login failed";
+      .addCase(authSlice.actions.loginUser.fulfilled, (state, action) => {
+        state.currentUser = action.payload.user;
+        state.token = action.payload.token;
       });
   },
 });
 
-export const {
-  signOutSuccess,
-  setLoading,
-  clearError,
-  updateAdminProfile,
-} = adminSlice.actions;
-export const loginUser = actions.loginUser;
+// Export necessary actions
+export const { updateAdminProfile } = adminSlice.actions;
+export const { signOutSuccess, setLoading, clearError, loginUser } = authSlice.actions;
+
 export default adminSlice.reducer;

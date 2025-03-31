@@ -1,125 +1,65 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // For localStorage
-import adminReducer from "./slices/adminSlice"; // Admin slice
-import companyOwnersReducer from "./slices/companyOwnerSlice"; // Company owners slice
-import teamManagersReducer from "./slices/teamManagersSlice"; // Team managers slice
-import teamMembersReducer from "./slices/teamMembersSlice"; // Team members slice
+import storage from "redux-persist/lib/storage";
+import adminReducer from "./slices/adminSlice";
+import companyOwnersReducer from "./slices/companyOwnerSlice";
+import teamManagersReducer from "./slices/teamManagersSlice";
+import teamMembersReducer from "./slices/teamMembersSlice";
 
-// Root persist config: Whitelist roles
-const rootPersistConfig = {
-  key: "root",
+// Function to create persist config for roles
+const createPersistConfig = (role) => ({
+  key: role,
   storage,
-  whitelist: [], // Leave empty, don't persist the entire store
-};
+  whitelist: ["currentUser", "token"],
+});
 
-// Role-specific persist config: Store token and user data
-const rolePersistConfig = {
-  key: "roleData",
-  storage,
-  whitelist: ["currentUser", "token"], // Persist only currentUser and token
-};
+// Wrap each role reducer with its own persist config
+const persistedReducers = combineReducers({
+  admin: persistReducer(createPersistConfig("admin"), adminReducer),
+  companyOwners: persistReducer(createPersistConfig("company-owners"), companyOwnersReducer),
+  teamManagers: persistReducer(createPersistConfig("team-managers"), teamManagersReducer),
+  teamMembers: persistReducer(createPersistConfig("team-members"), teamMembersReducer),
+});
 
-// Static reducers for roles
-const staticReducers = {
-  admin: persistReducer(rolePersistConfig, adminReducer),
-  companyOwners: persistReducer(rolePersistConfig, companyOwnersReducer),
-  teamManagers: persistReducer(rolePersistConfig, teamManagersReducer),
-  teamMembers: persistReducer(rolePersistConfig, teamMembersReducer),
-};
-
-// Function to create the root reducer dynamically with async reducers
-const createRootReducer = (asyncReducers) =>
-  combineReducers({
-    ...staticReducers,
-    ...asyncReducers, // Merge static reducers with dynamically injected reducers
-  });
-
-// Async reducers for dynamic injection
-const asyncReducers = {};
-
-// Handle resetting the store and combining reducers dynamically
+// Root reducer with reset functionality
 const rootReducer = (state, action) => {
   if (action.type === "RESET_STORE") {
-    // Clear persisted data and reset state
-    storage.removeItem("persist:root");
-    storage.removeItem("persist:roleData");
-    state = undefined; // Reset state
+    persistor.purge(); 
+    state = undefined;
   }
-  return createRootReducer(asyncReducers)(state, action); // Return the combined reducer
+  return persistedReducers(state, action);
 };
 
-// Create the Redux store with dynamic reducer capabilities
+// Create store
 const store = configureStore({
-  reducer: rootReducer, // Root reducer including async reducers
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [
-          "persist/PERSIST",
-          "persist/REHYDRATE",
-          "persist/REGISTER",
-        ],
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
       },
     }),
 });
 
-// Method to dynamically inject reducers
-store.injectReducer = (key, reducer) => {
-  if (!asyncReducers[key]) {
-    asyncReducers[key] = reducer; // Add the reducer to asyncReducers
-    store.replaceReducer(createRootReducer(asyncReducers)); // Replace the root reducer dynamically
-  }
-};
-
-// Configure Persistor for Redux Persist
+// Persistor
 const persistor = persistStore(store);
 
-// Define selectors for accessing commonly used state data
 store.selectors = {
   getCurrentUser: (state) => {
-    return (
-      state.admin?.currentUser ||
-      state.companyOwners?.currentUser ||
-      state.teamManagers?.currentUser ||
-      state.teamMembers?.currentUser
-    );
+    const userRole = Object.values(state).find((roleState) => roleState?.currentUser);
+    return userRole ? userRole.currentUser : null;
   },
   getCurrentRole: (state) => {
-    if (state.admin?.currentUser) return "admin";
-    if (state.companyOwners?.currentUser) return "company-owners";
-    if (state.teamManagers?.currentUser) return "team-managers";
-    if (state.teamMembers?.currentUser) return "team-members";
-    return null;
+    const roleEntry = Object.entries(state).find(([_, roleState]) => roleState?.currentUser);
+    return roleEntry ? roleEntry[0] : null;
   },
-  getToken: (state) => {
-    return (
-      state.admin?.token ||
-      state.companyOwners?.token ||
-      state.teamManagers?.token ||
-      state.teamMembers?.token
-    );
-  },
-  getAuthLoading: (state) => {
-    return (
-      state.admin?.loading ||
-      state.companyOwners?.loading ||
-      state.teamManagers?.loading ||
-      state.teamMembers?.loading
-    );
-  },
-  getAuthError: (state) => {
-    return (
-      state.admin?.error ||
-      state.companyOwners?.error ||
-      state.teamManagers?.error ||
-      state.teamMembers?.error
-    );
+  getAuthToken: (state) => {
+    const tokenRole = Object.values(state).find((roleState) => roleState?.token);
+    return tokenRole ? tokenRole.token : null;
   },
 };
 
-// Export persist and store
-export { persistor, store };
-
-// Action to reset the store and clear persisted data
+// Action to reset store
 export const resetStore = () => ({ type: "RESET_STORE" });
+
+export { persistor, store };

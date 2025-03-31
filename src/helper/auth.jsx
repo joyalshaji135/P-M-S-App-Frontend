@@ -1,18 +1,17 @@
+import { useSelector } from 'react-redux';
+import { store } from '../redux/store';
+
 export const getAuthToken = () => {
-  const token = localStorage.getItem(`Token`);
-  console.log("Hydrated token:", token);
-  if (!token) {
-    console.error("No admin token found");
-    throw new Error("Authentication token is missing");
-  }
-  return token;
+  const state = store.getState();
+  return store.selectors.getAuthToken(state);
 };
 
-export const getAuthUser = () => {
-  const user = JSON.parse(localStorage.getItem("admin"));
-  if (!user) {
-    console.error("No admin user found");
-    throw new Error("Authentication user is missing");
-  }
-  return user;
+export const getCurrentUser = () => {
+  const state = store.getState();
+  return store.selectors.getCurrentUser(state); // Reuse existing selector
 };
+
+export const getLoggedUser =() => {
+  const user = useSelector(store.selectors.getCurrentUser);
+  return user;
+}

@@ -1,41 +1,49 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function ProjectsMb() {
-  // Sample projects data
+  // Customer ID mapping
+  const customers = {
+    '67c440dbe269db9b854700bf': 'Tech Corp Inc',
+    '67c440dbe269db9b854700c0': 'FinTech Solutions',
+    '67c440dbe269db9b854700c1': 'Health Innovators'
+  };
+
+  // Sample projects data based on your JSON structure
   const [projects, setProjects] = useState([
     {
       id: 1,
-      title: 'Website Redesign',
-      description: 'Complete overhaul of company website with modern design and improved UX.',
-      status: 'Not Started',
-      team: ['Design', 'Development'],
-      deadline: '2023-07-15'
+      projectName: 'AI Development',
+      customer: '67c440dbe269db9b854700bf',
+      industry: 'Technology',
+      priority: 'High',
+      description: 'AI-driven project for automation and process optimization.',
+      projectStatus: 'Ongoing',
+      startDate: '2024-01-15T00:00:00.000Z',
+      endDate: '2024-12-31T00:00:00.000Z'
     },
     {
       id: 2,
-      title: 'Mobile App Development',
-      description: 'Build cross-platform mobile application for iOS and Android with React Native.',
-      status: 'In Progress',
-      team: ['Mobile', 'Backend'],
-      deadline: '2023-08-30'
+      projectName: 'Financial Platform Upgrade',
+      customer: '67c440dbe269db9b854700c0',
+      industry: 'Finance',
+      priority: 'Medium',
+      description: 'Modernization of core banking systems with cloud integration.',
+      projectStatus: 'Planning',
+      startDate: '2024-02-01T00:00:00.000Z',
+      endDate: '2024-06-30T00:00:00.000Z'
     },
     {
       id: 3,
-      title: 'CRM System Implementation',
-      description: 'Implement new customer relationship management system across all departments.',
-      status: 'Completed',
-      team: ['Sales', 'IT'],
-      deadline: '2023-05-20'
-    },
-    {
-      id: 4,
-      title: 'Marketing Campaign',
-      description: 'Launch summer marketing campaign with social media and email components.',
-      status: 'In Progress',
-      team: ['Marketing', 'Content'],
-      deadline: '2023-06-30'
+      projectName: 'Healthcare Analytics',
+      customer: '67c440dbe269db9b854700c1',
+      industry: 'Healthcare',
+      priority: 'Critical',
+      description: 'Big data analysis platform for patient outcome predictions.',
+      projectStatus: 'Completed',
+      startDate: '2023-09-01T00:00:00.000Z',
+      endDate: '2024-01-31T00:00:00.000Z'
     }
   ]);
 
@@ -56,18 +64,40 @@ function ProjectsMb() {
   // Filter projects by status
   const filteredProjects = filter === 'All' 
     ? projects 
-    : projects.filter(project => project.status === filter);
+    : projects.filter(project => project.projectStatus === filter);
 
   // Get status color classes
   const getStatusColor = (status) => {
     switch (status) {
       case 'Completed':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'In Progress':
+      case 'Ongoing':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Planning':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default:
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
+  };
+
+  // Get priority color classes
+  const getPriorityColor = (priority) => {
+    switch (priority.toLowerCase()) {
+      case 'critical':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'high':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  // Date formatting function
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
   return (
@@ -77,7 +107,7 @@ function ProjectsMb() {
         animate={{ opacity: 1, y: 0 }}
         className="text-3xl font-bold text-gray-800 mb-6"
       >
-        My Projects
+        Project Portfolio
       </motion.h1>
 
       {/* Filter controls */}
@@ -86,30 +116,19 @@ function ProjectsMb() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <button
-          onClick={() => setFilter('All')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${filter === 'All' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300'}`}
-        >
-          All Projects
-        </button>
-        <button
-          onClick={() => setFilter('Not Started')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${filter === 'Not Started' ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-white text-gray-700 border border-gray-300'}`}
-        >
-          Not Started
-        </button>
-        <button
-          onClick={() => setFilter('In Progress')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${filter === 'In Progress' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-white text-gray-700 border border-gray-300'}`}
-        >
-          In Progress
-        </button>
-        <button
-          onClick={() => setFilter('Completed')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${filter === 'Completed' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-white text-gray-700 border border-gray-300'}`}
-        >
-          Completed
-        </button>
+        {['All', 'Planning', 'Ongoing', 'Completed'].map((status) => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              filter === status 
+                ? `${getStatusColor(status).replace('border-', 'border ')} border-2` 
+                : 'bg-white text-gray-700 border border-gray-300'
+            }`}
+          >
+            {status}
+          </button>
+        ))}
       </motion.div>
 
       {/* Projects Grid */}
@@ -141,8 +160,13 @@ function ProjectsMb() {
                           onClick={() => setSelectedProject(project)}
                         >
                           <h3 className="text-lg font-semibold text-gray-800">
-                            {project.title}
+                            {project.projectName}
                           </h3>
+                          <div className="mt-2 flex gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(project.priority)}`}>
+                              {project.priority}
+                            </span>
+                          </div>
                         </div>
                         
                         <div className="p-5">
@@ -150,21 +174,24 @@ function ProjectsMb() {
                             {project.description}
                           </p>
                           
-                          <div className="flex items-center justify-between mb-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(project.status)} border`}>
-                              {project.status}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              Due: {new Date(project.deadline).toLocaleDateString()}
-                            </span>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-1">
-                            {project.team.map((team, i) => (
-                              <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                                {team}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(project.projectStatus)} border`}>
+                                {project.projectStatus}
                               </span>
-                            ))}
+                              <span className="text-xs text-gray-500">
+                                {formatDate(project.startDate)} - {formatDate(project.endDate)}
+                              </span>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1">
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                {customers[project.customer]}
+                              </span>
+                              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                                {project.industry}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         
@@ -207,7 +234,7 @@ function ProjectsMb() {
             >
               <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
                 <h2 className="text-xl font-semibold text-gray-800">
-                  {selectedProject.title}
+                  {selectedProject.projectName}
                 </h2>
                 <button 
                   onClick={() => setSelectedProject(null)}
@@ -228,36 +255,42 @@ function ProjectsMb() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-2">Status</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(selectedProject.status)} border`}>
-                      {selectedProject.status}
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(selectedProject.projectStatus)} border`}>
+                      {selectedProject.projectStatus}
                     </span>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Deadline</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Priority</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(selectedProject.priority)} border`}>
+                      {selectedProject.priority}
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Customer</h3>
                     <p className="text-gray-700">
-                      {new Date(selectedProject.deadline).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
+                      {customers[selectedProject.customer]}
                     </p>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Teams Involved</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProject.team.map((team, i) => (
-                        <span key={i} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                          {team}
-                        </span>
-                      ))}
-                    </div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Industry</h3>
+                    <p className="text-gray-700">{selectedProject.industry}</p>
                   </div>
                   
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-2">Project ID</h3>
-                    <p className="text-gray-700">{selectedProject.id}</p>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Start Date</h3>
+                    <p className="text-gray-700">
+                      {formatDate(selectedProject.startDate)}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">End Date</h3>
+                    <p className="text-gray-700">
+                      {formatDate(selectedProject.endDate)}
+                    </p>
                   </div>
                 </div>
               </div>

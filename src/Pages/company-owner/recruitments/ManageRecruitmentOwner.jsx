@@ -1,40 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { deleteRecruitmentPostById, getAllRecruitmentPosts } from '../../../api/pages-api/company-owner-api/manage-recruitment-api/CORecruitmentApi';
+import { toast } from 'react-toastify';
 
 function ManageRecruitmentOwner() {
-  const [recruitments, setRecruitments] = useState([]);
+  const [recruitmentData, setRecruitmentData] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredRecruitments, setFilteredRecruitments] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from getAllRecruitmentPosts api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('recruitments')) || [];
-    setRecruitments(storedData);
-    setFilteredRecruitments(storedData); // Initialize filteredRecruitments with all data
+    const fetchData = async () => {
+      try {
+        const data = await getAllRecruitmentPosts();
+        setRecruitmentData(data.recruitmentPosts);
+      } catch (error) {
+        console.error('Error fetching recruitment data:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Handle search functionality
   useEffect(() => {
     if (searchText) {
-      const filtered = recruitments.filter(
+      const filtered = recruitmentData.filter(
         (recruitment) =>
           recruitment.candidateName.toLowerCase().includes(searchText.toLowerCase()) ||
           recruitment.position.toLowerCase().includes(searchText.toLowerCase()) ||
           recruitment.status.toLowerCase().includes(searchText.toLowerCase())
       );
-      setFilteredRecruitments(filtered);
+      setFilteredData(filtered);
     } else {
-      setFilteredRecruitments(recruitments); // Reset to all recruitments if search text is empty
+      setFilteredData(recruitmentData); // Reset to all data if search text is empty
     }
-  }, [searchText, recruitments]);
+  }, [searchText, recruitmentData]);
 
   // Handle delete functionality
-  const handleDelete = (id) => {
-    const updatedRecruitments = recruitments.filter((recruitment) => recruitment.id !== id);
-    localStorage.setItem('recruitments', JSON.stringify(updatedRecruitments));
-    setRecruitments(updatedRecruitments); // Update state to reflect the deletion
-    setFilteredRecruitments(updatedRecruitments); // Update filtered recruitments as well
+  const handleDelete = async (id) => {
+   try {
+             const response = await deleteRecruitmentPostById(id)
+             if (response.success) {
+               const updatedRecruitment = recruitmentData.filter((recruitment) => recruitment._id !== id);
+               setRecruitmentData(updatedRecruitment);
+               setFilteredData(updatedRecruitment); // Refresh the table after deleting
+               toast.success(response.message || 'Recruitment deleted successfully');
+             } else {
+               console.error('Failed to delete Recruitment:', response.message);
+               toast.error(response.message || 'Failed to delete Recruitment');
+             }
+           } catch (error) {
+             console.error('Error deleting Recruitment:', error);
+             toast.error(error.message || 'Failed to delete event');
+           }
   };
 
   // Table columns
@@ -46,12 +65,12 @@ function ManageRecruitmentOwner() {
     },
     {
       name: 'Candidate Name',
-      selector: (row) => row.candidateName,
+      selector: (row) => row.name,
       sortable: true,
     },
     {
       name: 'Position',
-      selector: (row) => row.position,
+      selector: (row) => row.recruitmentPosition,
       sortable: true,
     },
     {
@@ -59,14 +78,14 @@ function ManageRecruitmentOwner() {
       cell: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.status === 'Offer Sent'
+            row.recruitmentStatus === 'Active'
               ? 'bg-green-100 text-green-800'
-              : row.status === 'Interview Scheduled'
+              : row.recruitmentStatus === 'Inactive'
               ? 'bg-blue-100 text-blue-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.recruitmentStatus}
         </span>
       ),
       sortable: true,
@@ -76,7 +95,7 @@ function ManageRecruitmentOwner() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/owner/recruitments/view/${row.id}`}>
+          <Link to={`/owner/recruitments/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +114,7 @@ function ManageRecruitmentOwner() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/owner/recruitments/edit/${row.id}`}>
+          <Link to={`/owner/recruitments/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +130,7 @@ function ManageRecruitmentOwner() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -148,7 +167,7 @@ function ManageRecruitmentOwner() {
           {/* Add Button */}
           <Link
             to="/owner/recruitments/add"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
             Add +
           </Link>
@@ -159,7 +178,7 @@ function ManageRecruitmentOwner() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={filteredRecruitments}
+          data={filteredData}
           pagination
           highlightOnHover
           responsive
