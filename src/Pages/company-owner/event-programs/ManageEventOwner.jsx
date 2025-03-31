@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { Link } from 'react-router-dom';
+import { deleteEventProgramById, getAllEventPrograms, statusUpdateEventProgramById } from '../../../api/pages-api/company-owner-api/event-program-api/COEventProgramApi';
+import { toast } from 'react-toastify';
 
 function ManageEventOwner() {
   const [events, setEvents] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredEvents, setFilteredEvents] = useState([]);
-
-  // Fetch data from localStorage on component mount
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('events')) || [];
-    setEvents(storedData);
-    setFilteredEvents(storedData); // Initialize filteredEvents with all data
-  }, []);
 
   // Handle search functionality
   useEffect(() => {
@@ -20,51 +15,120 @@ function ManageEventOwner() {
       const filtered = events.filter(
         (event) =>
           event.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          event.location.toLowerCase().includes(searchText.toLowerCase()) ||
-          event.time.toLowerCase().includes(searchText.toLowerCase())
+          event.location.toLowerCase().includes(searchText.toLowerCase())
       );
       setFilteredEvents(filtered);
     } else {
       setFilteredEvents(events); // Reset to all events if search text is empty
     }
   }, [searchText, events]);
-
-  // Handle delete functionality
-  const handleDelete = (id) => {
-    const updatedEvents = events.filter((event) => event.id !== id);
-    localStorage.setItem('events', JSON.stringify(updatedEvents));
-    setEvents(updatedEvents); // Update state to reflect the deletion
-    setFilteredEvents(updatedEvents); // Update filtered events as well
+const fetchEvents = async () => {
+  try {
+    const response = await getAllEventPrograms();
+    if (response.success) {
+      setEvents(response.eventPrograms);
+      setFilteredEvents(response.eventPrograms); // Initialize filteredEvents with all events
+    } else {
+      console.error('Failed to fetch events:', response.message);
+      setEvents([]);
+      setFilteredEvents([]);
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  }                                                                                                                             
+}
+useEffect(() => {
+  fetchEvents();
+},[]);
+  // Handle event deletion
+  const handleDelete = async (id) => {
+        // Delete the team member Api
+        try {
+          const response = await deleteEventProgramById(id)
+          if (response.success)
+          {
+            const updatedEvents = events.filter((event) => event._id!== id);
+            setEvents(updatedEvents);
+            setFilteredEvents(updatedEvents); // Refresh the table after deleting
+            toast.success(response.message || 'Event deleted successfully');
+          }
+          else
+          {
+            console.error('Failed to delete event:', response.message);
+            toast.error(response.message || 'Failed to delete event');
+          }
+        } catch (error) {
+          console.error('Error deleting event:', error);
+          toast.error(error.message || 'Failed to delete event');
+        }
   };
+const handleStatusUpdate = async (id, currentStatus) => {
+  try {
+    // Toggle between "Active" and "Inactive"
+    const updatedStatus = !currentStatus ;
+console.log("updatedStatus", updatedStatus);
+    const response = await statusUpdateEventProgramById(id, {
+      status: updatedStatus,
+    });
+
+    if (response.success) {
+      toast.success(response.message || "Status updated successfully");
+      fetchEvents(); // Refresh the table after updating
+    } else {
+      console.error("Failed to update status:", response.message);
+      toast.error(response.message || "Failed to update status");
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
+    toast.error(error.message || "Failed to update status");
+  }
+};
 
   // Table columns
   const columns = [
     {
-      name: 'Sl No',
-      selector: (row, index) => index + 1,
-      sortable: true,
-    },
-    {
-      name: 'Event Name',
+      name: "Event Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: 'Time',
-      selector: (row) => row.time,
+      name: "Priority",
+      selector: (row) => row.priority,
       sortable: true,
     },
     {
-      name: 'Location',
-      selector: (row) => row.location,
+      name: "Industry",
+      selector: (row) => `${row.industry}`,
       sortable: true,
     },
     {
-      name: 'Actions',
+      name: "Event Post",
+      selector: (row) => row.eventPost,
+      sortable: true,
+    },
+    {
+      name: "Status",
+      selector: (row) => (
+        <button
+          onClick={() => handleStatusUpdate(row._id, row.status)}
+          className={`px-3 py-1 rounded-full text-sm font-medium border transition duration-300 ${
+            row.status
+              ? "border-green-600 bg-green-100 text-green-700 hover:bg-green-200"
+              : "border-red-600 bg-red-100 text-red-700 hover:bg-red-200"
+          }`}
+        >
+          {row.status ? "Active" : "Inactive"}
+        </button>
+      ),
+      sortable: true,
+    },
+
+    {
+      name: "Actions",
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/owner/events/view/${row.id}`}>
+          <Link to={`/owner/events/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +147,7 @@ function ManageEventOwner() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/owner/events/edit/${row.id}`}>
+          <Link to={`/owner/events/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +163,7 @@ function ManageEventOwner() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -120,10 +184,10 @@ function ManageEventOwner() {
   ];
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
+    <div className="flex-1 p-6 overflow-y-auto" style={{ zIndex: 1 }}>
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Events</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">Events</h1>
         <div className="flex items-center space-x-4">
           {/* Search Bar */}
           <input
@@ -136,7 +200,7 @@ function ManageEventOwner() {
           {/* Add Button */}
           <Link
             to="/owner/events/add"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
             Add +
           </Link>
