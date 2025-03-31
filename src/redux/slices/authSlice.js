@@ -2,19 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginApi } from "../../api/admin-dashboard-api/login-api/LoginApi";
 
 export const createAuthSlice = (role) => {
-  const loadUserFromLocalStorage = () => {
-    try {
-      const storedInfo = localStorage.getItem(role);
-      return storedInfo ? JSON.parse(storedInfo) : null;
-    } catch (error) {
-      console.error(`Error parsing ${role} info from local storage:`, error);
-      return null;
-    }
-  };
-
+  // Initialize state from sessionStorage (secure storage)
   const initialState = {
-    currentUser: loadUserFromLocalStorage(),
-    token: null,
+    currentUser: JSON.parse(sessionStorage.getItem(`${role}_User`)) || null,
+    token: sessionStorage.getItem(`${role}_Token`) || null,
     error: null,
     loading: false,
     role,
@@ -27,7 +18,7 @@ export const createAuthSlice = (role) => {
         const response = await loginApi({ email, password, role });
         return response;
       } catch (error) {
-        return rejectWithValue(error.response?.data?.message || "Login failed");
+        return rejectWithValue(error.message || "Login failed");
       }
     }
   );
@@ -36,16 +27,10 @@ export const createAuthSlice = (role) => {
     name: role,
     initialState,
     reducers: {
-      signOutSuccess: (state) => {
-        state.currentUser = null;
-        state.token = null;
-        state.error = null;
-        state.loading = false;
-        try {
-          localStorage.removeItem(role);
-        } catch (error) {
-          console.error(`Error removing ${role} info from local storage:`, error);
-        }
+      signOutSuccess: () => {
+        sessionStorage.removeItem(`${role}_Token`);
+        sessionStorage.removeItem(`${role}_User`);
+        return { ...initialState, role }; 
       },
       setLoading: (state, action) => {
         state.loading = action.payload;
@@ -66,11 +51,10 @@ export const createAuthSlice = (role) => {
           state.token = token;
           state.error = null;
           state.loading = false;
-          try {
-            localStorage.setItem(role, JSON.stringify({ ...user, token }));
-          } catch (error) {
-            console.error(`Error saving ${role} info to local storage:`, error);
-          }
+
+          // Persist successful login session
+          sessionStorage.setItem(`${role}_Token`, token);
+          sessionStorage.setItem(`${role}_User`, JSON.stringify(user));
         })
         .addCase(loginUser.rejected, (state, action) => {
           state.loading = false;

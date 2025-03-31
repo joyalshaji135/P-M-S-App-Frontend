@@ -60,12 +60,13 @@ function Header({ dashboardName, toggleSidebar }) {
           <FaBars className="text-xl" />
         </button>
 
-        <div className="flex items-center ml-2">
+        {/* Dashboard Name and Icon */}
+        <div className="flex items-center ml-2 space-x-2">
           <p className="text-violet-600 mx-2">
-            <MdSpaceDashboard />
+            <MdSpaceDashboard  size={25}/>
           </p>
           <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">{dashboardName}</h1>
-          <p className="mx-2">DaxBod</p>
+          <p className="text-xl sm:text-2xl font-semibold text-gray-800">Panel</p>
         </div>
       </div>
 
