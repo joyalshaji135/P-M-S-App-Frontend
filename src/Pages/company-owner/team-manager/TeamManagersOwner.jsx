@@ -1,80 +1,98 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import DataTable from 'react-data-table-component';
+import { Link } from 'react-router-dom';
+import { deleteTeamManagerById, getAllTeamManagers } from '../../../api/pages-api/company-owner-api/team-manager-api/COTeamManagerApi';
 
 function TeamManagersOwner() {
+  // State for team managers data
   const [teamManagers, setTeamManagers] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredManagers, setFilteredManagers] = useState([]);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data getAllTeamManagers
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('teamManagers')) || [];
-    setTeamManagers(storedData);
-    setFilteredManagers(storedData); // Initialize filteredManagers with all data
+    const fetchData = async () => {
+      try {
+        const data = await getAllTeamManagers();
+        setTeamManagers(data.teamManagers);
+      } catch (error) {
+        console.error('Error fetching team managers:', error);
+      }
+    };
+    fetchData();
   }, []);
 
-  // Handle search functionality
-  useEffect(() => {
-    if (searchText) {
-      const filtered = teamManagers.filter(
-        (manager) =>
-          manager.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          manager.description.toLowerCase().includes(searchText.toLowerCase()) ||
-          manager.status.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setFilteredManagers(filtered);
-    } else {
-      setFilteredManagers(teamManagers); // Reset to all managers if search text is empty
-    }
-  }, [searchText, teamManagers]);
+  
 
-  // Handle delete functionality
-  const handleDelete = (id) => {
-    const updatedManagers = teamManagers.filter((manager) => manager.id !== id);
-    localStorage.setItem('teamManagers', JSON.stringify(updatedManagers));
-    setTeamManagers(updatedManagers); // Update state to reflect the deletion
-    setFilteredManagers(updatedManagers); // Update filtered managers as well
+  // Filter data based on search input
+  const filteredData = teamManagers.filter(
+    (manager) =>
+      manager.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      manager.description.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  // Function to delete a team manager
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are Sure ..."
+    )
+    if(!confirmDelete)
+      return
+
+    // Delete the team manager Api
+    try {
+      const response = await deleteTeamManagerById(id)
+      if (response.success)
+      {
+        const updatedManagers = teamManagers.filter((manager) => manager._id !== id);
+        setTeamManagers(updatedManagers);
+      }
+      const updatedManagers = teamManagers.filter((manager) => manager._id !== id);
+      setTeamManagers(updatedManagers);
+    }
+    catch (error) {
+      console.error('Error deleting team manager:', error);
+    }
   };
 
-  // Table columns
+  // Columns definition
   const columns = [
     {
-      name: 'Sl No',
-      selector: (row, index) => index + 1,
-      sortable: true,
-    },
-    {
       name: 'Name',
-      selector: (row) => row.name,
       sortable: true,
+      cell: (row) => (
+        <div className="flex items-center space-x-4">
+          <div>
+            <p className="font-medium text-black text-sm">{row.name}</p>
+          </div>
+        </div>
+      ),
     },
     {
-      name: 'Description',
-      selector: (row) => row.description,
+      name: 'Email',
+      selector: (row) => row.email,
       sortable: true,
     },
     {
       name: 'Status',
+      selector: (row) => row.status,
       cell: (row) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+          className={`px-2 py-1 rounded-full text-xs font-semibold border ${
             row.status === 'Active'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
+              ? 'border-green-800 bg-green-100 text-green-800'
+              : 'border-red-800 bg-red-100 text-red-800'
           }`}
         >
-          {row.status}
+          {row.status ? "Active" : "Inactive"}
         </span>
       ),
-      sortable: true,
     },
     {
       name: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/owner/team-managers/view/${row.id}`}>
+          <Link to={`/owner/team-managers/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +111,7 @@ function TeamManagersOwner() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/owner/team-managers/edit/${row.id}`}>
+          <Link to={`/owner/team-managers/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +127,7 @@ function TeamManagersOwner() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -126,11 +144,38 @@ function TeamManagersOwner() {
           </button>
         </div>
       ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
     },
   ];
 
+  // Custom styles for the table
+  const customStyles = {
+    headCells: {
+      style: {
+        backgroundColor: '#F5F5F5',
+        color: '#333',
+        fontWeight: 'bold',
+        fontSize: '14px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+      },
+    },
+    cells: {
+      style: {
+        padding: '0.8rem 0.4rem',
+      },
+    },
+    rows: {
+      style: {
+        borderBottom: '1px solid #e5e7eb',
+      },
+    },
+  };
+
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
+    <div className="flex-1 p-6 overflow-y-auto" style={{ zIndex: 1 }}>
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Team Managers</h1>
@@ -154,13 +199,13 @@ function TeamManagersOwner() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm">
         <DataTable
           columns={columns}
-          data={filteredManagers}
+          data={filteredData}
+          customStyles={customStyles}
           pagination
           highlightOnHover
-          responsive
         />
       </div>
     </div>

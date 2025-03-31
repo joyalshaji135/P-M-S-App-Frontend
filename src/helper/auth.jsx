@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import { store } from '../redux/store';
 
 export const getAuthToken = () => {
@@ -10,7 +11,7 @@ export const getCurrentUser = () => {
   return store.selectors.getCurrentUser(state); // Reuse existing selector
 };
 
-export const getUser =() => {
-  const role = JSON.parse(localStorage.getItem('admin'))
-  return role
+export const getLoggedUser =() => {
+  const user = useSelector(store.selectors.getCurrentUser);
+  return user;
 }

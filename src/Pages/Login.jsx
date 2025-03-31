@@ -255,11 +255,11 @@ function Login() {
   const validateForm = () => {
     const { email, password, role } = formData;
     if (!email || !password || !role) {
-      alert("All fields are required.");
+      toast.warn("All fields are required.");
       return false;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      alert("Please enter a valid email address.");
+      toast.warn("Please enter a valid email address.");
       return false;
     }
     return true;
@@ -287,7 +287,7 @@ function Login() {
       );
     } catch (error) {
       console.error("Login Failed:", error);
-      alert("Login Failed: " + error.message);
+      toast.error("Login Failed: " + error.message);
     }
   };
 
