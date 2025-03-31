@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getAuthToken } from "../../../../helper/auth";
+import { getAuthToken } from "../../helper/auth";
+
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiUrl = import.meta.env.VITE_API_URL;
