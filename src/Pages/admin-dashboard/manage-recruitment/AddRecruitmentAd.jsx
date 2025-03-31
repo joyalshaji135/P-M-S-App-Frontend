@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { addRecruitmentPost, getRecruitmentPostById, updateRecruitmentPostById } from '../../../api/pages-api/admin-dashboard-api/manage-recruitment-api/RecruitmentApi';
+import { toast } from 'react-toastify';
 
 function AddRecruitmentAd() {
   const navigate = useNavigate();
@@ -7,11 +9,9 @@ function AddRecruitmentAd() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
-    candidateName: '',
-    position: '',
-    status: 'Interview Scheduled', // Default status
     name: '',
+    position: '',
+    recruitmentStatus: 'Active', // Default status
     industry: '',
     priority: '',
     recruitmentPost: '',
@@ -27,13 +27,16 @@ function AddRecruitmentAd() {
 
   // Fetch data from local storage on component mount
   useEffect(() => {
+    // getRecruitmentPostById api
     if (id) {
-      // If id exists, fetch the data for editing
-      const storedData = JSON.parse(localStorage.getItem('recruitmentData')) || [];
-      const recruitmentToEdit = storedData.find((recruitment) => recruitment.id === parseInt(id));
-      if (recruitmentToEdit) {
-        setFormData(recruitmentToEdit); // Pre-fill the form with existing data
-      }
+      // not local storage
+      getRecruitmentPostById(id)
+        .then((data) => {
+          setFormData(data.recruitmentPost);
+        })
+        .catch((error) => {
+          console.error("Error fetching recruitment post by ID:", error);
+        });
     }
   }, [id]);
 
@@ -47,24 +50,25 @@ function AddRecruitmentAd() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('recruitmentData')) || [];
-
-    if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((recruitment) =>
-        recruitment.id === parseInt(id) ? formData : recruitment
-      );
-      localStorage.setItem('recruitmentData', JSON.stringify(updatedData));
-    } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('recruitmentData', JSON.stringify(updatedData));
-    }
-
+    try {
+          if (id) {
+            // If editing, update the existing team manager
+        var response =    await updateRecruitmentPostById(id, formData);
+          } else {
+            // If adding, create a new team manager
+       var response =     await addRecruitmentPost(formData);
+          }
+          if(response?.success){
+          toast.success(response.message || "Recruitment created successfully");          
+        navigate(-1);  
+        }      
+        } catch (error) {
+          console.error("Error creating event program:", error);
+          toast.error(error.message || "Failed to create event program");
+        }
+    
     // Redirect to the Manage Recruitment page
     navigate('/admin/recruitment');
   };
@@ -84,8 +88,8 @@ function AddRecruitmentAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
             <input
               type="text"
-              name="candidateName"
-              value={formData.candidateName}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter candidate name"
@@ -98,8 +102,8 @@ function AddRecruitmentAd() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
             <input
               type="text"
-              name="position"
-              value={formData.position}
+              name="recruitmentPosition"
+              value={formData.recruitmentPosition}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter position"
@@ -111,8 +115,8 @@ function AddRecruitmentAd() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
-              name="status"
-              value={formData.status}
+              name="recruitmentStatus"
+              value={formData.recruitmentStatus}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -123,32 +127,20 @@ function AddRecruitmentAd() {
             </select>
           </div>
 
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter name"
-              required
-            />
-          </div>
-
           {/* Industry */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
-            <input
-              type="text"
+            <select
               name="industry"
               value={formData.industry}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter industry"
               required
-            />
+            >
+              <option value="60d21b4667d0d8992e610c90">High Level Industry</option>
+              <option value="60d21b4667d0d8992e610c90">Medium Level Industry</option>
+              <option value="60d21b4667d0d8992e610c90">Low Level Industry</option>
+            </select>
           </div>
 
           {/* Priority */}
@@ -229,7 +221,7 @@ function AddRecruitmentAd() {
             <input
               type="date"
               name="recruitmentStartDate"
-              value={formData.recruitmentStartDate}
+              value={formData.recruitmentStartDate.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -242,7 +234,7 @@ function AddRecruitmentAd() {
             <input
               type="date"
               name="recruitmentEndDate"
-              value={formData.recruitmentEndDate}
+              value={formData.recruitmentEndDate.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required

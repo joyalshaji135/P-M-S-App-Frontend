@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { getAllDocumentFiles } from '../../../api/pages-api/admin-dashboard-api/document-file-api/DocumentFileApi';
 
 function FileDocumentsAd() {
   const [documents, setDocuments] = useState([]);
@@ -9,12 +10,18 @@ function FileDocumentsAd() {
   const navigate = useNavigate();
   const { id } = useParams(); // For editing documents
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from getAllDocumentFiles
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('documents')) || [];
-    setDocuments(storedData);
-    setFilteredDocuments(storedData); // Initialize filteredDocuments with all data
-  }, []);
+  const fetchData = async () => {
+        try {
+          const data = await getAllDocumentFiles();
+          setDocuments(data.documentFiles);
+        } catch (error) {
+          console.error('Error fetching Document Files sessions:', error);
+        }
+      };
+      fetchData();
+    }, []);
 
   // Handle search functionality
   useEffect(() => {
@@ -72,8 +79,8 @@ function FileDocumentsAd() {
       sortable: true,
     },
     {
-      name: 'File Type',
-      selector: (row) => row.type,
+      name: 'File Priority',
+      selector: (row) => row.priority,
       sortable: true,
     },
     {
@@ -86,7 +93,7 @@ function FileDocumentsAd() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/admin/documents/view/${row.id}`}>
+          <Link to={`/admin/documents/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +112,7 @@ function FileDocumentsAd() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/admin/documents/edit/${row.id}`}>
+          <Link to={`/admin/documents/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -121,7 +128,7 @@ function FileDocumentsAd() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

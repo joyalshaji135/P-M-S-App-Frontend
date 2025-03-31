@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getRecruitmentPostById } from '../../../api/pages-api/admin-dashboard-api/manage-recruitment-api/RecruitmentApi';
 
 function ViewRecruitmentAd() {
   const { id } = useParams(); // Get the id from the URL
   const [recruitment, setRecruitment] = useState(null);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getRecruitmentPostById
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('recruitmentData')) || [];
-    const recruitmentToView = storedData.find((recruitment) => recruitment.id === parseInt(id));
-    if (recruitmentToView) {
-      setRecruitment(recruitmentToView);
-    }
+    const fetchRecruitment = async () => {
+      try {
+        const response = await getRecruitmentPostById(id);
+        setRecruitment(response.recruitmentPost);
+      } catch (error) {
+        console.error('Error fetching recruitment:', error);
+      }
+    };
+
+    fetchRecruitment();
   }, [id]);
 
   if (!recruitment) {
@@ -27,7 +33,7 @@ function ViewRecruitmentAd() {
           {/* Candidate Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
-            <p className="text-gray-900">{recruitment.candidateName}</p>
+            <p className="text-gray-900">{recruitment.name}</p>
           </div>
 
           {/* Position */}
@@ -42,14 +48,14 @@ function ViewRecruitmentAd() {
             <p className="text-gray-900">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  recruitment.status === 'Offer Sent'
+                  recruitment.recruitmentStatus === 'Active'
                     ? 'bg-green-100 text-green-800'
-                    : recruitment.status === 'Interview Scheduled'
+                    : recruitment.recruitmentStatus === 'Inactive'
                     ? 'bg-blue-100 text-blue-800'
                     : 'bg-red-100 text-red-800'
                 }`}
               >
-                {recruitment.status}
+                {recruitment.recruitmentStatus}
               </span>
             </p>
           </div>
