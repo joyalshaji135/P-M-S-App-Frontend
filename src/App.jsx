@@ -103,11 +103,13 @@ import AddToDoMb from './Pages/team-member/AddToDoMb';
 import ViewToDoMb from './Pages/team-member/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
 import ChatPage from './components/ChatPage';
+import LandingPage from './Pages/LandingPage';
 
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
