@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createTeamMembers } from "../../../api/admin/team-member/TeamMembersApi";
+import { FaPlus, FaTrash } from "react-icons/fa"; // Import icons
+import {
+  addTeamMember,
+  getTeamMemberById,
+  updateTeamMemberById,
+} from "../../../api/pages-api/team-manager-api/team-member-api/TMTeamMemberApi";
 import { toast } from "react-toastify";
 
 function AddMembersMg() {
@@ -9,84 +14,92 @@ function AddMembersMg() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
     name: "",
     email: "",
     phone: "",
-    role: "team-members",
-    password: "",
-    confirmPassword: "",
-    isDefault: false,
-    dateOfBirth: "",
-    gender: "male",
-    profilePicture: "",
-    lastLogin: "",
-    newsletter: true,
-    notifications: true,
-    street: "",
-    city: "",
-    state: "",
-    district: "",
-    zipCode: "",
-    skills: [
-      {
-        skillName: "",
-        proficiency: "",
-        yearsOfExperience: "",
-        certification: "",
-      },
-    ],
-    companyName: "",
-    registrationNumber: "",
-    companyEmail: "",
-    companyPhone: "",
-    industry: "",
-    website: "",
-    companyStreet: "",
-    companyCity: "",
-    companyState: "",
-    companyDistrict: "",
-    companyZipCode: "",
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      district: "",
+      zipCode: "",
+    },
+    role: "",
+    status: "Active",
+    skills: [],
+    company: {
+      name: "",
+      registrationNumber: "",
+      email: "",
+      phone: "",
+      industry: "",
+      website: "",
+    },
   });
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getTeamMemberById api
   useEffect(() => {
-    if (id) {
-      const storedData = JSON.parse(localStorage.getItem("membersMg")) || [];
-      const memberToEdit = storedData.find(
-        (member) => member.id === parseInt(id)
-      );
-      if (memberToEdit) {
-        setFormData(memberToEdit);
+    const fetchData = async () => {
+      try {
+        const response = await getTeamMemberById(id);
+        const data = response.teamMember;
+        setFormData(data);
+      } catch (error) {
+        console.error("Error fetching team member:", error);
       }
+    };
+    if (id) {
+      fetchData();
     }
   }, [id]);
 
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData({
+        ...formData,
+        [parent]: {
+          ...formData[parent],
+          [child]: value,
+        },
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
-  // Handle skills input changes
-  const handleSkillChange = (index, e) => {
-    const { name, value } = e.target;
+  // Handle photo upload
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          photo: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle skills array changes
+  const handleSkillsChange = (index, field, value) => {
     const updatedSkills = [...formData.skills];
-    updatedSkills[index] = {
-      ...updatedSkills[index],
-      [name]: value,
-    };
+    updatedSkills[index][field] = value;
     setFormData({
       ...formData,
       skills: updatedSkills,
     });
   };
 
-  // Add a new skill field
-  const addSkillField = () => {
+  // Add a new skill to the skills array
+  const addSkill = () => {
     setFormData({
       ...formData,
       skills: [
@@ -94,10 +107,19 @@ function AddMembersMg() {
         {
           skillName: "",
           proficiency: "beginner",
-          yearsOfExperience: "",
+          yearsOfExperience: 0,
           certification: "",
-        }, // Set default proficiency
+        },
       ],
+    });
+  };
+
+  // Remove a skill from the skills array
+  const removeSkill = (index) => {
+    const updatedSkills = formData.skills.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      skills: updatedSkills,
     });
   };
 
@@ -105,626 +127,315 @@ function AddMembersMg() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const updatedSkills = formData.skills.map((skill) => ({
-      ...skill,
-      proficiency: skill.proficiency || "beginner", // Set default if empty
-    }));
-
-    setFormData({
-      ...formData,
-      skills: updatedSkills,
-    });
-
-    const data = {
-      ...formData,
-      skills: updatedSkills, // Use the updated skills
-      address: {
-        street: formData.street,
-        city: formData.city,
-        state: formData.state,
-        district: formData.district,
-        zipCode: formData.zipCode,
-      },
-      company: {
-        name: formData.companyName,
-        registrationNumber: formData.registrationNumber,
-        email: formData.companyEmail,
-        phone: formData.companyPhone,
-        industry: formData.industry,
-        website: formData.website,
-        address: {
-          street: formData.companyStreet,
-          city: formData.companyCity,
-          state: formData.companyState,
-          district: formData.companyDistrict,
-          zipCode: formData.companyZipCode,
-        },
-      },
-      preferences: {
-        newsletter: formData.newsletter,
-        notifications: formData.notifications,
-      },
-    };
-
     try {
-      const response = await createTeamMembers(data);
-      toast.success("Team member created successfully");
-      navigate("/team-manager/team-members");
+      if (id) {
+        // If editing, update the existing team manager
+        var response = await updateTeamMemberById(id, formData);
+      } else {
+        // If adding, create a new team manager
+        var response = await addTeamMember(formData);
+      }
+      if (response?.success) {
+        toast.success(response.message || "Team member saved successfully");
+        navigate(-1);
+      } else {
+        toast.error(response.message || "Failed to save team member");
+      }
     } catch (error) {
-      console.error("Error creating/updating team member:", error);
+      console.error("Error saving team members:", error);
+      toast.error(error.message || "Failed to save team members");
     }
   };
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 ">
-        {id ? "Edit Member" : "Add Member"}
+    <div className="flex-1 p-4 overflow-y-auto">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+        {id ? "Edit Team Member" : "Add Team Member"}
       </h1>
 
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg  space-y-8"
+        className="bg-white p-6 rounded-lg shadow-md"
       >
-        {/* Team Member Information Section */}
-        <div className="space-y-6">
-          {/* <h2 className="text-xl font-semibold text-gray-800">Team Member Information</h2> */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name*
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter name"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email*
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter email"
-                required
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone*
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter phone"
-                required
-              />
-            </div>
-
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role*
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="admin">Admin</option>
-                <option value="company-owners">Company Owners</option>
-                <option value="team-managers">Team Managers</option>
-                <option value="team-members">Team Members</option>
-              </select>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password*
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter password"
-                required
-              />
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password*
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Confirm password"
-                required
-              />
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
-              </label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // required
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            {/* Profile Picture */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Profile Picture URL
-              </label>
-              <input
-                type="url"
-                name="profilePicture"
-                value={formData.profilePicture}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter URL"
-              />
-            </div>
+        {/* Grid Layout for Form Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter name csacasc"
+              required
+            />
           </div>
-        </div>
 
-        {/* Preferences Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Preferences</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Newsletter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Receive Newsletter
-              </label>
-              <select
-                name="newsletter"
-                value={formData.newsletter}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // required
-              >
-                <option value={true}>Yes</option>
-                <option value={false}>No</option>
-              </select>
-            </div>
-
-            {/* Notifications */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Receive Notifications
-              </label>
-              <select
-                name="notifications"
-                value={formData.notifications}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // required
-              >
-                <option value={true}>Yes</option>
-                <option value={false}>No</option>
-              </select>
-            </div>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter email"
+              required
+            />
           </div>
-        </div>
 
-        {/* Address Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Address</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Street */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street*
-              </label>
-              <input
-                type="text"
-                name="street"
-                value={formData.street}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter street"
-                required
-              />
-            </div>
+          {/* Phone Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter phone number"
+              required
+            />
+          </div>
 
-            {/* City */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City*
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter city"
-                required
-              />
-            </div>
+          {/* Address */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Address
+            </label>
+            <input
+              type="text"
+              name="address.street"
+              value={formData.address.street}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Street"
+              required
+            />
+            <input
+              type="text"
+              name="address.city"
+              value={formData.address.city}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+              placeholder="City"
+              required
+            />
+            <input
+              type="text"
+              name="address.state"
+              value={formData.address.state}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+              placeholder="State"
+              required
+            />
+            <input
+              type="text"
+              name="address.district"
+              value={formData.address.district}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+              placeholder="District"
+              required
+            />
+            <input
+              type="text"
+              name="address.zipCode"
+              value={formData.address.zipCode}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2"
+              placeholder="Zip Code"
+              required
+            />
+          </div>
 
-            {/* State */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State*
-              </label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter state"
-                required
-              />
-            </div>
+          {/* Role */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Role
+            </label>
+            <input
+              type="text"
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter role"
+              required
+            />
+          </div>
 
-            {/* District */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District*
-              </label>
-              <input
-                type="text"
-                name="district"
-                value={formData.district}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter district"
-                required
-              />
-            </div>
-
-            {/* Zip Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Zip Code*
-              </label>
-              <input
-                type="text"
-                name="zipCode"
-                value={formData.zipCode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter zip code"
-                required
-              />
-            </div>
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           </div>
         </div>
 
         {/* Skills Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">Skills</h2>
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Skills</h2>
           {formData.skills.map((skill, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {/* Skill Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Skill Name
-                </label>
+            <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   type="text"
                   name="skillName"
                   value={skill.skillName}
-                  onChange={(e) => handleSkillChange(index, e)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "skillName", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter skill name"
-                  // required
+                  placeholder="Skill Name"
+                  required
                 />
-              </div>
-
-              {/* Proficiency */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Proficiency
-                </label>
                 <select
                   name="proficiency"
                   value={skill.proficiency}
-                  onChange={(e) => handleSkillChange(index, e)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "proficiency", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  // required
+                  required
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
                   <option value="advanced">Advanced</option>
-                  <option value="expert">Expert</option>
                 </select>
-              </div>
-
-              {/* Years of Experience */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Years of Experience
-                </label>
                 <input
                   type="number"
                   name="yearsOfExperience"
                   value={skill.yearsOfExperience}
-                  onChange={(e) => handleSkillChange(index, e)}
+                  onChange={(e) =>
+                    handleSkillsChange(
+                      index,
+                      "yearsOfExperience",
+                      e.target.value
+                    )
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter years"
-                  // required
+                  placeholder="Years of Experience"
+                  required
                 />
-              </div>
-
-              {/* Certification */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Certification
-                </label>
                 <input
                   type="text"
                   name="certification"
                   value={skill.certification}
-                  onChange={(e) => handleSkillChange(index, e)}
+                  onChange={(e) =>
+                    handleSkillsChange(index, "certification", e.target.value)
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter certification"
+                  placeholder="Certification"
                 />
               </div>
+              <button
+                type="button"
+                onClick={() => removeSkill(index)}
+                className="mt-2 text-red-600 hover:text-red-800"
+              >
+                Remove Skill
+              </button>
             </div>
           ))}
           <button
             type="button"
-            onClick={addSkillField}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onClick={addSkill}
+            className="mt-4 p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Add Skill
+            <span className="text-lg">+</span> Add Skill
           </button>
         </div>
 
-        {/* Company Information Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">
+        {/* Company Information */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Company Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Company Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Name
-              </label>
-              <input
-                type="text"
-                name="companyName"
-                value={formData.companyName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter company name"
-                // required
-              />
-            </div>
-
-            {/* Registration Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Registration Number
-              </label>
-              <input
-                type="text"
-                name="registrationNumber"
-                value={formData.registrationNumber}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter registration number"
-                // required
-              />
-            </div>
-
-            {/* Company Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Email
-              </label>
-              <input
-                type="email"
-                name="companyEmail"
-                value={formData.companyEmail}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter company email"
-                // required
-              />
-            </div>
-
-            {/* Company Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Phone
-              </label>
-              <input
-                type="text"
-                name="companyPhone"
-                value={formData.companyPhone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter company phone"
-                // required
-              />
-            </div>
-
-            {/* Industry */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Industry
-              </label>
-              <input
-                type="text"
-                name="industry"
-                value={formData.industry}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter industry"
-                // required
-              />
-            </div>
-
-            {/* Website */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Website
-              </label>
-              <input
-                type="url"
-                name="website"
-                value={formData.website}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter website URL"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Company Address Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800">
-            Company Address
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Company Street */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street
-              </label>
-              <input
-                type="text"
-                name="companyStreet"
-                value={formData.companyStreet}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter street"
-                // required
-              />
-            </div>
-
-            {/* Company City */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <input
-                type="text"
-                name="companyCity"
-                value={formData.companyCity}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter city"
-                // required
-              />
-            </div>
-
-            {/* Company State */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
-              <input
-                type="text"
-                name="companyState"
-                value={formData.companyState}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter state"
-                // required
-              />
-            </div>
-
-            {/* Company District */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District
-              </label>
-              <input
-                type="text"
-                name="companyDistrict"
-                value={formData.companyDistrict}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter district"
-                // required
-              />
-            </div>
-
-            {/* Company Zip Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Zip Code
-              </label>
-              <input
-                type="text"
-                name="companyZipCode"
-                value={formData.companyZipCode}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter zip code"
-                // required
-              />
-            </div>
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="company.name"
+              value={formData.company.name}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Company Name"
+              required
+            />
+            <input
+              type="text"
+              name="company.registrationNumber"
+              value={formData.company.registrationNumber}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Registration Number"
+              required
+            />
+            <input
+              type="email"
+              name="company.email"
+              value={formData.company.email}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Company Email"
+              required
+            />
+            <input
+              type="tel"
+              name="company.phone"
+              value={formData.company.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Company Phone"
+              required
+            />
+            <input
+              type="text"
+              name="company.industry"
+              value={formData.company.industry}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Industry"
+              required
+            />
+            <input
+              type="text"
+              name="company.website"
+              value={formData.company.website}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Website"
+              required
+            />
           </div>
         </div>
 
         {/* Save Button */}
-        <div className="mt-8 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {id ? "Update" : "Save"}
           </button>

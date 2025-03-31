@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
+import { getAllGoogleMeetSessions } from '../../../api/pages-api/company-owner-api/google-meet-api/COGoogleMeetingApi';
 
 function MeetingsCo() {
   const [meetings, setMeetings] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredMeetings, setFilteredMeetings] = useState([]);
 
-  // Fetch data from localStorage on component mount
+  // Fetch data from getAllGoogleMeetSessions api
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('meetings')) || [];
-    setMeetings(storedData);
-    setFilteredMeetings(storedData); // Initialize filteredMeetings with all data
+    const fetchData = async () => {
+      try {
+        const data = await getAllGoogleMeetSessions();
+        setMeetings(data.googleMeets);
+      } catch (error) {
+        console.error('Error fetching Google Meet sessions:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   // Handle search functionality
@@ -19,9 +26,8 @@ function MeetingsCo() {
     if (searchText) {
       const filtered = meetings.filter(
         (meeting) =>
-          meeting.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          meeting.time.toLowerCase().includes(searchText.toLowerCase()) ||
-          meeting.link.toLowerCase().includes(searchText.toLowerCase())
+          meeting.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          meeting.meetingTime.toLowerCase().includes(searchText.toLowerCase()) // Updated to meetingTime
       );
       setFilteredMeetings(filtered);
     } else {
@@ -46,19 +52,19 @@ function MeetingsCo() {
     },
     {
       name: 'Meeting Title',
-      selector: (row) => row.title,
+      selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: 'Time',
-      selector: (row) => row.time,
+      name: 'Meeting Time', // Updated column name
+      selector: (row) => row.meetingTime, // Updated to meetingTime
       sortable: true,
     },
     {
       name: 'Meeting Link',
       cell: (row) => (
         <a
-          href={row.link}
+          href={row.meetingLink}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:underline"
@@ -72,7 +78,7 @@ function MeetingsCo() {
       cell: (row) => (
         <div className="flex space-x-2">
           {/* View Button */}
-          <Link to={`/owner/meetings/view/${row.id}`}>
+          <Link to={`/owner/meetings/view/${row._id}`}>
             <button className="text-blue-600 hover:text-blue-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +97,7 @@ function MeetingsCo() {
           </Link>
 
           {/* Edit Button */}
-          <Link to={`/owner/meetings/edit/${row.id}`}>
+          <Link to={`/owner/meetings/edit/${row._id}`}>
             <button className="text-yellow-600 hover:text-yellow-900">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +113,7 @@ function MeetingsCo() {
           {/* Delete Button */}
           <button
             className="text-red-600 hover:text-red-900"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDelete(row._id)}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -144,9 +150,9 @@ function MeetingsCo() {
           {/* Add Button */}
           <Link
             to="/owner/meetings/add"
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            className="bg-slate-800 text-white px-6 py-2 rounded-md hover:bg-black"
           >
-            Add Meet
+            Add +
           </Link>
         </div>
       </div>

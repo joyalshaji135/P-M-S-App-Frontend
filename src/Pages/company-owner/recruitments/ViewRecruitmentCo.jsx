@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getRecruitmentPostById } from '../../../api/pages-api/company-owner-api/manage-recruitment-api/CORecruitmentApi';
 
 function ViewRecruitmentCo() {
   const { id } = useParams(); // Get the id from the URL
   const [recruitment, setRecruitment] = useState(null);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from getRecruitmentPostById
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('recruitments')) || [];
-    const recruitmentToView = storedData.find((recruitment) => recruitment.id === parseInt(id));
-    if (recruitmentToView) {
-      setRecruitment(recruitmentToView);
-    }
+    const fetchRecruitment = async () => {
+      try {
+        const response = await getRecruitmentPostById(id);
+        setRecruitment(response.recruitmentPost);
+      } catch (error) {
+        console.error('Error fetching recruitment:', error);
+      }
+    };
+
+    fetchRecruitment();
   }, [id]);
 
   if (!recruitment) {
@@ -27,7 +33,7 @@ function ViewRecruitmentCo() {
           {/* Candidate Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Candidate Name</label>
-            <p className="text-gray-900">{recruitment.candidateName}</p>
+            <p className="text-gray-900">{recruitment.name}</p>
           </div>
 
           {/* Position */}
@@ -42,16 +48,100 @@ function ViewRecruitmentCo() {
             <p className="text-gray-900">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  recruitment.status === 'Offer Sent'
+                  recruitment.recruitmentStatus === 'Active'
                     ? 'bg-green-100 text-green-800'
-                    : recruitment.status === 'Interview Scheduled'
+                    : recruitment.recruitmentStatus === 'Inactive'
                     ? 'bg-blue-100 text-blue-800'
                     : 'bg-red-100 text-red-800'
                 }`}
               >
-                {recruitment.status}
+                {recruitment.recruitmentStatus}
               </span>
             </p>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <p className="text-gray-900">{recruitment.name}</p>
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+            <p className="text-gray-900">{recruitment.industry}</p>
+          </div>
+
+          {/* Priority */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <p className="text-gray-900">
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  recruitment.priority === 'High'
+                    ? 'bg-red-100 text-red-800'
+                    : recruitment.priority === 'Medium'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800'
+                }`}
+              >
+                {recruitment.priority}
+              </span>
+            </p>
+          </div>
+
+          {/* Recruitment Post */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Post</label>
+            <p className="text-gray-900">{recruitment.recruitmentPost}</p>
+          </div>
+
+          {/* Recruitment Position */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Position</label>
+            <p className="text-gray-900">{recruitment.recruitmentPosition}</p>
+          </div>
+
+          {/* Recruitment Location */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Location</label>
+            <p className="text-gray-900">{recruitment.recruitmentLocation}</p>
+          </div>
+
+          {/* Recruitment Salary */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Salary</label>
+            <p className="text-gray-900">{recruitment.recruitmentSalary}</p>
+          </div>
+
+          {/* Recruitment Start Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Start Date</label>
+            <p className="text-gray-900">{new Date(recruitment.recruitmentStartDate).toLocaleDateString()}</p>
+          </div>
+
+          {/* Recruitment End Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment End Date</label>
+            <p className="text-gray-900">{new Date(recruitment.recruitmentEndDate).toLocaleDateString()}</p>
+          </div>
+
+          {/* Recruitment Contact Person */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Contact Person</label>
+            <p className="text-gray-900">{recruitment.recruitmentContactPerson}</p>
+          </div>
+
+          {/* Recruitment Contact Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Contact Number</label>
+            <p className="text-gray-900">{recruitment.recruitmentContactNumber}</p>
+          </div>
+
+          {/* Recruitment Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Recruitment Email</label>
+            <p className="text-gray-900">{recruitment.recruitmentEmail}</p>
           </div>
         </div>
       </div>
