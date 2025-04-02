@@ -5,7 +5,7 @@ import { FaArrowLeft, FaStar, FaUser, FaProjectDiagram, FaCalendarAlt, FaInfoCir
 import { getClientFeedbackById } from '../../../api/pages-api/team-manager-api/client-feedback-api/TMClientFeedbackApi';
 import { BeatLoader } from 'react-spinners';
 
-function ViewFeedbackCo() {
+function ViewFeedback() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [feedback, setFeedback] = useState(null);
@@ -242,4 +242,4 @@ function ViewFeedbackCo() {
   );
 }
 
-export default ViewFeedbackCo;
+export default ViewFeedback;

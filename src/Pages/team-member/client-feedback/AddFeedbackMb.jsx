@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaSave, FaStar, FaChevronDown } from 'react-icons/fa';
 import { getAllIndustryProjects, getAllTeamManagers } from '../../../api/comon-dropdown-api/ComonDropDownApi';
 
-function AddFeedbackMg() {
+function AddFeedbackMb() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
@@ -332,4 +332,4 @@ function AddFeedbackMg() {
   );
 }
 
-export default AddFeedbackMg;
+export default AddFeedbackMb;

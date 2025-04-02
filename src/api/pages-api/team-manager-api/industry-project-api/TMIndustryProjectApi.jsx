@@ -5,12 +5,12 @@ const apiKey = import.meta.env.VITE_API_KEY;
 const apiUrl = import.meta.env.VITE_API_URL;
 const appVersion = import.meta.env.VITE_APP_VERSION;
 
-export const getIndustryProjects = async () => {
+export const getAllIndustryProjects = async () => {
     try {
-        const response = await axios.get(`${apiUrl}super-admin/industry-projects/get-all-industry-projects`, {
+        const response = await axios.get(`${apiUrl}team-manager/industry-projects/get-all-industry-projects`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -23,10 +23,10 @@ export const getIndustryProjects = async () => {
 
 export const addIndustryProject = async (data) => {
     try {
-        const response = await axios.post(`${apiUrl}super-admin/industry-projects/add-industry-project`, data, {
+        const response = await axios.post(`${apiUrl}team-manager/industry-projects/create-industry-project`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -39,10 +39,10 @@ export const addIndustryProject = async (data) => {
 
 export const updateIndustryProject = async (projectId, data) => {
     try {
-        const response = await axios.put(`${apiUrl}super-admin/industry-projects/${projectId}/update-industry-project`, data, {
+        const response = await axios.put(`${apiUrl}team-manager/industry-projects/${projectId}/update-industry-project`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -55,10 +55,10 @@ export const updateIndustryProject = async (projectId, data) => {
 
 export const deleteIndustryProject = async (projectId) => {
     try {
-        const response = await axios.delete(`${apiUrl}super-admin/industry-projects/${projectId}/delete-industry-project`, {
+        const response = await axios.delete(`${apiUrl}team-manager/industry-projects/${projectId}/delete-industry-project`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -71,10 +71,10 @@ export const deleteIndustryProject = async (projectId) => {
 
 export const getIndustryProjectById = async (projectId) => {
     try {
-        const response = await axios.get(`${apiUrl}super-admin/industry-projects/${projectId}/get-by-id-industry-project`, {
+        const response = await axios.get(`${apiUrl}team-manager/industry-projects/${projectId}/get-by-id-industry-project`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -87,10 +87,10 @@ export const getIndustryProjectById = async (projectId) => {
 
 export const updateIndustryProjectStatus = async (projectId, data) => {
     try {
-        const response = await axios.put(`${apiUrl}super-admin/industry-projects/${projectId}/update-industry-project-status`, data, {
+        const response = await axios.put(`${apiUrl}team-manager/industry-projects/${projectId}/status-change-industry-project`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });

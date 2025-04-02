@@ -8,11 +8,12 @@ const appVersion = import.meta.env.VITE_APP_VERSION;
 export const getAllClientFeedbacks = async () => { 
     try {
         const response = await axios.get(
-            `${apiUrl}super-admin/client-feedbacks/get-all-client-feedbacks`,
+            `${apiUrl}company-owner/client-feedback/get-all-client-feedbacks`,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
+                    "x-api-key": apiKey,
                 },
             }
         );
@@ -26,11 +27,11 @@ export const getAllClientFeedbacks = async () => {
 export const getClientFeedbackById = async (feedbackId) => {
     try {
         const response = await axios.get(
-            `${apiUrl}super-admin/client-feedbacks/${feedbackId}/get-by-id-client-feedback`,
+            `${apiUrl}company-owner/client-feedback/${feedbackId}/get-by-id-client-feedback`,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
                     "x-api-key": apiKey,
                 },
             }
@@ -45,11 +46,11 @@ export const getClientFeedbackById = async (feedbackId) => {
 export const deleteClientFeedback = async (feedbackId) => {
     try {
         const response = await axios.delete(
-            `${apiUrl}super-admin/client-feedbacks/${feedbackId}/delete-client-feedback`,
+            `${apiUrl}company-owner/client-feedback/${feedbackId}/delete-client-feedback`,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
                     "x-api-key": apiKey,
                 },
             }
@@ -64,12 +65,12 @@ export const deleteClientFeedback = async (feedbackId) => {
 export const updateClientFeedback = async (feedbackId, data) => {
     try {
         const response = await axios.put(
-            `${apiUrl}super-admin/client-feedbacks/${feedbackId}/update-client-feedback`,
+            `${apiUrl}company-owner/client-feedback/${feedbackId}/update-client-feedback`,
             data,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
                     "x-api-key": apiKey,
                 },
             }
@@ -84,12 +85,12 @@ export const updateClientFeedback = async (feedbackId, data) => {
 export const addClientFeedback = async (data) => {
     try {
         const response = await axios.post(
-            `${apiUrl}super-admin/client-feedbacks/add-client-feedback`,
+            `${apiUrl}company-owner/client-feedback/create-client-feedback`,
             data,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
                     "x-api-key": apiKey,
                 },
             }
@@ -104,12 +105,12 @@ export const addClientFeedback = async (data) => {
 export const updateClientFeedbackStatus = async (feedbackId, data) => {
     try {
         const response = await axios.put(
-            `${apiUrl}super-admin/client-feedbacks/${feedbackId}/update-client-feedback-status`,
+            `${apiUrl}company-owner/client-feedback/${feedbackId}/status-change-client-feedback`,
             data,
             {
                 headers: {
                     Authorization: `Bearer ${getAuthToken()}`,
-                    "app-version": appVersion,
+                    "x-app-version": appVersion,
                     "x-api-key": apiKey,
                 },
             }

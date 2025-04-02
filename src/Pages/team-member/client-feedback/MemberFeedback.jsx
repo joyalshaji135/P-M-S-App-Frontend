@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getAllClientFeedbacks } from '../../../api/pages-api/team-manager-api/client-feedback-api/TMClientFeedbackApi';
 import { FaSearch, FaEdit, FaTrash, FaEye, FaFilter, FaStar, FaPlus, FaTimes } from 'react-icons/fa';
 
-function ManagerFeedback() {
+function MemberFeedback() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filteredFeedbacks, setFilteredFeedbacks] = useState([]);
@@ -213,7 +213,7 @@ function ManagerFeedback() {
             whileTap={{ scale: 0.98 }}
           >
             <Link
-              to="/team-manager/feedbacks/add"
+              to="/team-member/feedbacks/add"
               className={`flex items-center justify-center px-6 py-2 ${colors.accent} ${colors.accentText} rounded-lg ${colors.accentHover} transition-all shadow-sm`}
             >
               <FaPlus className="mr-2" />
@@ -336,7 +336,7 @@ function ManagerFeedback() {
                 <div className="flex space-x-3">
                   <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                     <Link
-                      to={`/team-manager/feedbacks/view/${feedback._id}`}
+                      to={`/team-member/feedbacks/view/${feedback._id}`}
                       className={`text-blue-600 hover:text-blue-800 transition-colors flex items-center`}
                       title="View"
                     >
@@ -345,7 +345,7 @@ function ManagerFeedback() {
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                     <Link
-                      to={`/team-manager/feedbacks/edit/${feedback._id}`}
+                      to={`/team-member/feedbacks/edit/${feedback._id}`}
                       className={`text-blue-600 hover:text-blue-800 transition-colors flex items-center`}
                       title="Edit"
                     >
@@ -379,4 +379,4 @@ function ManagerFeedback() {
   );
 }
 
-export default ManagerFeedback;
+export default MemberFeedback;
