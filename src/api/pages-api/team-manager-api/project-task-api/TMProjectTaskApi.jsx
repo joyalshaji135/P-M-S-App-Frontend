@@ -9,10 +9,10 @@ const appVersion = import.meta.env.VITE_APP_VERSION;
 
 export const addProjectTask = async (data) => {
     try {
-        const response = await axios.post(`${apiUrl}super-admin/project-tasks/add-project-task`, data, {
+        const response = await axios.post(`${apiUrl}team-manager/task-roles/create-task-role`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -25,10 +25,10 @@ export const addProjectTask = async (data) => {
 
 export const updateProjectTask = async (taskId, data) => {
     try {
-        const response = await axios.put(`${apiUrl}super-admin/project-tasks/${taskId}/update-project-task`, data, {
+        const response = await axios.put(`${apiUrl}team-manager/task-roles/${taskId}/update-task-role`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -41,10 +41,10 @@ export const updateProjectTask = async (taskId, data) => {
 
 export const deleteProjectTask = async (taskId) => {
     try {
-        const response = await axios.delete(`${apiUrl}super-admin/project-tasks/${taskId}/delete-project-task`, {
+        const response = await axios.delete(`${apiUrl}team-manager/task-roles/${taskId}/delete-task-role`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -55,12 +55,12 @@ export const deleteProjectTask = async (taskId) => {
     }
 };
 
-export const getProjectTasks = async (projectId) => {
+export const getAllProjectTasks = async (projectId) => {
     try {
-        const response = await axios.get(`${apiUrl}super-admin/project-tasks/${projectId}/get-all-project-tasks`, {
+        const response = await axios.get(`${apiUrl}team-manager/task-roles/get-all-task-roles`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -73,10 +73,10 @@ export const getProjectTasks = async (projectId) => {
 
 export const getProjectTaskById = async (taskId) => {
     try {
-        const response = await axios.get(`${apiUrl}super-admin/project-tasks/${taskId}/get-by-id-project-task`, {
+        const response = await axios.get(`${apiUrl}team-manager/task-roles/${taskId}/get-by-id-task-role`, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
-                "app-version": appVersion,
+                "x-app-version": appVersion,
                 "x-api-key": apiKey,
             },
         });
@@ -89,7 +89,7 @@ export const getProjectTaskById = async (taskId) => {
 
 export const updateProjectTaskStatus = async (taskId, data) => {
     try {
-        const response = await axios.put(`${apiUrl}super-admin/project-tasks/${taskId}/update-project-task-status`, data, {
+        const response = await axios.put(`${apiUrl}team-manager/task-roles/${taskId}/status-change-task-role`, data, {
             headers: {
                 Authorization: `Bearer ${getAuthToken()}`,
                 "app-version": appVersion,

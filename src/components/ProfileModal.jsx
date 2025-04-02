@@ -75,6 +75,9 @@ function ProfileModal({ open, onClose, user }) {
               <p className="my-2">
                 <strong>Email: </strong> {userData?.email}
               </p>
+              <p className="my-2">
+                <strong>Role: </strong> {userData?.role}
+              </p>
             </div>
             <div className="mt-2 flex justify-between">
               <button

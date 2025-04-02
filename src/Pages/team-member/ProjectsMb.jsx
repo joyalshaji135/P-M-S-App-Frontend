@@ -1,54 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { getAllIndustryProjects } from '../../api/pages-api/team-member-api/industry-project-api/MTIndustryProjectApi';
+
 
 function ProjectsMb() {
-  // Customer ID mapping
-  const customers = {
-    '67c440dbe269db9b854700bf': 'Tech Corp Inc',
-    '67c440dbe269db9b854700c0': 'FinTech Solutions',
-    '67c440dbe269db9b854700c1': 'Health Innovators'
-  };
-
-  // Sample projects data based on your JSON structure
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      projectName: 'AI Development',
-      customer: '67c440dbe269db9b854700bf',
-      industry: 'Technology',
-      priority: 'High',
-      description: 'AI-driven project for automation and process optimization.',
-      projectStatus: 'Ongoing',
-      startDate: '2024-01-15T00:00:00.000Z',
-      endDate: '2024-12-31T00:00:00.000Z'
-    },
-    {
-      id: 2,
-      projectName: 'Financial Platform Upgrade',
-      customer: '67c440dbe269db9b854700c0',
-      industry: 'Finance',
-      priority: 'Medium',
-      description: 'Modernization of core banking systems with cloud integration.',
-      projectStatus: 'Planning',
-      startDate: '2024-02-01T00:00:00.000Z',
-      endDate: '2024-06-30T00:00:00.000Z'
-    },
-    {
-      id: 3,
-      projectName: 'Healthcare Analytics',
-      customer: '67c440dbe269db9b854700c1',
-      industry: 'Healthcare',
-      priority: 'Critical',
-      description: 'Big data analysis platform for patient outcome predictions.',
-      projectStatus: 'Completed',
-      startDate: '2023-09-01T00:00:00.000Z',
-      endDate: '2024-01-31T00:00:00.000Z'
-    }
-  ]);
-
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filter, setFilter] = useState('All');
+
+  // Fetch projects on component mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await getAllIndustryProjects();
+        if (response.success) {
+          setProjects(response.industryProjects);
+        } else {
+          setError('Failed to fetch projects');
+        }
+      } catch (err) {
+        setError(err.message || 'An error occurred while fetching projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   // Handle drag and drop
   const handleDragEnd = (result) => {
@@ -82,13 +63,17 @@ function ProjectsMb() {
 
   // Get priority color classes
   const getPriorityColor = (priority) => {
-    switch (priority.toLowerCase()) {
+    if (!priority) return 'bg-gray-100 text-gray-800 border-gray-200';
+    
+    switch (priority.name.toLowerCase()) {
       case 'critical':
         return 'bg-red-100 text-red-800 border-red-200';
       case 'high':
         return 'bg-orange-100 text-orange-800 border-orange-200';
       case 'medium':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -99,6 +84,28 @@ function ProjectsMb() {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 overflow-y-auto bg-blue-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-700">Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-6 overflow-y-auto bg-blue-50 min-h-screen flex items-center justify-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+          <strong className="font-bold">Error!</strong>
+          <span className="block sm:inline"> {error}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-blue-50 min-h-screen">
@@ -142,7 +149,7 @@ function ProjectsMb() {
             >
               <AnimatePresence>
                 {filteredProjects.map((project, index) => (
-                  <Draggable key={project.id} draggableId={project.id.toString()} index={index}>
+                  <Draggable key={project._id} draggableId={project._id} index={index}>
                     {(provided) => (
                       <motion.div
                         ref={provided.innerRef}
@@ -164,7 +171,7 @@ function ProjectsMb() {
                           </h3>
                           <div className="mt-2 flex gap-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(project.priority)}`}>
-                              {project.priority}
+                              {project.priority?.name || 'Not specified'}
                             </span>
                           </div>
                         </div>
@@ -186,17 +193,17 @@ function ProjectsMb() {
                             
                             <div className="flex flex-wrap gap-1">
                               <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                                {customers[project.customer]}
+                                {project.customer?.name || 'Unknown customer'}
                               </span>
                               <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                                {project.industry}
+                                {project.industry?.name || 'Unknown industry'}
                               </span>
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="px-5 py-3 bg-blue-50 border-t border-blue-100 text-xs text-gray-500 flex justify-between">
-                          <span>Project ID: {project.id}</span>
+                          <span>Project ID: {project.code}</span>
                           <button 
                             onClick={() => setSelectedProject(project)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
@@ -263,20 +270,26 @@ function ProjectsMb() {
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-2">Priority</h3>
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(selectedProject.priority)} border`}>
-                      {selectedProject.priority}
+                      {selectedProject.priority?.name || 'Not specified'}
                     </span>
                   </div>
                   
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-2">Customer</h3>
                     <p className="text-gray-700">
-                      {customers[selectedProject.customer]}
+                      {selectedProject.customer?.name || 'Unknown customer'}
                     </p>
+                    {selectedProject.customer?.email && (
+                      <p className="text-gray-500 text-sm mt-1">{selectedProject.customer.email}</p>
+                    )}
+                    {selectedProject.customer?.phone && (
+                      <p className="text-gray-500 text-sm mt-1">{selectedProject.customer.phone}</p>
+                    )}
                   </div>
                   
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-2">Industry</h3>
-                    <p className="text-gray-700">{selectedProject.industry}</p>
+                    <p className="text-gray-700">{selectedProject.industry?.name || 'Unknown industry'}</p>
                   </div>
                   
                   <div>
@@ -291,6 +304,21 @@ function ProjectsMb() {
                     <p className="text-gray-700">
                       {formatDate(selectedProject.endDate)}
                     </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Project Code</h3>
+                    <p className="text-gray-700">{selectedProject.code}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Created By</h3>
+                    <p className="text-gray-700">
+                      {selectedProject.createdBy?.name || 'Unknown'}
+                    </p>
+                    {selectedProject.createdBy?.email && (
+                      <p className="text-gray-500 text-sm mt-1">{selectedProject.createdBy.email}</p>
+                    )}
                   </div>
                 </div>
               </div>

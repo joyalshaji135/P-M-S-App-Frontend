@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { getLoggedUser } from '../../helper/auth';
 
 // Dummy Data Generator Method
 const createDummyTask = ({
@@ -57,6 +58,7 @@ const initialTasks = [
     taskModule: 'Frontend'
   })
 ];
+
 
 // Resource and Project mappings
 const resources = {

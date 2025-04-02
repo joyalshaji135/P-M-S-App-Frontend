@@ -95,12 +95,13 @@ import TasksMb from './Pages/team-member/TasksMb';
 import AddTasksMb from './Pages/team-member/AddTasksMb';
 import ViewTasksMb from './Pages/team-member/ViewTasksMb';
 import ProjectsMb from './Pages/team-member/ProjectsMb';
-import MemberFeedback from './Pages/team-member/MemberFeedback';
-import AddFeedbackMb from './Pages/team-member/AddFeedbackMb';
+import MemberFeedback from './Pages/team-member/client-feedback/MemberFeedback';
+import AddFeedbackMb from './Pages/team-member/client-feedback/AddFeedbackMb';
+import ViewFeedback from './Pages/team-member/client-feedback/ViewFeedback';
 import MeetingsMb from './Pages/team-member/MeetingsMb';
-import ToDoMb from './Pages/team-member/ToDoMb';
-import AddToDoMb from './Pages/team-member/AddToDoMb';
-import ViewToDoMb from './Pages/team-member/ViewToDoMb';
+import ToDoMb from './Pages/team-member/todo-list/ToDoMb';
+import AddToDoMb from './Pages/team-member/todo-list/AddToDoMb';
+import ViewToDoMb from './Pages/team-member/todo-list/ViewToDoMb';
 import DocumentsMb from './Pages/team-member/DocumentsMb';
 import ChatPage from './components/ChatPage';
 import LandingPage from './Pages/LandingPage';
@@ -265,6 +266,8 @@ function App() {
           
           <Route path="feedback" element={<MemberFeedback />} />
           <Route path="feedbacks/add" element={<AddFeedbackMb />} />
+          <Route path="feedbacks/edit/:id" element={<AddFeedbackMb />} />
+          <Route path="feedbacks/view/:id" element={<ViewFeedback />} />
           
           <Route path="meetings" element={<MeetingsMb />} />
           

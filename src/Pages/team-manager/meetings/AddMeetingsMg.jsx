@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { addGoogleMeetSession, getGoogleMeetSessionById, updateGoogleMeetSessionById } from '../../../api/pages-api/company-owner-api/google-meet-api/COGoogleMeetingApi';
+import { toast } from 'react-toastify';
 
 function AddMeetingsMg() {
   const navigate = useNavigate();
@@ -7,26 +9,45 @@ function AddMeetingsMg() {
 
   // State for form data
   const [formData, setFormData] = useState({
-    id: Date.now(),
     name: '',
     description: '',
-    industryProject: '',
     customer: '',
-    meetingDate: '',
     meetingTime: '',
     meetingLink: '',
-    meetingStatus: 'Scheduled',
+    industryProject: '',
+    meetingDate: '',
+    meetingStatus: '',
+    industryProjects: ''
   });
 
-  // Fetch data from local storage on component mount (for editing)
+  // State for dropdown options
+  const [industryProjects, setIndustryProjects] = useState([]);
+  const [customers, setCustomers] = useState([]);
+
+  // Fetch data from getGoogleMeetSessionById
   useEffect(() => {
     if (id) {
-      const storedData = JSON.parse(localStorage.getItem('meetingsMg')) || [];
-      const meetingToEdit = storedData.find((meeting) => meeting.id === parseInt(id));
-      if (meetingToEdit) {
-        setFormData(meetingToEdit);
-      }
+      // Fetch data from getGoogleMeetSessionById api
+      const fetchData = async () => {
+        try {
+          const response = await getGoogleMeetSessionById(id);
+          const data = response.googleMeet;
+          setFormData(data);
+        } catch (error) {
+          console.error('Error fetching meeting:', error);
+        }
+      };
+      fetchData();
     }
+    // Fetch industryProjects and customers (example data)
+    setIndustryProjects([
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Project 1' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Project 2' },
+    ]);
+    setCustomers([
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Customer 1' },
+      { _id: '64a1b2c3d4e5f6a7b8c9d0e2', name: 'Customer 2' },
+    ]);
   }, [id]);
 
   // Handle input changes
@@ -39,28 +60,33 @@ function AddMeetingsMg() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+try {
+  
 
-    // Get existing data from local storage
-    const storedData = JSON.parse(localStorage.getItem('meetingsMg')) || [];
-
+    // Add or update meeting
     if (id) {
-      // If editing, update the existing entry
-      const updatedData = storedData.map((meeting) =>
-        meeting.id === parseInt(id) ? formData : meeting
-      );
-      localStorage.setItem('meetingsMg', JSON.stringify(updatedData));
+      // Update meeting
+    var response =  await updateGoogleMeetSessionById(id, formData);
     } else {
-      // If adding, create a new entry
-      const updatedData = [...storedData, formData];
-      localStorage.setItem('meetingsMg', JSON.stringify(updatedData));
+      // Add meeting
+    var response = await addGoogleMeetSession(formData);
     }
-
-    // Redirect to the meetings management page
-    navigate('/team-manager/meetings');
-  };
-
+    if(response.success){
+      toast.success(response.message || "Meeting saved successfully");
+    navigate(-1);
+    }
+    else{
+      toast.error(response.message || "Failed to save meeting");
+    }
+  }
+   
+catch (error) {
+  console.error("Error adding meeting:", error);
+  toast.error(error.message || "Failed to save meeting");
+}
+}
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -69,61 +95,71 @@ function AddMeetingsMg() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
+        {/* Grid Layout for Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Meeting Name */}
+          {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Title</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter meeting name"
+              placeholder="Enter meeting title"
               required
             />
           </div>
 
           {/* Description */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Description</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter meeting description"
-              rows="4"
               required
-            />
+            ></textarea>
           </div>
 
           {/* Industry Project */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Industry Project</label>
-            <input
-              type="text"
+            <select
               name="industryProject"
               value={formData.industryProject}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter industry project"
               required
-            />
+            >
+              <option value="">Select Industry Project</option>
+              {industryProjects.map((project) => (
+                <option key={project._id} value={project._id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Customer */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer</label>
-            <input
-              type="text"
+            <select
               name="customer"
               value={formData.customer}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter customer"
               required
-            />
+            >
+              <option value="">Select Customer</option>
+              {customers.map((customer) => (
+                <option key={customer._id} value={customer._id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Meeting Date */}
@@ -132,7 +168,7 @@ function AddMeetingsMg() {
             <input
               type="date"
               name="meetingDate"
-              value={formData.meetingDate}
+              value={formData.meetingDate.split("T")[0]}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -153,7 +189,7 @@ function AddMeetingsMg() {
           </div>
 
           {/* Meeting Link */}
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
             <input
               type="url"
@@ -176,6 +212,7 @@ function AddMeetingsMg() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
+              <option value="">Select Status</option>
               <option value="Scheduled">Scheduled</option>
               <option value="Completed">Completed</option>
               <option value="Cancelled">Cancelled</option>

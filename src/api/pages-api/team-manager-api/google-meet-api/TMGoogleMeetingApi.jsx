@@ -8,7 +8,7 @@ const appVersion = import.meta.env.VITE_APP_VERSION;
 export const getAllGoogleMeetSessions = async () => {
     try {
       const response = await axios.get(
-        `${apiUrl}super-admin/google-meet/get-all-google-meets`, 
+        `${apiUrl}company-owner/google-meet/get-all-google-meets`, 
         {
           headers: {
             Authorization: `Bearer ${getAuthToken()}`,
@@ -27,7 +27,7 @@ export const getAllGoogleMeetSessions = async () => {
 export const getGoogleMeetSessionById = async (id) => {
     try {
       const response = await axios.get(
-        `${apiUrl}super-admin/google-meet/${id}/get-by-id-google-meet`, 
+        `${apiUrl}company-owner/google-meet/${id}/get-by-id-google-meet`, 
         {
           headers: {
             Authorization: `Bearer ${getAuthToken()}`,
@@ -46,7 +46,7 @@ export const getGoogleMeetSessionById = async (id) => {
 export const deleteGoogleMeetSessionById = async (id) => {
     try {
       const response = await axios.delete(
-        `${apiUrl}super-admin/google-meet/${id}/delete-session`, 
+        `${apiUrl}company-owner/google-meet/${id}/delete-google-meet`, 
         {
           headers: {
             Authorization: `Bearer ${getAuthToken()}`,
@@ -66,7 +66,7 @@ export const deleteGoogleMeetSessionById = async (id) => {
 export const updateGoogleMeetSessionById = async (id, data) => {
   try {
     const response = await axios.put(
-      `${apiUrl}super-admin/google-meet/${id}/update-google-meet`,
+      `${apiUrl}company-owner/google-meet/${id}/update-google-meet`,
       data,
       {
         headers: {
@@ -88,7 +88,7 @@ export const updateGoogleMeetSessionById = async (id, data) => {
 export const addGoogleMeetSession = async (data) => {
   try {
     const response = await axios.post(
-      `${apiUrl}super-admin/google-meet/create-google-meet`,
+      `${apiUrl}company-owner/google-meet/create-google-meet`,
       data,
       {
         headers: {
