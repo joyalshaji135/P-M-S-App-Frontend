@@ -1,87 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { FiSearch, FiEdit, FiFile, FiX, FiArrowRight } from 'react-icons/fi';
 import { getLoggedUser } from '../../helper/auth';
-
-// Dummy Data Generator Method
-const createDummyTask = ({
-  id,
-  taskTitle,
-  taskDescription,
-  taskStatus = 'Pending',
-  taskHours,
-  taskTakenTime = 0,
-  startDate,
-  endDate,
-  resourceId,
-  projectId,
-  taskModule
-}) => ({
-  id,
-  taskTitle,
-  taskDescription,
-  taskStatus,
-  taskHours,
-  taskTakenTime,
-  percentageOfCompleted: Math.round((taskTakenTime / taskHours) * 100) || 0,
-  startDate: new Date(startDate).toISOString(),
-  endDate: new Date(endDate).toISOString(),
-  resourceName: resourceId,
-  project: projectId,
-  taskModule
-});
-
-// Initial Dummy Data
-const initialTasks = [
-  createDummyTask({
-    id: 1,
-    taskTitle: 'API Integration',
-    taskDescription: 'Integrate third-party payment gateway API',
-    taskStatus: 'In Progress',
-    taskHours: 15,
-    taskTakenTime: 8,
-    startDate: '2024-03-01',
-    endDate: '2024-03-10',
-    resourceId: '67c7ecd97865c45ac8b983a8',
-    projectId: '67c4a06dca86d94bd5785077',
-    taskModule: 'Backend'
-  }),
-  createDummyTask({
-    id: 2,
-    taskTitle: 'UI Redesign',
-    taskDescription: 'Redesign user dashboard interface',
-    taskHours: 20,
-    startDate: '2024-03-05',
-    endDate: '2024-03-15',
-    resourceId: '67c7ecd97865c45ac8b983a9',
-    projectId: '67c4a06dca86d94bd5785078',
-    taskModule: 'Frontend'
-  })
-];
-
-
-// Resource and Project mappings
-const resources = {
-  '67c7ecd97865c45ac8b983a8': 'John Developer',
-  '67c7ecd97865c45ac8b983a9': 'Sarah Designer'
-};
-
-const projects = {
-  '67c4a06dca86d94bd5785077': 'E-commerce Platform',
-  '67c4a06dca86d94bd5785078': 'Mobile App Redesign'
-};
+import axios from 'axios'; // or your preferred HTTP client
+import { getClientTaskById } from '../../api/pages-api/team-member-api/project-task-api/MTProjectTaskApi';
 
 function TasksMb() {
-  const [tasks, setTasks] = useState(initialTasks);
-  const [isEditing, setIsEditing] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(4);
+  const [editMode, setEditMode] = useState(false);
+  const [editedTask, setEditedTask] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const itemsPerPage = 5;
+
+  // Status options
+  const statusOptions = ['Not Started', 'In Progress', 'Completed', 'On Hold'];
+  const userData = getLoggedUser();
+  const userId = userData._id;
+  // Fetch tasks from API
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setLoading(true);
+        // Replace with your actual API endpoint
+        const response = await getClientTaskById(userId);
+        if (response.success) {
+          setTasks(response.taskAssigned);
+          setFilteredTasks(response.taskAssigned);
+        } else {
+          setError('Failed to fetch tasks');
+        }
+      } catch (err) {
+        setError(err.message || 'Error fetching tasks');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  // Filter and search logic
+  useEffect(() => {
+    const filtered = tasks.filter(task => {
+      const matchesSearch = task.taskTitle.toLowerCase().includes(searchText.toLowerCase()) || 
+                          task.taskDescription.toLowerCase().includes(searchText.toLowerCase());
+      
+      const matchesFilter = filter === 'all' || task.taskStatus === filter;
+      
+      return matchesSearch && matchesFilter;
+    });
+    setFilteredTasks(filtered);
+    setCurrentPage(1);
+  }, [searchText, filter, tasks]);
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTasks = tasks.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(tasks.length / itemsPerPage);
+  const currentItems = filteredTasks.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
 
   // Animation variants
   const cardVariants = {
@@ -91,308 +73,508 @@ function TasksMb() {
       y: 0,
       transition: { duration: 0.3 }
     },
-    exit: { opacity: 0, x: -50 },
-    drag: { scale: 1.05, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }
+    hover: { y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }
   };
 
-  // Drag and drop handler
-  const handleDragEnd = (result) => {
-    if (!result.destination) return;
-    
-    const items = Array.from(tasks);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    setTasks(items);
-  };
-
-  // Status color mapping
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        type: 'spring',
+        damping: 25,
+        stiffness: 500
+      }
     }
   };
 
-  // Date formatting
+  // Get priority badge style
+  const getPriorityBadge = (priority) => {
+    // You can implement this based on your actual priority field if available
+    return 'bg-blue-100 text-blue-600';
+  };
+
+  // Get status badge style
+  const getStatusBadge = (status) => {
+    switch(status.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-600';
+      case 'in progress': return 'bg-blue-100 text-blue-600';
+      case 'not started': return 'bg-gray-100 text-gray-600';
+      case 'on hold': return 'bg-orange-100 text-orange-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  // Format date
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Update task handler
-  const handleUpdateTask = (id, field, value) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { 
-        ...task, 
-        [field]: value,
-        percentageOfCompleted: field === 'taskTakenTime' 
-          ? Math.round((value / task.taskHours) * 100) 
-          : task.percentageOfCompleted
-      } : task
-    ));
-  };
-
-  // Add new dummy task
-  const addDummyTask = () => {
-    const newTask = createDummyTask({
-      id: tasks.length + 1,
-      taskTitle: `New Task ${tasks.length + 1}`,
-      taskDescription: 'Sample task description',
-      taskHours: 10,
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 604800000), // +7 days
-      resourceId: '67c7ecd97865c45ac8b983a8',
-      projectId: '67c4a06dca86d94bd5785077',
-      taskModule: 'General'
+  // Handle edit button click
+  const handleEditClick = (task) => {
+    setSelectedTask(task);
+    setEditedTask({
+      taskStatus: task.taskStatus,
+      percentageOfCompleted: task.percentageOfCompleted
     });
-    setTasks([...tasks, newTask]);
+    setEditMode(true);
   };
+
+  // Handle save changes
+  const handleSaveChanges = async () => {
+    try {
+      // Update local state first for immediate UI feedback
+      const updatedTasks = tasks.map(task => {
+        if (task._id === selectedTask._id) {
+          return {
+            ...task,
+            taskStatus: editedTask.taskStatus,
+            percentageOfCompleted: editedTask.percentageOfCompleted,
+            userUpdatedBy: getLoggedUser(), // Update with current user
+            userUpdatedDate: new Date().toISOString()
+          };
+        }
+        return task;
+      });
+      
+      setTasks(updatedTasks);
+      setFilteredTasks(updatedTasks);
+      
+      // API call to update task
+      const response = await axios.put(`/api/tasks/${selectedTask._id}`, {
+        taskStatus: editedTask.taskStatus,
+        percentageOfCompleted: editedTask.percentageOfCompleted
+      });
+      
+      if (!response.data.success) {
+        throw new Error('Failed to update task');
+      }
+      
+      setEditMode(false);
+    } catch (err) {
+      console.error('Error updating task:', err);
+      // Revert changes if API call fails
+      setTasks([...tasks]);
+      setFilteredTasks([...tasks]);
+      setError('Failed to update task');
+    }
+  };
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedTask(prev => ({
+      ...prev,
+      [name]: name === 'percentageOfCompleted' ? parseInt(value) : value
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6 bg-blue-50 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 p-6 bg-blue-50 min-h-screen flex items-center justify-center">
+        <div className="text-center text-red-500">
+          <p>Error: {error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-blue-50 min-h-screen">
-      {/* Header Section */}
-      <div className="flex justify-between items-center mb-8">
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-gray-800"
-        >
-          Task Management
-        </motion.h1>
-        <button
-          onClick={addDummyTask}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          + Add Dummy Task
-        </button>
-      </div>
-
-      {/* Task List */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="tasks">
-          {(provided) => (
-            <div 
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              <AnimatePresence>
-                {currentTasks.map((task, index) => (
-                  <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                    {(provided) => (
-                      <motion.div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
-                      >
-                        <div className="bg-blue-50 px-5 py-4 border-b border-blue-100">
-                          <div className="flex justify-between items-start">
-                            <h3 className="text-lg font-semibold text-gray-800 truncate">
-                              {task.taskTitle}
-                            </h3>
-                            <button
-                              onClick={() => setIsEditing(task.id)}
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                              </svg>
-                            </button>
-                          </div>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
-                              {task.taskModule}
-                            </span>
-                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                              {projects[task.project]}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="p-5">
-                          <p className="text-gray-600 mb-4">
-                            {task.taskDescription}
-                          </p>
-
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.taskStatus)} border`}>
-                                {task.taskStatus}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {formatDate(task.startDate)} - {formatDate(task.endDate)}
-                              </span>
-                            </div>
-
-                            <div className="flex justify-between items-center text-sm">
-                              <div>
-                                <span className="font-medium">{task.taskTakenTime}h</span>
-                                <span className="text-gray-500">/{task.taskHours}h</span>
-                              </div>
-                              <div className="w-1/2 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className="bg-blue-600 rounded-full h-2"
-                                  style={{ width: `${task.percentageOfCompleted}%` }}
-                                ></div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 text-xs">
-                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-                                {resources[task.resourceName]}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </Draggable>
-                ))}
-              </AnimatePresence>
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-
-      {/* Pagination Controls */}
-      <motion.div 
-        className="mt-6 flex justify-center items-center gap-4"
-        initial={{ opacity: 0, y: 20 }}
+      <motion.h1 
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="text-3xl font-bold text-gray-800 mb-6"
       >
-        <button
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          disabled={currentPage === 1}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
-        >
-          Previous
-        </button>
-        <span className="text-sm text-gray-600">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
-        >
-          Next
-        </button>
+        Task Management
+      </motion.h1>
+
+      {/* Filters and Search */}
+      <motion.div 
+        className="mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === 'all' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              All Tasks
+            </button>
+            {statusOptions.map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === status 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+          
+          <div className="relative w-full md:w-64">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
+            />
+            {searchText && (
+              <button
+                onClick={() => setSearchText('')}
+                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={18} />
+              </button>
+            )}
+          </div>
+        </div>
       </motion.div>
 
-      {/* Edit Modal */}
+      {/* Tasks Grid */}
+      {filteredTasks.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100"
+        >
+          No tasks found matching your criteria
+        </motion.div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {currentItems.map((task) => (
+                <motion.div
+                  key={task._id}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover="hover"
+                  className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
+                >
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {task.taskTitle}
+                        </h3>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className={`px-2 py-1 ${getStatusBadge(task.taskStatus)} text-xs rounded-full`}>
+                            {task.taskStatus}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {task.taskModule?.name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5 flex-grow">
+                    <p className="text-gray-600 mb-4 line-clamp-2">
+                      {task.taskDescription || 'No description provided'}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        {task.project?.projectName}
+                      </span>
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                        {task.resourceName?.name}
+                      </span>
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="mb-2">
+                      <div className="flex justify-between text-xs text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span>{task.percentageOfCompleted}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full" 
+                          style={{ width: `${task.percentageOfCompleted}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    {/* Dates */}
+                    <div className="flex justify-between text-xs text-gray-500 mt-3">
+                      <span>Start: {formatDate(task.startDate)}</span>
+                      <span>End: {formatDate(task.endDate)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <button
+                      onClick={() => setSelectedTask(task)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    >
+                      Details <FiArrowRight className="ml-1" />
+                    </button>
+                    <button
+                      onClick={() => handleEditClick(task)}
+                      className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50 transition"
+                    >
+                      <FiEdit size={18} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Pagination Controls */}
+          <motion.div 
+            className="mt-6 flex justify-center items-center gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <button
+              onClick={() => setCurrentPage(p => p - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors flex items-center"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors flex items-center"
+            >
+              Next
+            </button>
+          </motion.div>
+        </>
+      )}
+
+      {/* Task Detail Modal */}
       <AnimatePresence>
-        {isEditing && (
+        {selectedTask && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => {
+              setSelectedTask(null);
+              setEditMode(false);
+            }}
           >
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md"
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Update Task Progress
-              </h2>
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      {selectedTask.taskTitle}
+                    </h2>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className={`px-2 py-1 ${getStatusBadge(selectedTask.taskStatus)} text-xs rounded-full`}>
+                        {selectedTask.taskStatus}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {selectedTask.taskModule?.name}
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setSelectedTask(null);
+                      setEditMode(false);
+                    }}
+                    className="text-gray-500 hover:text-gray-700 p-1"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
+              </div>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Task Title
-                  </label>
-                  <p className="px-4 py-2 bg-gray-100 rounded-lg">
-                    {tasks.find(t => t.id === isEditing)?.taskTitle}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Start Date
-                    </label>
-                    <p className="px-4 py-2 bg-gray-100 rounded-lg">
-                      {formatDate(tasks.find(t => t.id === isEditing)?.startDate)}
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
+                    <p className="text-gray-700">
+                      {selectedTask.taskDescription || 'No description provided'}
                     </p>
                   </div>
-
+                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      End Date
-                    </label>
-                    <p className="px-4 py-2 bg-gray-100 rounded-lg">
-                      {formatDate(tasks.find(t => t.id === isEditing)?.endDate)}
-                    </p>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2">Details</h3>
+                    <div className="space-y-2">
+                      <p className="text-gray-700">
+                        <span className="font-medium">Project:</span> {selectedTask.project?.projectName}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Assigned To:</span> {selectedTask.resourceName?.name}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Start Date:</span> {formatDate(selectedTask.startDate)}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">End Date:</span> {formatDate(selectedTask.endDate)}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Estimated Hours:</span> {selectedTask.taskHours}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Time Taken:</span> {selectedTask.taskTakenTime}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Editable Task Status and Progress */}
+                  <div className="md:col-span-2 border-t border-gray-200 pt-4">
+                    <h3 className="text-sm font-medium text-gray-500 mb-4">Task Status</h3>
+                    
+                    {editMode ? (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                          <select
+                            name="taskStatus"
+                            value={editedTask.taskStatus}
+                            onChange={handleInputChange}
+                            className="w-full rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
+                          >
+                            {statusOptions.map(option => (
+                              <option key={option} value={option}>{option}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Progress</label>
+                          <div className="flex items-center gap-4">
+                            <input
+                              type="range"
+                              name="percentageOfCompleted"
+                              min="0"
+                              max="100"
+                              value={editedTask.percentageOfCompleted}
+                              onChange={handleInputChange}
+                              className="w-full"
+                            />
+                            <span className="text-sm font-medium text-gray-700 w-12 text-center">
+                              {editedTask.percentageOfCompleted}%
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3 mt-6">
+                          <button
+                            onClick={() => setEditMode(false)}
+                            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveChanges}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                          <p className={`inline-block ${getStatusBadge(selectedTask.taskStatus)} px-3 py-1 rounded-full text-sm`}>
+                            {selectedTask.taskStatus}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Progress</label>
+                          <div className="flex items-center gap-4">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 flex-1">
+                              <div 
+                                className="bg-blue-600 h-2.5 rounded-full" 
+                                style={{ width: `${selectedTask.percentageOfCompleted}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 w-12 text-center">
+                              {selectedTask.percentageOfCompleted}%
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end mt-6">
+                          <button
+                            onClick={() => {
+                              setEditedTask({
+                                taskStatus: selectedTask.taskStatus,
+                                percentageOfCompleted: selectedTask.percentageOfCompleted
+                              });
+                              setEditMode(true);
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center"
+                          >
+                            <FiEdit className="mr-2" /> Edit Status
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <p className="px-4 py-2 bg-gray-100 rounded-lg">
-                    {tasks.find(t => t.id === isEditing)?.taskDescription}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Hours Spent
-                    </label>
-                    <input
-                      type="number"
-                      value={tasks.find(t => t.id === isEditing)?.taskTakenTime || ''}
-                      onChange={(e) => 
-                        handleUpdateTask(isEditing, 'taskTakenTime', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status
-                    </label>
-                    <select
-                      value={tasks.find(t => t.id === isEditing)?.taskStatus}
-                      onChange={(e) => 
-                        handleUpdateTask(isEditing, 'taskStatus', e.target.value)
-                      }
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setIsEditing(null)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => setIsEditing(null)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Save Changes
-                  </button>
-                </div>
+              </div>
+              
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedTask(null);
+                    setEditMode(false);
+                  }}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Close
+                </button>
               </div>
             </motion.div>
           </motion.div>

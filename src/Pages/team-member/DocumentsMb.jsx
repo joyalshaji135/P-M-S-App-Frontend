@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiDownload, FiFile, FiX, FiArrowRight } from 'react-icons/fi';
+import { getLoggedUser } from '../../helper/auth';
 
 function DocumentsMb() {
   const [documents, setDocuments] = useState([]);
@@ -18,6 +19,8 @@ function DocumentsMb() {
     '60d21b4667d0d8992e610c92': 'Healthcare'
   };
 
+  const userData = getLoggedUser();
+  console.log(userData._id,"user");
   // Mock data based on your API structure
   useEffect(() => {
     const mockDocuments = [
