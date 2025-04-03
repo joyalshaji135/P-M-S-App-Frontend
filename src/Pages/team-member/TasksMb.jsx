@@ -3,10 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiEdit, FiFile, FiX, FiArrowRight } from 'react-icons/fi';
 import { getLoggedUser } from '../../helper/auth';
 import axios from 'axios'; // or your preferred HTTP client
-import { getClientTaskById } from '../../api/pages-api/team-member-api/project-task-api/MTProjectTaskApi';
+import { getClientTaskById, updateProjectTask } from '../../api/pages-api/team-member-api/project-task-api/MTProjectTaskApi';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 function TasksMb() {
   const [tasks, setTasks] = useState([]);
+  const navigate = useNavigate();
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedTask, setSelectedTask] = useState(null);
@@ -48,10 +51,10 @@ function TasksMb() {
   // Filter and search logic
   useEffect(() => {
     const filtered = tasks.filter(task => {
-      const matchesSearch = task.taskTitle.toLowerCase().includes(searchText.toLowerCase()) || 
-                          task.taskDescription.toLowerCase().includes(searchText.toLowerCase());
+      const matchesSearch = task?.taskName.toLowerCase().includes(searchText.toLowerCase()) || 
+                          task?.taskDescription.toLowerCase().includes(searchText.toLowerCase());
       
-      const matchesFilter = filter === 'all' || task.taskStatus === filter;
+      const matchesFilter = filter === 'all' || task?.taskStatus === filter;
       
       return matchesSearch && matchesFilter;
     });
@@ -97,7 +100,7 @@ function TasksMb() {
 
   // Get status badge style
   const getStatusBadge = (status) => {
-    switch(status.toLowerCase()) {
+    switch(status?.toLowerCase()) {
       case 'completed': return 'bg-green-100 text-green-600';
       case 'in progress': return 'bg-blue-100 text-blue-600';
       case 'not started': return 'bg-gray-100 text-gray-600';
@@ -122,43 +125,42 @@ function TasksMb() {
     setEditMode(true);
   };
 
-  // Handle save changes
   const handleSaveChanges = async () => {
     try {
-      // Update local state first for immediate UI feedback
-      const updatedTasks = tasks.map(task => {
-        if (task._id === selectedTask._id) {
-          return {
-            ...task,
-            taskStatus: editedTask.taskStatus,
-            percentageOfCompleted: editedTask.percentageOfCompleted,
-            userUpdatedBy: getLoggedUser(), // Update with current user
-            userUpdatedDate: new Date().toISOString()
-          };
-        }
-        return task;
-      });
-      
-      setTasks(updatedTasks);
-      setFilteredTasks(updatedTasks);
-      
-      // API call to update task
-      const response = await axios.put(`/api/tasks/${selectedTask._id}`, {
+      // Create payload with backend-expected field names
+      const backendData = {
         taskStatus: editedTask.taskStatus,
         percentageOfCompleted: editedTask.percentageOfCompleted
-      });
-      
-      if (!response.data.success) {
-        throw new Error('Failed to update task');
+      };
+      console.log(selectedTask._id) 
+      // Make API call first
+      const response = await updateProjectTask(selectedTask._id, backendData);
+  
+      if (response.success) {
+        // Update local state with API response data
+        const updatedTasks = tasks.map(task => 
+          task._id === selectedTask._id ? response.updatedTask : task
+        );
+  
+        setTasks(updatedTasks);
+        setFilteredTasks(updatedTasks);
+        setEditMode(false);
+        setSelectedTask(response.updatedTask); // Update detailed view
+        toast.success(response.message || 'Task updated successfully');
+        // redirect to task pag
+        navigate('/team-member/tasks');
+      } else {
+        throw new Error(response.message || 'Failed to update task');
       }
-      
-      setEditMode(false);
     } catch (err) {
-      console.error('Error updating task:', err);
-      // Revert changes if API call fails
-      setTasks([...tasks]);
-      setFilteredTasks([...tasks]);
-      setError('Failed to update task');
+      console.error("Update error:", err);
+      setError(err.message || "Failed to update task. Please check your data.");
+      // Optional: Revert local changes
+      const originalTasks = tasks.map(task => 
+        task._id === selectedTask._id ? selectedTask : task
+      );
+      setTasks(originalTasks);
+      setFilteredTasks(originalTasks);
     }
   };
 
@@ -280,9 +282,8 @@ function TasksMb() {
             <AnimatePresence>
               {currentItems.map((task) => (
                 <motion.div
-                  key={task._id}
+                  key={task?._id}
                   variants={cardVariants}
-                  initial="hidden"
                   animate="visible"
                   whileHover="hover"
                   className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col"
@@ -291,14 +292,14 @@ function TasksMb() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-800">
-                          {task.taskTitle}
+                          {task?.taskName}
                         </h3>
                         <div className="mt-1 flex items-center gap-2">
-                          <span className={`px-2 py-1 ${getStatusBadge(task.taskStatus)} text-xs rounded-full`}>
-                            {task.taskStatus}
+                          <span className={`px-2 py-1 ${getStatusBadge(task?.taskStatus)} text-xs rounded-full`}>
+                            {task?.taskStatus}
                           </span>
                           <span className="text-xs text-gray-500">
-                            {task.taskModule?.name}
+                            {task?.taskModule?.name}
                           </span>
                         </div>
                       </div>
@@ -307,15 +308,15 @@ function TasksMb() {
                   
                   <div className="p-5 flex-grow">
                     <p className="text-gray-600 mb-4 line-clamp-2">
-                      {task.taskDescription || 'No description provided'}
+                      {task?.taskDescription || 'No description provided'}
                     </p>
                     
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                        {task.project?.projectName}
+                        {task?.project?.projectName}
                       </span>
                       <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
-                        {task.resourceName?.name}
+                        {task?.resourceName?.name}
                       </span>
                     </div>
                     
@@ -323,20 +324,20 @@ function TasksMb() {
                     <div className="mb-2">
                       <div className="flex justify-between text-xs text-gray-600 mb-1">
                         <span>Progress</span>
-                        <span>{task.percentageOfCompleted}%</span>
+                        <span>{task?.percentageOfCompleted}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="bg-blue-600 h-2 rounded-full" 
-                          style={{ width: `${task.percentageOfCompleted}%` }}
+                          style={{ width: `${task?.percentageOfCompleted}%` }}
                         ></div>
                       </div>
                     </div>
                     
                     {/* Dates */}
                     <div className="flex justify-between text-xs text-gray-500 mt-3">
-                      <span>Start: {formatDate(task.startDate)}</span>
-                      <span>End: {formatDate(task.endDate)}</span>
+                      <span>Start: {formatDate(task?.startDate)}</span>
+                      <span>End: {formatDate(task?.endDate)}</span>
                     </div>
                   </div>
                   

@@ -24,3 +24,20 @@ export const getClientTaskById = async (client_id) => {
         throw new Error("Failed to get client task by ID.");
     }
 };
+
+// Update the Project Task Api
+export const updateProjectTask = async (taskId, data) => {
+    try {
+        const response = await axios.patch(`${apiUrl}team-member/task-wise/${taskId}/update-project-task`, data, {
+            headers: {
+                Authorization: `Bearer ${getAuthToken()}`,
+                "x-app-version": appVersion,
+                "x-api-key": apiKey,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to update project task.");
+    }
+};
