@@ -1,325 +1,251 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getTeamManagerById } from "../../../api/pages-api/admin-dashboard-api/team-manager-api/TeamManagerApi";
+import { motion } from "framer-motion";
 
 function ViewTeamManager() {
-  const { id } = useParams(); // Get the id from the URL
+  const { id } = useParams();
   const [manager, setManager] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch data from getTeamManagerById
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const data = await getTeamManagerById(id);
         setManager(data.teamManager);
       } catch (error) {
-        console.error("Error fetching company owner:", error);
+        console.error("Error fetching team manager:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, [id]);
 
-  if (!manager) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading...
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
+  if (!manager) {
+    return (
+      <div className="flex justify-center items-center h-screen text-blue-600">
+        Failed to load team manager data
+      </div>
+    );
+  }
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
   return (
-    <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-        View Team Manager
-      </h1>
+    <div className="flex-1 p-6 overflow-y-auto bg-blue-50">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="max-w-6xl mx-auto"
+      >
+        {/* Header */}
+        <motion.div variants={itemVariants} className="mb-8">
+          <h1 className="text-2xl font-bold text-blue-800">Team Manager Details</h1>
+          <p className="text-blue-600 mt-1">Viewing details for {manager.name}</p>
+        </motion.div>
 
-      {/* Main Card */}
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        {/* Basic Information Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Basic Information
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Photo and Name */}
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-gray-600 text-lg">👤</span>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <p className="text-gray-900 font-medium">{manager.name}</p>
-              </div>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <p className="text-gray-900">{manager.email}</p>
-            </div>
-
-            {/* Phone Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              <p className="text-gray-900">{manager.phone}</p>
-            </div>
-
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <p className="text-gray-900">{manager.role}</p>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <p
-                className={`text-gray-900 ${
-                  manager.status ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {manager.status ? "Active" : "Inactive"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Personal Details Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Personal Details
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Date of Birth */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date of Birth
-              </label>
-              <p className="text-gray-900">
-                {new Date(manager.dateOfBirth).toLocaleDateString()}
-              </p>
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
-              </label>
-              <p className="text-gray-900">{manager.gender}</p>
-            </div>
-
-      
-
-            {/* Last Login */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Last Login
-              </label>
-              <p className="text-gray-900">
-                {new Date(manager.lastLogin).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Preferences Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Preferences
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Newsletter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Newsletter
-              </label>
-              <p className="text-gray-900">
-                {manager.preferences.newsletter
-                  ? "Subscribed"
-                  : "Not Subscribed"}
-              </p>
-            </div>
-
-            {/* Notifications */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Notifications
-              </label>
-              <p className="text-gray-900">
-                {manager.preferences.notifications ? "Enabled" : "Disabled"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Address Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Address
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Street */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street
-              </label>
-              <p className="text-gray-900">{manager.address.street}</p>
-            </div>
-
-            {/* City */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <p className="text-gray-900">{manager.address.city}</p>
-            </div>
-
-            {/* State */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                State
-              </label>
-              <p className="text-gray-900">{manager.address.state}</p>
-            </div>
-
-            {/* District */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District
-              </label>
-              <p className="text-gray-900">{manager.address.district}</p>
-            </div>
-
-            {/* Zip Code */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Zip Code
-              </label>
-              <p className="text-gray-900">{manager.address.zipCode}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Company Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Company
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Company Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Name
-              </label>
-              <p className="text-gray-900">{manager.company.name}</p>
-            </div>
-
-            {/* Registration Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Registration Number
-              </label>
-              <p className="text-gray-900">
-                {manager.company.registrationNumber}
-              </p>
-            </div>
-
-            {/* Company Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Email
-              </label>
-              <p className="text-gray-900">{manager.company.email}</p>
-            </div>
-
-            {/* Company Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Company Phone
-              </label>
-              <p className="text-gray-900">{manager.company.phone}</p>
-            </div>
-
-            {/* Industry */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Industry
-              </label>
-              <p className="text-gray-900">{manager.company.industry}</p>
-            </div>
-
-            {/* Website */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Website
-              </label>
-              <p className="text-gray-900">{manager.company.website}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Skills Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-            Skills
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {manager.skills.map((skill, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                <div className="space-y-2">
-                  {/* Skill Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Skill Name
-                    </label>
-                    <p className="text-gray-900 font-medium">
-                      {skill.skillName}
-                    </p>
-                  </div>
-
-                  {/* Proficiency */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Proficiency
-                    </label>
-                    <p className="text-gray-900">{skill.proficiency}</p>
-                  </div>
-
-                  {/* Years of Experience */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Years of Experience
-                    </label>
-                    <p className="text-gray-900">{skill.yearsOfExperience}</p>
-                  </div>
-
-                  {/* Certification */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Certification
-                    </label>
-                    <p className="text-gray-900">
-                      {skill.certification || "N/A"}
-                    </p>
+        {/* Main Card */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-white rounded-xl shadow-md overflow-hidden"
+        >
+          {/* Basic Information Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="p-6 border-b border-blue-100"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-6">
+                <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-500 text-2xl">👤</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-blue-800">{manager.name}</h2>
+                  <p className="text-blue-600">{manager.email}</p>
+                  <div className="mt-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      manager.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {manager.status ? "Active" : "Inactive"}
+                    </span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <DetailItem label="Phone" value={manager.phone} />
+              <DetailItem label="Role" value={manager.role} />
+              <DetailItem 
+                label="Date of Birth" 
+                value={new Date(manager.dateOfBirth).toLocaleDateString()} 
+              />
+              <DetailItem label="Gender" value={manager.gender} />
+              <DetailItem 
+                label="Last Login" 
+                value={new Date(manager.lastLogin).toLocaleString()} 
+              />
+            </div>
+          </motion.div>
+
+          {/* Preferences Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="p-6 border-b border-blue-100"
+          >
+            <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Preferences
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <DetailItem 
+                label="Newsletter" 
+                value={manager.preferences.newsletter ? "Subscribed" : "Not Subscribed"} 
+                badgeColor={manager.preferences.newsletter ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}
+              />
+              <DetailItem 
+                label="Notifications" 
+                value={manager.preferences.notifications ? "Enabled" : "Disabled"} 
+                badgeColor={manager.preferences.notifications ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}
+              />
+            </div>
+          </motion.div>
+
+          {/* Address Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="p-6 border-b border-blue-100"
+          >
+            <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Address
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <DetailItem label="Street" value={manager.address.street} />
+              <DetailItem label="City" value={manager.address.city} />
+              <DetailItem label="State" value={manager.address.state} />
+              <DetailItem label="District" value={manager.address.district} />
+              <DetailItem label="ZIP Code" value={manager.address.zipCode} />
+            </div>
+          </motion.div>
+
+          {/* Company Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="p-6 border-b border-blue-100"
+          >
+            <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              Company Information
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <DetailItem label="Company Name" value={manager.company.name} />
+              <DetailItem label="Registration Number" value={manager.company.registrationNumber} />
+              <DetailItem label="Company Email" value={manager.company.email} />
+              <DetailItem label="Company Phone" value={manager.company.phone} />
+              <DetailItem label="Industry" value={manager.company.industry} />
+              <DetailItem 
+                label="Website" 
+                value={
+                  <a href={manager.company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    {manager.company.website}
+                  </a>
+                } 
+              />
+            </div>
+          </motion.div>
+
+          {/* Skills Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="p-6"
+          >
+            <h2 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Skills
+            </h2>
+            
+            {manager.skills.length === 0 ? (
+              <p className="text-blue-500 text-center py-4">No skills added</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {manager.skills.map((skill, index) => (
+                  <motion.div 
+                    key={index}
+                    variants={itemVariants}
+                    className="bg-blue-50 p-4 rounded-lg border border-blue-100"
+                  >
+                    <div className="space-y-3">
+                      <DetailItem label="Skill Name" value={skill.skillName} />
+                      <DetailItem label="Proficiency" value={skill.proficiency} />
+                      <DetailItem label="Years of Experience" value={skill.yearsOfExperience} />
+                      <DetailItem label="Certification" value={skill.certification || "N/A"} />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
+
+// Reusable detail item component
+const DetailItem = ({ label, value, badgeColor }) => (
+  <div>
+    <h3 className="text-sm font-medium text-blue-700">{label}</h3>
+    {badgeColor ? (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeColor}`}>
+        {value}
+      </span>
+    ) : (
+      <p className="text-gray-800 mt-1">{value}</p>
+    )}
+  </div>
+);
 
 export default ViewTeamManager;
