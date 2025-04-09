@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 import {
   addCompanyOwner,
   getCompanyOwnerById,
   updateCompanyOwnerById,
 } from "../../../api/pages-api/admin-dashboard-api/company-owner-api/CompanyOwnerApi";
-import { toast } from "react-toastify";
-import { motion } from "framer-motion";
+import {
+  getAllState,
+  getAllDistrict,
+} from "../../../api/comon-dropdown-api/ComonDropDownApi";
 
 function AddCompanyOwner() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // State for form data
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,6 +25,7 @@ function AddCompanyOwner() {
       street: "",
       city: "",
       state: "",
+      stateId: "",
       district: "",
       zipCode: "",
     },
@@ -42,120 +46,156 @@ function AddCompanyOwner() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getCompanyOwnerById(id);
-      setFormData(data.companyOwner);
-    } catch (error) {
-      console.error("Error fetching company owner:", error);
-      toast.error("Failed to load company owner data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setFormData({
-        ...formData,
-        [parent]: {
-          ...formData[parent],
-          [child]: value,
-        },
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
-  };
-
-  const handleNestedInputChange = (e, parent) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [parent]: {
-        ...formData[parent],
-        [name]: type === "checkbox" ? checked : value,
-      },
-    });
-  };
-
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          profilePicture: reader.result,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      let response;
-
-      if (id) {
-        response = await updateCompanyOwnerById(id, formData);
-      } else {
-        response = await addCompanyOwner(formData);
-      }
-
-      if (response?.success) {
-        toast.success(response.message || "Operation completed successfully");
-        navigate("/admin/company-owner");
-      } else {
-        toast.error(response?.message || "Failed to perform the operation");
-      }
-    } catch (error) {
-      console.error("Error updating company owner:", error);
-      toast.error(error.message || "Failed to perform the operation");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [statesList, setStatesList] = useState([]);
+  const [districtsList, setDistrictsList] = useState([]);
+  const [isFetchingDistricts, setIsFetchingDistricts] = useState(false);
+  const [prevStateId, setPrevStateId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
+      transition: { duration: 0.5, staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.3
+    visible: { y: 0, opacity: 1, transition: { duration: 0.3 } },
+  };
+
+  // Memoized district fetcher
+  const fetchDistricts = useCallback(
+    async (stateId) => {
+      if (!stateId || stateId === prevStateId) return;
+
+      setIsFetchingDistricts(true);
+      try {
+        const response = await getAllDistrict(stateId);
+        setDistrictsList(response.result); // Directly use response.result
+        setPrevStateId(stateId);
+      } catch (error) {
+        toast.error("Failed to load districts");
+        console.error("District fetch error:", error);
+      } finally {
+        setIsFetchingDistricts(false);
       }
+    },
+    [prevStateId]
+  );
+
+  useEffect(() => {
+    const initializeData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch states
+        const statesResponse = await getAllState();
+        setStatesList(statesResponse.data);
+
+        if (id) {
+          // Fetch existing company owner data
+          const data = await getCompanyOwnerById(id);
+          const initialData = data.companyOwner;
+
+          setFormData({
+            ...initialData,
+            address: {
+              ...initialData.address,
+              stateId: initialData.address.stateId || "",
+            },
+          });
+
+          // If state is already selected, fetch districts
+          if (initialData.address.stateId) {
+            await fetchDistricts(initialData.address.stateId);
+          }
+        }
+      } catch (error) {
+        toast.error("Failed to load initial data");
+        console.error("Initialization error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initializeData();
+  }, [id, fetchDistricts]);
+
+  const handleStateChange = async (e) => {
+    const stateId = e.target.value;
+    const stateName = e.target.options[e.target.selectedIndex].text;
+
+    setFormData((prev) => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        state: stateName,
+        stateId: stateId,
+        district: "",
+      },
+    }));
+
+    await fetchDistricts(stateId);
+  };
+
+  const handleDistrictChange = (e) => {
+    const districtName = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        district: districtName,
+      },
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: { ...prev[parent], [child]: value },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  const handleNestedInputChange = (e, parent) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [parent]: {
+        ...prev[parent],
+        [name]: type === "checkbox" ? checked : value,
+      },
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = id
+        ? await updateCompanyOwnerById(id, formData)
+        : await addCompanyOwner(formData);
+
+      if (response?.success) {
+        toast.success(response.message || "Operation successful");
+        navigate("/admin/company-owner");
+      } else {
+        toast.error(response?.message || "Operation failed");
+      }
+    } catch (error) {
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
       <motion.form
@@ -170,18 +210,30 @@ function AddCompanyOwner() {
             {id ? "Edit Company Owner" : "Add New Company Owner"}
           </h2>
           <p className="text-gray-600 mt-1">
-            {id ? "Update the company owner details" : "Fill in the details to add a new company owner"}
+            {id
+              ? "Update the company owner details"
+              : "Fill in the details to add a new company owner"}
           </p>
         </div>
 
         {/* Personal Information Section */}
-        <motion.div 
+        <motion.div
           className="mb-8 p-6 bg-blue-50 rounded-lg"
           variants={itemVariants}
         >
           <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
             </svg>
             Personal Information
           </h3>
@@ -280,14 +332,29 @@ function AddCompanyOwner() {
         </motion.div>
 
         {/* Address Section */}
-        <motion.div 
+        <motion.div
           className="mb-8 p-6 bg-blue-50 rounded-lg"
           variants={itemVariants}
         >
           <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
             Address Information
           </h3>
@@ -326,30 +393,40 @@ function AddCompanyOwner() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 State <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="address.state"
-                value={formData.address.state}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="NY"
+              <select
+                value={formData.address.stateId}
+                onChange={handleStateChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
-              />
+                disabled={isLoading}
+              >
+                <option value="">Select State</option>
+                {statesList.map((state) => (
+                  <option key={state.id} value={state.id}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
             </motion.div>
 
             <motion.div variants={itemVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 District <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="address.district"
+              <select
                 value={formData.address.district}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Manhattan"
+                onChange={handleDistrictChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 required
-              />
+                disabled={!formData.address.stateId || isFetchingDistricts}
+              >
+                <option value="">Select District</option>
+                {districtsList.map((district) => (
+                  <option key={district.id} value={district.name}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
             </motion.div>
 
             <motion.div variants={itemVariants}>
@@ -370,13 +447,23 @@ function AddCompanyOwner() {
         </motion.div>
 
         {/* Company Information Section */}
-        <motion.div 
+        <motion.div
           className="mb-8 p-6 bg-blue-50 rounded-lg"
           variants={itemVariants}
         >
           <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
             </svg>
             Company Information
           </h3>
@@ -474,22 +561,34 @@ function AddCompanyOwner() {
         </motion.div>
 
         {/* Preferences Section */}
-        <motion.div 
+        <motion.div
           className="mb-8 p-6 bg-blue-50 rounded-lg"
           variants={itemVariants}
         >
           <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
             Preferences
           </h3>
           <div className="space-y-3">
-            <motion.div 
-              className="flex items-center"
-              variants={itemVariants}
-            >
+            <motion.div className="flex items-center" variants={itemVariants}>
               <input
                 type="checkbox"
                 id="newsletter"
@@ -498,15 +597,15 @@ function AddCompanyOwner() {
                 onChange={(e) => handleNestedInputChange(e, "preferences")}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-700">
+              <label
+                htmlFor="newsletter"
+                className="ml-2 block text-sm text-gray-700"
+              >
                 Subscribe to Newsletter
               </label>
             </motion.div>
 
-            <motion.div 
-              className="flex items-center"
-              variants={itemVariants}
-            >
+            <motion.div className="flex items-center" variants={itemVariants}>
               <input
                 type="checkbox"
                 id="notifications"
@@ -515,7 +614,10 @@ function AddCompanyOwner() {
                 onChange={(e) => handleNestedInputChange(e, "preferences")}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="notifications" className="ml-2 block text-sm text-gray-700">
+              <label
+                htmlFor="notifications"
+                className="ml-2 block text-sm text-gray-700"
+              >
                 Enable Notifications
               </label>
             </motion.div>
@@ -523,7 +625,7 @@ function AddCompanyOwner() {
         </motion.div>
 
         {/* Form Actions */}
-        <motion.div 
+        <motion.div
           className="flex justify-end space-x-4 mt-8"
           variants={itemVariants}
         >
@@ -540,9 +642,25 @@ function AddCompanyOwner() {
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center"
           >
             {isLoading && (
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             )}
             {id ? "Update Company Owner" : "Add Company Owner"}

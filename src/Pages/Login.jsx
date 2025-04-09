@@ -230,12 +230,12 @@ function Login() {
                   />
                   <span className="text-sm text-gray-600">Remember me</span>
                 </label>
-                <a
+                {/* <a
                   href="#forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  Forgot password?
-                </a>
+                  Forgot password?  
+                </a> */}
               </div>
             </div>
 
@@ -263,12 +263,12 @@ function Login() {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-gray-600">
+          {/* <div className="mt-8 text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <a href="#signup" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
               Create account
             </a>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Illustration Section */}
