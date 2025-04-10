@@ -4,16 +4,17 @@ import { motion } from 'framer-motion';
 import { FaUser, FaBriefcase, FaCalendarAlt, FaPhone, FaEnvelope, FaMapMarkerAlt, FaMoneyBillWave, FaArrowLeft, FaSave } from 'react-icons/fa';
 import { addRecruitmentPost, getRecruitmentPostById, updateRecruitmentPostById } from '../../../api/pages-api/admin-dashboard-api/manage-recruitment-api/RecruitmentApi';
 import { toast } from 'react-toastify';
+import { getAllIndustryNatures, getAllPriority } from '../../../api/comon-dropdown-api/ComonDropDownApi';
 
 function AddRecruitmentAd() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    name: '',
+    name: 'We Are Hiring ....',
     position: '',
     recruitmentStatus: 'Interview Scheduled',
-    industry: 'High Level Industry',
-    priority: 'Medium',
+    industry: '',
+    priority: '',
     recruitmentPost: '',
     recruitmentPosition: '',
     recruitmentLocation: '',
@@ -26,6 +27,22 @@ function AddRecruitmentAd() {
   });
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [priorities, setPriorities] = useState([]);
+  const [industries, setIndustries] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const prioritiesData = await getAllPriority();
+        const industriesData = await getAllIndustryNatures();
+        setPriorities(prioritiesData.priority);
+        setIndustries(industriesData.industryNatures);
+      } catch (error) {
+        toast.error("Failed to load dropdown options");
+      }
+    };
+    fetchDropdownData();
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -34,7 +51,6 @@ function AddRecruitmentAd() {
           setLoading(true);
           const response = await getRecruitmentPostById(id);
           const data = response.recruitmentPost;
-          // Format dates for input fields
           const formattedData = {
             ...data,
             recruitmentStartDate: data.recruitmentStartDate ? data.recruitmentStartDate.split('T')[0] : '',
@@ -133,7 +149,7 @@ function AddRecruitmentAd() {
               <h3 className="text-lg font-semibold text-blue-700 border-b border-blue-100 pb-2">Candidate Information</h3>
               
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-blue-700">Candidate Name*</label>
+                <label className="block text-sm font-medium text-blue-700">Recruitment Title*</label>
                 <input
                   type="text"
                   name="name"
@@ -154,9 +170,9 @@ function AddRecruitmentAd() {
                   className="w-full px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
                   required
                 >
-                  <option value="High Level Industry">High Level Industry</option>
-                  <option value="Medium Level Industry">Medium Level Industry</option>
-                  <option value="Low Level Industry">Low Level Industry</option>
+                  {industries.map((industry, index) => (
+                    <option key={index} value={industry._id}>{industry.name}</option>
+                  ))}
                 </select>
               </div>
 
@@ -184,9 +200,9 @@ function AddRecruitmentAd() {
                   className="w-full px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent"
                   required
                 >
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
+                  {priorities.map((priority, index) => (
+                    <option key={index} value={priority._id}>{priority.name}</option>
+                  ))}
                 </select>
               </div>
             </div>

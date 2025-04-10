@@ -19,6 +19,7 @@ function AddTeamMembersAd() {
     name: "",
     email: "",
     phone: "",
+    gender: "male",
     dateOfBirth: "",
     address: {
       street: "",
@@ -27,17 +28,16 @@ function AddTeamMembersAd() {
       district: "",
       zipCode: "",
     },
-    role: "",
+    role: "team-members",
     status: "Active",
-    description: "",
     skills: [],
     company: {
-      name: "",
-      registrationNumber: "",
-      email: "",
-      phone: "",
-      industry: "",
-      website: "",
+      name: "TechNova Solutions Pvt. Ltd.",
+      registrationNumber: "TNPL123456",
+      website: "https://www.technova.com",
+      email: "info@technova.com",
+      phone: "+1-800-555-7890",
+      industry: "Information Technology"
     },
   });
 
@@ -218,14 +218,30 @@ function AddTeamMembersAd() {
             </div>
 
             <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Gender</label>
+              {/* drop down gender */}
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">Role*</label>
               <input
                 type="text"
                 name="role"
-                value={formData.role}
+                value={formData.role || 'team-members'}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Software Engineer"
+                disabled
                 required
               />
             </div>
@@ -242,18 +258,6 @@ function AddTeamMembersAd() {
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
-            </div>
-
-            <div className="md:col-span-2 space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Brief description about the team member"
-                rows="3"
-              />
             </div>
           </div>
         </motion.div>
@@ -436,7 +440,7 @@ function AddTeamMembersAd() {
         </motion.div>
 
         {/* Company Information Card */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -528,7 +532,8 @@ function AddTeamMembersAd() {
               />
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
+        {/* Performance Information Card */}
 
         {/* Form Actions */}
         <motion.div

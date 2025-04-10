@@ -25,7 +25,6 @@ function AddCompanyOwner() {
       street: "",
       city: "",
       state: "",
-      stateId: "",
       district: "",
       zipCode: "",
     },
@@ -34,13 +33,13 @@ function AddCompanyOwner() {
       notifications: false,
     },
     company: {
-      name: "",
-      registrationNumber: "",
-      website: "",
-      email: "",
-      phone: "",
-      industry: "",
-    },
+      name: "TechNova Solutions Pvt. Ltd.",
+      registrationNumber: "TNPL123456",
+      website: "https://www.technova.com",
+      email: "info@technova.com",
+      phone: "+918590343392",
+      industry: "Information Technology"
+    },    
     dateOfBirth: "",
     gender: "male",
   });
@@ -447,7 +446,7 @@ function AddCompanyOwner() {
         </motion.div>
 
         {/* Company Information Section */}
-        <motion.div
+        {/* <motion.div
           className="mb-8 p-6 bg-blue-50 rounded-lg"
           variants={itemVariants}
         >
@@ -558,7 +557,7 @@ function AddCompanyOwner() {
               />
             </motion.div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Preferences Section */}
         <motion.div

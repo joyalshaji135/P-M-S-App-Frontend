@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaSearch, FaPlus, FaEye, FaEdit, FaTrash, FaUserTie, FaBriefcase } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEye, FaEdit, FaTrash, FaUserTie, FaBriefcase, FaCalendarAlt, FaPhone, FaEnvelope, FaIndustry, FaExclamation } from 'react-icons/fa';
 import { deleteRecruitmentPostById, getAllRecruitmentPosts } from '../../../api/pages-api/admin-dashboard-api/manage-recruitment-api/RecruitmentApi';
 import { toast } from 'react-toastify';
 
@@ -36,9 +36,9 @@ function ManageRecruitmentAd() {
     if (searchText) {
       const filtered = recruitmentData.filter(
         (recruitment) =>
-          recruitment.candidateName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          recruitment.name?.toLowerCase().includes(searchText.toLowerCase()) ||
           recruitment.recruitmentPosition?.toLowerCase().includes(searchText.toLowerCase()) ||
-          recruitment.recruitmentStatus?.toLowerCase().includes(searchText.toLowerCase())
+          recruitment.priority?.name?.toLowerCase().includes(searchText.toLowerCase())
       );
       setFilteredData(filtered);
     } else {
@@ -73,6 +73,13 @@ function ManageRecruitmentAd() {
     }
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-blue-50">
       {/* Header Section */}
@@ -97,7 +104,7 @@ function ManageRecruitmentAd() {
             </div>
             <input
               type="text"
-              placeholder="Search candidates..."
+              placeholder="Search posts..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="pl-10 w-full px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
@@ -144,21 +151,21 @@ function ManageRecruitmentAd() {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <span className="text-xs font-medium text-blue-600">#{indexOfFirstItem + index + 1}</span>
+                      <span className="text-xs font-medium text-blue-600">#{recruitment.code || indexOfFirstItem + index + 1}</span>
                       <h3 className="text-lg font-bold text-blue-800 mt-1">
-                        {recruitment.candidateName || 'N/A'}
+                        {recruitment.name || 'N/A'}
                       </h3>
                     </div>
                     <span
                       className={`px-3 py-1 rounded-xl text-xs font-medium ${
-                        recruitment.recruitmentStatus === 'Active'
-                          ? 'bg-green-100 text-green-800'
-                          : recruitment.recruitmentStatus === 'Inactive'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-red-100 text-red-800'
+                        recruitment.priority?.name === 'High'
+                          ? 'bg-red-100 text-red-800'
+                          : recruitment.priority?.name === 'Medium'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
                       }`}
                     >
-                      {recruitment.recruitmentStatus || 'N/A'}
+                      {recruitment.priority?.name || 'N/A'}
                     </span>
                   </div>
 
@@ -175,11 +182,53 @@ function ManageRecruitmentAd() {
 
                     <div className="flex items-start">
                       <div className="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
-                        <FaUserTie className="text-sm" />
+                        <FaIndustry className="text-sm" />
                       </div>
                       <div>
-                        <p className="text-xs text-blue-600">Experience</p>
-                        <p className="text-blue-800 font-medium">{recruitment.experience || 'N/A'}</p>
+                        <p className="text-xs text-blue-600">Industry</p>
+                        <p className="text-blue-800 font-medium">{recruitment.industry?.name || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div className="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
+                        <FaCalendarAlt className="text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600">Date Range</p>
+                        <p className="text-blue-800 font-medium">
+                          {formatDate(recruitment.recruitmentStartDate)} - {formatDate(recruitment.recruitmentEndDate)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div className="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
+                        <FaPhone className="text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600">Contact</p>
+                        <p className="text-blue-800 font-medium">{recruitment.recruitmentContactPerson} ({recruitment.recruitmentContactNumber})</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div className="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
+                        <FaEnvelope className="text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600">Email</p>
+                        <p className="text-blue-800 font-medium">{recruitment.recruitmentEmail || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <div className="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
+                        <FaExclamation className="text-sm" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600">Salary</p>
+                        <p className="text-blue-800 font-medium">{recruitment.recruitmentSalary || 'N/A'}</p>
                       </div>
                     </div>
                   </div>
