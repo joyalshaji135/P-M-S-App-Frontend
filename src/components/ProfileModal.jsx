@@ -14,7 +14,7 @@ function ProfileModal({ open, onClose, user }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const currentRole = useSelector(store.selectors.getCurrentRole);
   const userData = getLoggedUser();
-
+  
   if (!open) return null;
 
   const handleLogout = () => {

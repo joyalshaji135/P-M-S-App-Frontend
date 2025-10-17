@@ -179,7 +179,20 @@ function OwnerSidebar({ isSidebarOpen }) {
               <span className="ml-2">Google Meet</span>
             </NavLink>
           </li>
-
+          {/* Manage Event */}
+          <li>
+              <NavLink
+                to="/owner/logs"
+                className={({ isActive }) =>
+                  `flex items-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition-colors ${
+                    isActive ? 'bg-blue-50 text-blue-500 font-semibold' : ''
+                  }`
+                }
+              >
+                <MdOutlineEvent className="text-xl" />
+                <span className="ml-2">Active Log</span>
+              </NavLink>
+            </li>
         
         </ul>
       </div>

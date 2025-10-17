@@ -75,7 +75,7 @@ try {
     }
     if(response.success){
       toast.success(response.message || "Meeting saved successfully");
-    navigate(-1);
+    navigate("/owner/events");
     }
     else{
       toast.error(response.message || "Failed to save meeting");

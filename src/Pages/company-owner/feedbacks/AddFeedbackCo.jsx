@@ -133,7 +133,7 @@ function AddFeedbackCo() {
       }
 
       // Redirect to the feedback list page
-      navigate('/team-manager/feedbacks');
+      navigate('/owner/feedbacks');
     } catch (err) {
       setError(err.message);
     } finally {
