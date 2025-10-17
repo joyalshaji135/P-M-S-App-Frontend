@@ -210,3 +210,42 @@ export const getAllIndustryProjects = async ()=>{
   }
 }
 
+// Get All State
+export const getAllState = async ()=>{
+  try {
+    const response = await axios.get(
+      `${apiUrl}super-admin/common-drop-downs/dd-states`, 
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "x-app-version": appVersion,
+          "x-api-key": apiKey,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching industry natures:", error);
+    throw error; 
+  }
+}
+
+// Get All District
+export const getAllDistrict = async (id)=>{
+  try {
+    const response = await axios.get(
+      `${apiUrl}super-admin/common-drop-downs/dd-states/${id}`, 
+      {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          "x-app-version": appVersion,
+          "x-api-key": apiKey,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching industry natures:", error);
+    throw error; 
+  }
+}

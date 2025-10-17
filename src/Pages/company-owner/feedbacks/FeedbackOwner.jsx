@@ -213,7 +213,7 @@ function FeedbackOwner() {
             whileTap={{ scale: 0.98 }}
           >
             <Link
-              to="/team-manager/feedbacks/add"
+              to="/owner/feedbacks/add"
               className={`flex items-center justify-center px-6 py-2 ${colors.accent} ${colors.accentText} rounded-lg ${colors.accentHover} transition-all shadow-sm`}
             >
               <FaPlus className="mr-2" />
@@ -306,6 +306,9 @@ function FeedbackOwner() {
                   <p className={`text-sm ${colors.secondaryText}`}>
                     Project: {feedback.industryProject?.code || 'N/A'}
                   </p>
+                  <p className={`text-sm ${colors.secondaryText}`}>
+                    Project: {feedback.industryProject?.projectName || 'N/A'}
+                  </p>
                 </div>
                 <motion.span
                   whileHover={{ scale: 1.05 }}
@@ -336,7 +339,7 @@ function FeedbackOwner() {
                 <div className="flex space-x-3">
                   <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                     <Link
-                      to={`/team-manager/feedbacks/view/${feedback._id}`}
+                      to={`/owner/feedbacks/view/${feedback._id}`}
                       className={`text-blue-600 hover:text-blue-800 transition-colors flex items-center`}
                       title="View"
                     >
@@ -345,7 +348,7 @@ function FeedbackOwner() {
                   </motion.div>
                   <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                     <Link
-                      to={`/team-manager/feedbacks/edit/${feedback._id}`}
+                      to={`/owner/feedbacks/edit/${feedback._id}`}
                       className={`text-blue-600 hover:text-blue-800 transition-colors flex items-center`}
                       title="Edit"
                     >

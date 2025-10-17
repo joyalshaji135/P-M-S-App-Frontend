@@ -149,7 +149,6 @@ function AdminSidebar({ isSidebarOpen }) {
               <span className="ml-2">File Document</span>
             </NavLink>
           </li>
-
           {/* Lookup Section */}
           <li>
             <div
