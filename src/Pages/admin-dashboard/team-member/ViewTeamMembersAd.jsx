@@ -1,190 +1,222 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getTeamMemberById } from "../../../api/pages-api/admin-dashboard-api/team-member-api/TeamMemberApi";
+import { motion } from "framer-motion";
 
 function ViewTeamMembersAd() {
-  const { id } = useParams(); // Get the id from the URL
+  const { id } = useParams();
   const [member, setMember] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch data from getTeamMemberById api
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getTeamMemberById(id);
-        const data = response.teamMember;
-        setMember(data);
+        setMember(response.teamMember);
       } catch (error) {
         console.error("Error fetching team member:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, [id]);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   if (!member) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
-        Loading...
+        Team member not found
       </div>
     );
   }
 
   return (
     <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-        View Team Member
-      </h1>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold text-gray-800">Member Profile</h1>
+        <p className="text-gray-600 mt-2">View and manage team member details</p>
+      </motion.div>
 
-      {/* Main Card */}
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Photo and Name */}
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 text-xl">👤</span>
+      {/* Profile Header Card */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100"
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-blue-600">
+            {member.name.charAt(0).toUpperCase()}
+          </div>
+          
+          <div className="flex-1">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{member.name}</h2>
+                <p className="text-blue-600">{member.role}</p>
+              </div>
+              
+              <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${
+                member.status === "Active" 
+                  ? "bg-green-100 text-green-800" 
+                  : "bg-red-100 text-red-800"
+              }`}>
+                {member.status}
+              </span>
             </div>
+            
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-gray-800 font-medium">{member.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-gray-800 font-medium">{member.phone || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Date of Birth</p>
+                <p className="text-gray-800 font-medium">
+                  {member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString() : "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Personal Details Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 lg:col-span-1"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+            Personal Details
+          </h3>
+          
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <p className="text-gray-900 font-medium">{member?.name}</p>
+              <p className="text-sm text-gray-500">Address</p>
+              <p className="text-gray-800">
+                {member.address?.street || "N/A"}, {member.address?.city || "N/A"},<br />
+                {member.address?.state || "N/A"}, {member.address?.district || "N/A"},<br />
+                {member.address?.zipCode || "N/A"}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Description</p>
+              <p className="text-gray-800">
+                {member.description || "No description provided"}
+              </p>
             </div>
           </div>
+        </motion.div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <p className="text-gray-900">{member?.email}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date Of Birth
-            </label>
-            <p className="text-gray-900">
-              {member.dateOfBirth
-                ? new Date(member?.dateOfBirth).toLocaleDateString()
-                : "N/A"}
-            </p>
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <p className="text-gray-900">{member?.phone}</p>
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <p className="text-gray-900">
-              {member?.address?.street}, {member?.address?.city},{" "}
-              {member?.address?.state}, {member?.address?.district},{" "}
-              {member?.address?.zipCode}
-            </p>
-          </div>
-
-          {/* Role */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
-            </label>
-            <p className="text-gray-900">{member?.role}</p>
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <p
-              className={`text-gray-900 ${
-                member?.status === "Active" ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {member?.status}
-            </p>
-          </div>
-
-          {/* Description */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <p className="text-gray-900">{member?.description}</p>
-          </div>
-
-          {/* Skills */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Skills
-            </label>
+        {/* Skills Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 lg:col-span-2"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+            Skills & Expertise
+          </h3>
+          
+          {member.skills.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {member.skills.map((skill, index) => (
-                <div
+                <div 
                   key={index}
-                  className="bg-gray-50 p-4 rounded-lg shadow-sm"
+                  className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors"
                 >
-                  <div className="space-y-2">
-                    <p className="text-gray-900">
-                      <strong>Skill Name:</strong> {skill?.skillName || "N/A"}
+                  <h4 className="font-medium text-gray-800 mb-2">{skill.skillName || "Unnamed Skill"}</h4>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-gray-700">
+                      <span className="text-gray-500">Proficiency:</span> {skill.proficiency || "N/A"}
                     </p>
-                    <p className="text-gray-900">
-                      <strong>Proficiency:</strong>{" "}
-                      {skill?.proficiency || "N/A"}
+                    <p className="text-gray-700">
+                      <span className="text-gray-500">Experience:</span> {skill.yearsOfExperience || "N/A"} years
                     </p>
-                    <p className="text-gray-900">
-                      <strong>Years of Experience:</strong>{" "}
-                      {skill?.yearsOfExperience || "N/A"}
-                    </p>
-                    <p className="text-gray-900">
-                      <strong>Certification:</strong>{" "}
-                      {skill?.certification || "N/A"}
+                    <p className="text-gray-700">
+                      <span className="text-gray-500">Certification:</span> {skill.certification || "N/A"}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          ) : (
+            <p className="text-gray-500">No skills listed</p>
+          )}
+        </motion.div>
 
-          {/* Company Information */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Company Information
-            </label>
-            <div className="bg-gray-50 p-6 rounded-lg shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-gray-900">
-                    <strong>Name:</strong> {member.company.name}
-                  </p>
-                  <p className="text-gray-900">
-                    <strong>Registration Number:</strong>{" "}
-                    {member.company.registrationNumber}
-                  </p>
-                  <p className="text-gray-900">
-                    <strong>Email:</strong> {member.company.email}
-                  </p>
-                  <p className="text-gray-900">
-                    <strong>Phone:</strong> {member.company.phone}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-900">
-                    <strong>Industry:</strong> {member.company.industry}
-                  </p>
-                  <p className="text-gray-900">
-                    <strong>Website:</strong> {member.company.website}
-                  </p>
-                </div>
-              </div>
+        {/* Company Information Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 lg:col-span-3"
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-100">
+            Company Information
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <p className="text-sm text-gray-500">Company Name</p>
+              <p className="text-gray-800 font-medium">{member.company.name}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Registration Number</p>
+              <p className="text-gray-800 font-medium">{member.company.registrationNumber}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Industry</p>
+              <p className="text-gray-800 font-medium">{member.company.industry}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="text-gray-800 font-medium">{member.company.email}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Phone</p>
+              <p className="text-gray-800 font-medium">{member.company.phone}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-gray-500">Website</p>
+              <p className="text-gray-800 font-medium">
+                {member.company.website ? (
+                  <a href={member.company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    {member.company.website}
+                  </a>
+                ) : "N/A"}
+              </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

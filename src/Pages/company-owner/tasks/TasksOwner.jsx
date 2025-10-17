@@ -96,7 +96,7 @@ function TasksOwner() {
         <div className="flex flex-col md:flex-row items-start md:items-center w-full md:w-auto gap-3">
           {/* Add Button */}
           <Link
-            to="/team-manager/tasks/add"
+            to="/owner/tasks/add"
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 whitespace-nowrap text-center flex items-center gap-2 shadow-md"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -165,7 +165,7 @@ function TasksOwner() {
           <p className="mt-1 text-sm text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
           <div className="mt-6">
             <Link
-              to="/team-manager/tasks/add"
+              to="/owner/tasks/add"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -244,7 +244,7 @@ function TasksOwner() {
               {/* Card Footer */}
               <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-end space-x-2">
                 {/* View Button */}
-                <Link to={`/team-manager/tasks/view/${task._id}`}>
+                <Link to={`/owner/tasks/view/${task._id}`}>
                   <button 
                     className="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-50"
                     title="View"
@@ -257,7 +257,7 @@ function TasksOwner() {
                 </Link>
 
                 {/* Edit Button */}
-                <Link to={`/team-manager/tasks/edit/${task._id}`}>
+                <Link to={`/owner/tasks/edit/${task._id}`}>
                   <button 
                     className="text-yellow-600 hover:text-yellow-900 p-1 rounded-full hover:bg-yellow-50"
                     title="Edit"

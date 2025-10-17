@@ -204,6 +204,9 @@ function ViewFeedbackCo() {
             <p className="text-gray-700">
               <span className="font-medium">Project Code:</span> {feedback.industryProject?.code || 'N/A'}
             </p>
+            <p className="text-gray-700">
+              <span className="font-medium">Project Code:</span> {feedback.industryProject?.projectName || 'N/A'}
+            </p>
           </div>
         </motion.div>
 
@@ -231,7 +234,7 @@ function ViewFeedbackCo() {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/team-manager/feedbacks')}
+            onClick={() => navigate('/owner/feedbacks')}
             className={`px-6 py-2 ${colors.accent} ${colors.accentText} rounded-lg ${colors.accentHover} transition-colors`}
           >
             Back to Feedbacks

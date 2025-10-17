@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { Menu, X, Check, Users, Calendar, FileText, List, BarChart2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, Check, Users, Calendar, FileText, List, BarChart2, ArrowRight } from 'lucide-react';
 import dashboard from '../assets/Dashboard.png';
 import notifications from '../assets/notifications.png';
-
-
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 
 function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToSection = (sectionId) => {
     const section = document.getElementById(sectionId);
@@ -17,9 +26,8 @@ function LandingPage() {
   };
 
   const navigateToLogin = () => {
-    // In a real app, this would navigate to your login page
     console.log("Navigating to login");
-    window.location.href = "/login"; // or use your router
+    window.location.href = "/login";
   };
 
   const features = [
@@ -61,309 +69,584 @@ function LandingPage() {
     { value: "24/7", label: "Reliable Service" }
   ];
 
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { duration: 0.6 } }
+  };
+
+  const slideInFromLeft = {
+    hidden: { opacity: 0, x: -50 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.6 } }
+  };
+
+  const slideInFromRight = {
+    hidden: { opacity: 0, x: 50 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.6 } }
+  };
+
+  const scaleUp = {
+    hidden: { opacity: 0, scale: 0.9 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
+  };
+
   return (
     <div className='w-full min-h-screen bg-amber-50 overflow-x-hidden'>
-      <header className='fixed top-0 w-full z-50 bg-white flex justify-between items-center text-black py-4 px-6 md:px-16 lg:px-32 drop-shadow-md'>
+      <motion.header 
+        className={`fixed top-0 w-full z-50 flex justify-between items-center text-black py-4 px-6 md:px-16 lg:px-32 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-3' : 'bg-white/80 backdrop-blur-sm'}`}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
-          <h1 className='text-2xl md:text-3xl font-bold text-indigo-700'>TaskFlow</h1>
+          <motion.h1 
+            className='text-2xl md:text-3xl font-bold text-indigo-700'
+            whileHover={{ scale: 1.05 }}
+          >
+            TaskFlow
+          </motion.h1>
         </div>
         
         <nav className='hidden xl:flex items-center gap-8 font-semibold'>
-          <button 
+          <motion.button 
             onClick={() => scrollToSection('hero')}
             className='text-sm font-medium hover:text-indigo-600 p-2 transition'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Home
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
             onClick={() => scrollToSection('features')}
             className='text-sm font-medium hover:text-indigo-600 p-2 transition'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Features
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
             onClick={() => scrollToSection('about')}
             className='text-sm font-medium hover:text-indigo-600 p-2 transition'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             About
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
             onClick={() => scrollToSection('contact')}
             className='text-sm font-medium hover:text-indigo-600 p-2 transition'
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             Contact
-          </button>
+          </motion.button>
         </nav>
         
         <div className='hidden xl:flex items-center gap-4'>
-          <button 
+          <motion.button 
             onClick={navigateToLogin}
-            className='rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium'
+            className='rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium flex items-center gap-2'
+            whileHover={{ scale: 1.05, boxShadow: '0 5px 15px rgba(79, 70, 229, 0.3)' }}
+            whileTap={{ scale: 0.95 }}
           >
-            Sign In
-          </button>
+            Sign In <ArrowRight size={16} />
+          </motion.button>
         </div>
         
-        <button 
+        <motion.button 
           className='xl:hidden block focus:outline-none' 
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </header>
+        </motion.button>
+      </motion.header>
 
-      {isOpen && (
-        <div className='xl:hidden fixed inset-0 z-40 bg-white flex flex-col items-center justify-center gap-6 mt-16'>
-          <button 
-            className='absolute top-6 right-6 focus:outline-none'
-            onClick={() => setIsOpen(false)}
-            aria-label="Close menu"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            className='xl:hidden fixed inset-0 z-40 bg-white flex flex-col items-center justify-center gap-6 mt-16'
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            <X size={24} />
-          </button>
-          <nav className='flex flex-col items-center gap-6 font-medium'>
-            <button 
-              onClick={() => scrollToSection('hero')}
-              className='text-lg hover:text-indigo-600 transition'
+            <motion.button 
+              className='absolute top-6 right-6 focus:outline-none'
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              Home
-            </button>
-            <button 
-              onClick={() => scrollToSection('features')}
-              className='text-lg hover:text-indigo-600 transition'
+              <X size={24} />
+            </motion.button>
+            <nav className='flex flex-col items-center gap-6 font-medium'>
+              <motion.button 
+                onClick={() => scrollToSection('hero')}
+                className='text-lg hover:text-indigo-600 transition'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Home
+              </motion.button>
+              <motion.button 
+                onClick={() => scrollToSection('features')}
+                className='text-lg hover:text-indigo-600 transition'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Features
+              </motion.button>
+              <motion.button 
+                onClick={() => scrollToSection('about')}
+                className='text-lg hover:text-indigo-600 transition'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                About
+              </motion.button>
+              <motion.button 
+                onClick={() => scrollToSection('contact')}
+                className='text-lg hover:text-indigo-600 transition'
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Contact
+              </motion.button>
+            </nav>
+            <motion.button 
+              onClick={navigateToLogin}
+              className='rounded-md px-6 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium flex items-center gap-2'
+              whileHover={{ scale: 1.05, boxShadow: '0 5px 15px rgba(79, 70, 229, 0.3)' }}
+              whileTap={{ scale: 0.95 }}
             >
-              Features
-            </button>
-            <button 
-              onClick={() => scrollToSection('about')}
-              className='text-lg hover:text-indigo-600 transition'
-            >
-              About
-            </button>
-            <button 
-              onClick={() => scrollToSection('contact')}
-              className='text-lg hover:text-indigo-600 transition'
-            >
-              Contact
-            </button>
-          </nav>
-          <button 
-            onClick={navigateToLogin}
-            className='rounded-md px-6 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium'
-          >
-            Sign In
-          </button>
-        </div>
-      )}
-
+              Sign In <ArrowRight size={16} />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className='pt-20'>
-        <section id="hero" className='relative py-16 px-6 md:px-16 lg:px-32 flex flex-col md:flex-row items-center gap-8'>
-          <div className='absolute -right-20 -top-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply opacity-70 animate-blob'></div>
-          <div className='absolute -bottom-20 -left-20 w-72 h-72 bg-amber-100 rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000'></div>
+        <section id="hero" className='relative py-16 px-6 md:px-16 lg:px-32 flex flex-col md:flex-row items-center gap-8 min-h-[90vh]'>
+          <div className='absolute -right-20 -top-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply opacity-70 animate-blob filter blur-xl'></div>
+          <div className='absolute -bottom-20 -left-20 w-72 h-72 bg-amber-100 rounded-full mix-blend-multiply opacity-70 animate-blob animation-delay-2000 filter blur-xl'></div>
           
-          <div className='relative z-10 md:w-1/2'>
-            <h1 className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4'>
+          <motion.div 
+            className='relative z-10 md:w-1/2'
+            initial="hidden"
+            animate="show"
+            variants={slideInFromLeft}
+          >
+            <motion.h1 
+              className='text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               Streamline Your Team's <span className='text-indigo-600'>Workflow</span>
-            </h1>
-            <p className='text-md md:text-lg text-gray-600 mb-6'>
+            </motion.h1>
+            <motion.p 
+              className='text-md md:text-lg text-gray-600 mb-6'
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
               TaskFlow offers all the essential project management tools without the monthly fees.
               Perfect for teams tired of overpriced, bloated alternatives.
-            </p>
-            <button 
-              onClick={navigateToLogin}
-              className='rounded-md px-6 py-3 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium'
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
             >
-              Get Started
-            </button>
-          </div>
+              <motion.button 
+                onClick={navigateToLogin}
+                className='rounded-md px-6 py-3 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium flex items-center gap-2'
+                whileHover={{ scale: 1.05, boxShadow: '0 5px 15px rgba(79, 70, 229, 0.4)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Get Started <ArrowRight size={18} />
+              </motion.button>
+            </motion.div>
+          </motion.div>
           
-          <div className='relative z-10 md:w-1/2 mt-8 md:mt-0'>
+          <motion.div 
+            className='relative z-10 md:w-1/2 mt-8 md:mt-0'
+            initial="hidden"
+            animate="show"
+            variants={slideInFromRight}
+          >
             <div className='relative'>
-              <div className='absolute -z-10 -top-4 -right-4 w-full h-full bg-indigo-200 rounded-xl'></div>
-              <img 
+              <motion.div 
+                className='absolute -z-10 -top-4 -right-4 w-full h-full bg-indigo-200 rounded-xl'
+                animate={{
+                  y: [0, -10, 0],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              ></motion.div>
+              <motion.img 
                 src={dashboard} 
                 alt="TaskFlow Dashboard" 
                 className='relative rounded-xl shadow-lg border-4 border-white'
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
               />
             </div>
-          </div>
+          </motion.div>
         </section>
 
-        \
-
         <section id="features" className='py-16 px-6 md:px-16 lg:px-32 bg-white'>
-          <div className='text-center mb-12'>
+          <motion.div 
+            className='text-center mb-12'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
             <h2 className='text-2xl md:text-3xl font-bold text-gray-800 mb-3'>
               Everything Your Team Needs
             </h2>
             <p className='text-gray-600 max-w-2xl mx-auto'>
               All the essential tools without unnecessary complexity or costs
             </p>
-          </div>
+          </motion.div>
           
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+          <motion.div 
+            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
             {features.map((feature, index) => (
-              <div key={index} className='bg-amber-50 p-6 rounded-lg hover:shadow-md transition transform hover:-translate-y-1'>
+              <motion.div 
+                key={index} 
+                className='bg-amber-50 p-6 rounded-lg hover:shadow-md transition transform hover:-translate-y-1'
+                variants={item}
+                whileHover={{ 
+                  scale: 1.03,
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                }}
+              >
                 <div className='flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-indigo-100'>
                   {feature.icon}
                 </div>
                 <h3 className='text-xl font-semibold mb-2 text-gray-800'>{feature.title}</h3>
                 <p className='text-gray-600'>{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className='mt-16 flex flex-col md:flex-row items-center gap-8 bg-indigo-50 rounded-xl p-8'>
-            <div className='md:w-1/2'>
+          <motion.div 
+            className='mt-16 flex flex-col md:flex-row items-center gap-8 bg-indigo-50 rounded-xl p-8'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className='md:w-1/2'
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+            >
               <h3 className='text-2xl font-bold text-gray-800 mb-4'>Real-time Collaboration</h3>
               <p className='text-gray-600 mb-4'>
                 See updates from your team members instantly. No more refreshing or waiting for sync.
               </p>
               <ul className='space-y-2'>
-                <li className='flex items-start'>
+                <motion.li 
+                  className='flex items-start'
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  viewport={{ once: true }}
+                >
                   <Check className='text-indigo-600 mt-1 mr-2' size={18} />
                   <span>Live notifications for task updates</span>
-                </li>
-                <li className='flex items-start'>
+                </motion.li>
+                <motion.li 
+                  className='flex items-start'
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  viewport={{ once: true }}
+                >
                   <Check className='text-indigo-600 mt-1 mr-2' size={18} />
                   <span>Instant messaging within projects</span>
-                </li>
-                <li className='flex items-start'>
+                </motion.li>
+                <motion.li 
+                  className='flex items-start'
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  viewport={{ once: true }}
+                >
                   <Check className='text-indigo-600 mt-1 mr-2' size={18} />
                   <span>Collaborative document editing</span>
-                </li>
+                </motion.li>
               </ul>
-            </div>
-            <div className='md:w-1/2'>
+            </motion.div>
+            <motion.div 
+              className='md:w-1/2'
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+            >
               <div className='bg-white p-4 rounded-lg shadow-md border border-gray-200'>
-                <img 
+                <motion.img 
                   src={notifications} 
                   alt="Collaboration Preview" 
                   className='rounded-lg'
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 />
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         <section id="about" className='py-16 px-6 md:px-16 lg:px-32 bg-gray-50'>
-          <div className='max-w-6xl mx-auto'>
-            <h2 className='text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center'>
+          <motion.div 
+            className='max-w-6xl mx-auto'
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <motion.h2 
+              className='text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center'
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+            >
               Why We Created TaskFlow
-            </h2>
+            </motion.h2>
             
             <div className='flex flex-col lg:flex-row gap-12 items-center'>
-              <div className='lg:w-1/2'>
+              <motion.div 
+                className='lg:w-1/2'
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                viewport={{ once: true }}
+              >
                 <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'>
-                  <img 
+                  <motion.img 
                     src={dashboard} 
                     alt="TaskFlow Interface" 
                     className='rounded-lg mb-4'
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   />
                   <p className='text-gray-600 text-center text-sm'>
                     Our clean, intuitive interface saves you time and frustration
                   </p>
                 </div>
-              </div>
+              </motion.div>
               
-              <div className='lg:w-1/2 space-y-6'>
-                <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'>
+              <motion.div 
+                className='lg:w-1/2 space-y-6'
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                viewport={{ once: true }}
+              >
+                <motion.div 
+                  className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'
+                  whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <h3 className='text-xl font-semibold mb-3 text-indigo-600'>The Problem</h3>
                   <p className='text-gray-600'>
                     We saw teams struggling with expensive, complex tools that required training and still didn't meet their basic needs. Many were using multiple apps just to get their work done.
                   </p>
-                </div>
+                </motion.div>
                 
-                <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'>
+                <motion.div 
+                  className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'
+                  whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
+                >
                   <h3 className='text-xl font-semibold mb-3 text-indigo-600'>Our Solution</h3>
                   <p className='text-gray-600'>
                     TaskFlow combines all essential project management features in one simple, free platform. We cut the bloat and focused on what teams actually need to collaborate effectively.
                   </p>
-                </div>
+                </motion.div>
                 
-                <div className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'>
+                <motion.div 
+                  className='bg-white p-6 rounded-xl shadow-sm border border-gray-200'
+                  whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
+                >
                   <h3 className='text-xl font-semibold mb-3 text-indigo-600'>Our Promise</h3>
                   <p className='text-gray-600'>
                     We'll never charge for core features. TaskFlow will remain free for teams of all sizes, with optional premium support for businesses that need it.
                   </p>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         <section id="contact" className='py-16 px-6 md:px-16 lg:px-32 bg-white'>
-          <div className='max-w-md mx-auto'>
+          <motion.div 
+            className='max-w-md mx-auto'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
             <h2 className='text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center'>
               Contact Us
             </h2>
-            <form className='space-y-4'>
-              <div>
+            <motion.form 
+              className='space-y-4'
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <motion.div
+                variants={item}
+              >
                 <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>Name</label>
                 <input 
                   type='text' 
                   id='name' 
                   className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                 />
-              </div>
-              <div>
+              </motion.div>
+              <motion.div
+                variants={item}
+              >
                 <label htmlFor='email' className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
                 <input 
                   type='email' 
                   id='email' 
                   className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                 />
-              </div>
-              <div>
+              </motion.div>
+              <motion.div
+                variants={item}
+              >
                 <label htmlFor='message' className='block text-sm font-medium text-gray-700 mb-1'>Message</label>
                 <textarea 
                   id='message' 
                   rows='4'
                   className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm'
                 ></textarea>
-              </div>
-              <button 
+              </motion.div>
+              <motion.button 
                 type='submit'
                 className='w-full rounded-md px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 transition font-medium'
+                whileHover={{ scale: 1.02, boxShadow: '0 5px 15px rgba(79, 70, 229, 0.3)' }}
+                whileTap={{ scale: 0.98 }}
               >
                 Send Message
-              </button>
-            </form>
-          </div>
+              </motion.button>
+            </motion.form>
+          </motion.div>
         </section>
 
         <footer className='bg-gray-800 text-white py-12 px-6 md:px-16 lg:px-32'>
-          <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'>
-            <div>
+          <motion.div 
+            className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <motion.div
+              variants={item}
+            >
               <h3 className='text-lg font-bold mb-3'>TaskFlow</h3>
               <p className='text-gray-400 text-sm'>
                 Simple, free project management for teams of all sizes.
               </p>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              variants={item}
+            >
               <h4 className='font-semibold mb-3 text-sm'>Product</h4>
               <ul className='space-y-2'>
-                <li><button onClick={() => scrollToSection('features')} className='text-gray-400 hover:text-white transition text-sm'>Features</button></li>
+                <li>
+                  <motion.button 
+                    onClick={() => scrollToSection('features')} 
+                    className='text-gray-400 hover:text-white transition text-sm'
+                    whileHover={{ x: 5 }}
+                  >
+                    Features
+                  </motion.button>
+                </li>
               </ul>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              variants={item}
+            >
               <h4 className='font-semibold mb-3 text-sm'>Company</h4>
               <ul className='space-y-2'>
-                <li><button onClick={() => scrollToSection('about')} className='text-gray-400 hover:text-white transition text-sm'>About</button></li>
+                <li>
+                  <motion.button 
+                    onClick={() => scrollToSection('about')} 
+                    className='text-gray-400 hover:text-white transition text-sm'
+                    whileHover={{ x: 5 }}
+                  >
+                    About
+                  </motion.button>
+                </li>
               </ul>
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              variants={item}
+            >
               <h4 className='font-semibold mb-3 text-sm'>Support</h4>
               <ul className='space-y-2'>
-                <li><button onClick={() => scrollToSection('contact')} className='text-gray-400 hover:text-white transition text-sm'>Contact</button></li>
+                <li>
+                  <motion.button 
+                    onClick={() => scrollToSection('contact')} 
+                    className='text-gray-400 hover:text-white transition text-sm'
+                    whileHover={{ x: 5 }}
+                  >
+                    Contact
+                  </motion.button>
+                </li>
               </ul>
-            </div>
-          </div>
-          <div className='border-t border-gray-700 pt-8 text-center text-gray-400 text-sm'>
+            </motion.div>
+          </motion.div>
+          <motion.div 
+            className='border-t border-gray-700 pt-8 text-center text-gray-400 text-sm'
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <p>© {new Date().getFullYear()} TaskFlow. All rights reserved.</p>
-          </div>
+          </motion.div>
         </footer>
       </main>
     </div>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getAuthToken } from "../../../../helper/auth";
+import { toast } from "react-toastify";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -18,8 +19,8 @@ export const addProjectTask = async (data) => {
         });
         return response.data;
     } catch (error) {
-        console.error(error);
-        throw new Error("Failed to add project task.");
+        console.error("Error adding project task:",error);
+        throw error;
     }
 };
 

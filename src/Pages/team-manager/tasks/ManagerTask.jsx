@@ -45,7 +45,8 @@ function ManagerTask() {
         (task) =>
           (task.taskName && task.taskName.toLowerCase().includes(searchValue)) ||
           (task.taskTitle && task.taskTitle.toLowerCase().includes(searchValue)) ||
-          (task.taskStatus && task.taskStatus.toLowerCase().includes(searchValue))
+          (task.taskStatus && task.taskStatus.toLowerCase().includes(searchValue)) ||
+          (task.resourceName.name && task.resourceName.name.toLowerCase().includes(searchValue))
 )
     }
     

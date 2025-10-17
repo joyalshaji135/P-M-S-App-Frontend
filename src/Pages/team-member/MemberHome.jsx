@@ -1,10 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTasks, FaProjectDiagram, FaRegComments, FaVideo, FaCheckCircle, FaFolder } from 'react-icons/fa';
+import { getLoggedUser } from '../../helper/auth';
+import { getIndustryProjectCount } from '../../api/common-count-api/industry-project-count/industryProjectCountApi';
+import { projectTaskCountApi } from '../../api/common-count-api/project-task-count/projectTaskCountApi';
+import { googleMeetCountApi } from '../../api/common-count-api/google-meet-count/googleMeetCountApi';
+import { getFileDocumentCountApi } from '../../api/common-count-api/file-document-count/fileDocumentCountApi';
+import { clientFeedbackCountApi } from '../../api/common-count-api/client-feedback-count/clientFeedbackCountApi';
+
+
 
 function MemberHome() {
+  const userData = getLoggedUser();
+  const [projectCount, setProjectCount] = useState(0);
+  const [taskCount, setTaskCount] = useState(0);
+  const [feedbackCount, setFeedbackCount] = useState(0);
+  const [meetingsCount, setMeetingsCount] = useState(0);
+  const [documentsCount, setDocumentsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch counts with user ID (if API requires it)
+        const projectResponse = await getIndustryProjectCount();
+        const taskResponse = await projectTaskCountApi();
+        const feedbackResponse = await clientFeedbackCountApi();
+        const meetingResponse = await googleMeetCountApi();
+        const documentResponse = await getFileDocumentCountApi();
+
+        // Set state using correct response properties
+        setProjectCount(projectResponse);
+        setTaskCount(taskResponse);
+        setFeedbackCount(feedbackResponse);
+        setMeetingsCount(meetingResponse);
+        setDocumentsCount(documentResponse);
+        
+        
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.message);
+        // Reset counts on error (optional)
+        setProjectCount(0);
+        setTaskCount(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Safely access userData.id
+
   return (
     <div className="flex-1 p-6 overflow-y-auto">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Welcome, Member!</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Welcome, {userData.name}!</h1>
 
       {/* Status Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -15,7 +68,7 @@ function MemberHome() {
               <FaTasks className="h-5 w-5 text-black" />
             </div>
             <div className="p-2 bg-white rounded-full">
-              <p className="text-2xl font-bold text-blue-800">8</p>
+              <p className="text-2xl font-bold text-blue-800">{ taskCount.taskCount}</p>
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Tasks</h2>
@@ -29,7 +82,7 @@ function MemberHome() {
               <FaProjectDiagram className="h-5 w-5 text-black" />
             </div>
             <div className="p-2 bg-white rounded-full">
-              <p className="text-2xl font-bold text-purple-800">5</p>
+              <p className="text-2xl font-bold text-purple-800">{ projectCount.projectCount}</p>
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Projects</h2>
@@ -43,7 +96,7 @@ function MemberHome() {
               <FaRegComments className="h-5 w-5 text-black" />
             </div>
             <div className="p-2 bg-white rounded-full">
-              <p className="text-2xl font-bold text-green-800">3</p>
+              <p className="text-2xl font-bold text-green-800">{ feedbackCount.feedbackCount }</p>
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Feedback</h2>
@@ -57,7 +110,7 @@ function MemberHome() {
               <FaVideo className="h-5 w-5 text-black" />
             </div>
             <div className="p-2 bg-white rounded-full">
-              <p className="text-2xl font-bold text-yellow-800">2</p>
+              <p className="text-2xl font-bold text-yellow-800">{ meetingsCount.googleMeetCount }</p>
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">Meetings</h2>
@@ -88,7 +141,7 @@ function MemberHome() {
               <FaFolder className="h-5 w-5 text-black" />
             </div>
             <div className="p-2 bg-white rounded-full">
-              <p className="text-2xl font-bold text-teal-800">10</p>
+              <p className="text-2xl font-bold text-teal-800">{ documentsCount.documentFileCount }</p>
             </div>
           </div>
           <h2 className="text-lg font-semibold text-gray-800 mt-3">File Documents</h2>
