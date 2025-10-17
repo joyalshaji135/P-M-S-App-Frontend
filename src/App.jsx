@@ -65,7 +65,7 @@ import ViewRecruitmentCo from './Pages/company-owner/recruitments/ViewRecruitmen
 import MeetingsCo from './Pages/company-owner/meetings/MeetingsCo';
 import AddMeetingsCo from './Pages/company-owner/meetings/AddMeetingsCo';
 import ViewMeetingsCo from './Pages/company-owner/meetings/ViewMeetingsCo';
-import ActiveLogger from './Pages/company-owner/active-logger/activeLogger';
+// import ActiveLogger from './Pages/company-owner/active-logger/activeLogger';
 
 
 // Team Manager Components
@@ -215,7 +215,6 @@ function App() {
           <Route path="meetings/edit/:id" element={<AddMeetingsCo />} />
           <Route path="meetings/view/:id" element={<ViewMeetingsCo />} />
 
-          <Route path="logs" element={<ActiveLogger />} />
         </Route>
       </Route>
 
