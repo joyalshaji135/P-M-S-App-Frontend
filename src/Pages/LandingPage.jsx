@@ -4,6 +4,7 @@ import dashboard from '../assets/Dashboard.png';
 import notifications from '../assets/notifications.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +26,11 @@ function LandingPage() {
     }
   };
 
+  const navigate = useNavigate();
+  
   const navigateToLogin = () => {
     console.log("Navigating to login");
-    window.location.href = "/login";
+    navigate('/login');
   };
 
   const features = [
