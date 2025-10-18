@@ -118,21 +118,21 @@ function Login() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-100 z-50">
-        <div className="flex flex-col items-center justify-center">
-          <div className="inline-flex items-center gap-2 mb-4 animate-pulse">
-            <LuWorkflow className="text-5xl text-blue-600" />
-            <span className="text-3xl font-bold text-gray-800">TaskFlow</span>
-          </div>
-          <div className="w-32 h-1 bg-blue-200 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600 rounded-full animate-progress"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-100 z-50">
+  //       <div className="flex flex-col items-center justify-center">
+  //         <div className="inline-flex items-center gap-2 mb-4 animate-pulse">
+  //           <LuWorkflow className="text-5xl text-blue-600" />
+  //           <span className="text-3xl font-bold text-gray-800">TaskFlow</span>
+  //         </div>
+  //         <div className="w-32 h-1 bg-blue-200 rounded-full overflow-hidden">
+  //           <div className="h-full bg-blue-600 rounded-full animate-progress"></div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="relative flex justify-center items-center w-full min-h-screen bg-gradient-to-br from-blue-50 to-sky-100 p-4 overflow-hidden">
